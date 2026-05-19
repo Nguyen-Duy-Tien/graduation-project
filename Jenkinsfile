@@ -88,7 +88,7 @@ pipeline {
             steps {
                 echo '=== STAGE 6: TRIỂN KHAI ỨNG DỤNG LÊN CỔNG 3001 ĐỂ LÀM BIA BẮN DAST ==='
                 // CHỈNH SỬA QUAN TRỌNG: Di chuyển vào thư mục vulnerable-rest-api để gọi đúng file docker-compose.yml
-                sh "cd ${TARGET_APP_DIR} && sudo docker-compose up -d --build"
+                sh "cd ${TARGET_APP_DIR} && docker-compose up -d --build"
                 // Nghỉ 15 giây để Node.js server hoàn thành việc kết nối DB và chạy database migrations công việc tuần 9
                 sh 'sleep 15'
             }
@@ -135,7 +135,7 @@ pipeline {
         always {
             echo '=== DỌN DẸP HẠ TẦNG & LƯU TRỮ KẾT QUẢ KIỂM THỬ ==='
             // Hạ ứng dụng vulnerable-rest-api xuống sau khi kết thúc đợt quét tấn công để giải phóng tài nguyên RAM/Port
-            sh "cd ${TARGET_APP_DIR} && sudo docker-compose down"
+            sh "cd ${TARGET_APP_DIR} && docker-compose down"
             
             // Đọc kết quả phân loại từ AI để áp dụng cơ chế bẻ gãy build (Quality Gate - FR-04)
             script {
