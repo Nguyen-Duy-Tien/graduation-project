@@ -1,6 +1,10 @@
 pipeline {
     agent any
 
+    tools {
+        nodejs 'NodeJS_18' 
+    }
+
     environment {
         // Định nghĩa các thư mục đầu ra (sẽ tự động sinh ra tại thư mục gốc khi chạy)
         CONTEXT_DIR = "security-context-output"
