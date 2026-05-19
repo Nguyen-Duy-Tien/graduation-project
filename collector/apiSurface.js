@@ -224,11 +224,18 @@ function parseDockerCompose(content) {
     }
 
     // Environment keys (bỏ values để không lộ secret)
-    for (const env of svc.environment ?? []) {
-      if (typeof env === 'string') {
-        allEnvKeys.push(env.split('=')[0]);
-      } else if (typeof env === 'object') {
-        allEnvKeys.push(...Object.keys(env));
+    const envs = svc.environment;
+    if (envs) {
+      if (Array.isArray(envs)) {
+        // Trường hợp environment viết dạng mảng: - MONGO_URI=mongodb://db...
+        for (const env of envs) {
+          if (typeof env === 'string') {
+            allEnvKeys.push(env.split('=')[0]);
+          }
+        }
+      } else if (typeof envs === 'object' && envs !== null) {
+        // Trường hợp environment viết dạng cặp Key-Value (Object): MONGO_URI: mongodb://db...
+        allEnvKeys.push(...Object.keys(envs));
       }
     }
   }
