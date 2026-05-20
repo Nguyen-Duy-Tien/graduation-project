@@ -104,14 +104,32 @@ pipeline {
                 script {
                     def toolConfig = readJSON file: "${CONTEXT_DIR}/tool_config.json"
                     
-                    // 1. Thực thi OWASP ZAP Tấn công Động dựa vào Gateway IP của Docker (172.19.0.1) hoặc Localhost
+                    // 1. Thực thi OWASP ZAP Tấn công Động - Ép chạy quyền root và đưa vào mạng nội bộ Docker Compose
                     if (toolConfig.zap && toolConfig.zap.enabled) {
                         echo "AI kích hoạt OWASP ZAP ở chế độ: ${toolConfig.zap.mode}"
+                        
+                        // Chạy ZAP chung network 'vulnerable-rest-api_default' để gọi thẳng qua tên container 'api'
                         if (toolConfig.zap.mode == "api-scan") {
-                            // Quét dựa trên một Endpoint thực tế của API để kiểm tra cấu trúc dữ liệu JSON trả về
-                            sh "docker run --rm -v \$(pwd):/zap/wrk/:rw -t ghcr.io/zaproxy/zaproxy:stable zap-api-scan.py -t http://172.19.0.1:3001/api/books -f openapi -J zap-report.json || true"
+                            sh """
+                            docker run --rm \
+                              --user root \
+                              --network vulnerable-rest-api_default \
+                              -v \$(pwd):/zap/wrk/:rw \
+                              -t ghcr.io/zaproxy/zaproxy:stable zap-api-scan.py \
+                              -t http://api:3001/api/books \
+                              -f openapi \
+                              -J zap-report.json || true
+                            """
                         } else {
-                            sh "docker run --rm -v \$(pwd):/zap/wrk/:rw -t ghcr.io/zaproxy/zaproxy:stable zap-baseline.py -t http://172.19.0.1:3001 -J zap-report.json || true"
+                            sh """
+                            docker run --rm \
+                              --user root \
+                              --network vulnerable-rest-api_default \
+                              -v \$(pwd):/zap/wrk/:rw \
+                              -t ghcr.io/zaproxy/zaproxy:stable zap-baseline.py \
+                              -t http://api:3001 \
+                              -J zap-report.json || true
+                            """
                         }
                         sh "mv zap-report.json ${REPORTS_DIR}/zap-report.json || true"
                     }
@@ -119,8 +137,24 @@ pipeline {
                     // 2. Thực thi Nuclei quét dựa trên lỗ hổng mẫu cấu hình
                     if (toolConfig.nuclei && toolConfig.nuclei.enabled) {
                         echo "AI kích hoạt Nuclei Scan với các Tags: ${toolConfig.nuclei.templateTags}"
-                        def tagsArgs = toolConfig.nuclei.templateTags.join(",")
-                        sh "docker run --rm -v \$(pwd):/src projectdiscovery/nuclei -target http://172.19.0.1:3001 -tags ${tagsArgs} -json-export /src/${REPORTS_DIR}/nuclei-report.json || true"
+                        
+                        // SỬA LỖI SANDBOX: Sử dụng vòng lặp Groovy thuần để nối chuỗi thay vì dùng hàm .join() của JSONArray
+                        def tagsList = []
+                        for (int i = 0; i < toolConfig.nuclei.templateTags.size(); i++) {
+                            tagsList.add(toolConfig.nuclei.templateTags[i])
+                        }
+                        def tagsArgs = tagsList.join(",") // Ép về mảng String thuần của Groovy thì .join(",") sẽ được thông qua an toàn
+                        
+                        // Đồng bộ đưa Nuclei vào chung network nội bộ và bắn trực tiếp sang container 'api'
+                        sh """
+                        docker run --rm \
+                          --network vulnerable-rest-api_default \
+                          -v \$(pwd):/src \
+                          projectdiscovery/nuclei \
+                          -target http://api:3001 \
+                          -tags ${tagsArgs} \
+                          -json-export /src/${REPORTS_DIR}/nuclei-report.json || true
+                        """
                     }
                 }
             }
