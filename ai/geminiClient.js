@@ -10,8 +10,8 @@
 const GEMINI_ENDPOINT = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent';
 
 // Retry config
-const MAX_RETRIES    = 3;
-const RETRY_DELAYS   = [2000, 4000, 6000];  // ms, backoff 2s/4s/6s
+const MAX_RETRIES    = 5; // Tăng lên 5 lần thử
+const RETRY_DELAYS   = [10000, 30000, 60000, 90000, 120000];
 const RETRYABLE_CODES = new Set([429, 500, 502, 503, 504]);
 
 // ── Safety filter override ────────────────────────────────────────────────────

@@ -308,6 +308,7 @@ export function buildToolConfig(aiResult, context) {
   };
 }
 
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 // ── CLI runner (dùng bởi Jenkinsfile Stage 4) ─────────────────────────────────
 
 async function main() {
@@ -332,6 +333,11 @@ async function main() {
   const toolConfigPath = join(resolve(outputDir), 'tool_config.json');
   writeFileSync(toolConfigPath, JSON.stringify(toolConfig, null, 2), 'utf8');
   console.log(`[OUTPUT] tool_config.json → ${toolConfigPath}`);
+
+// === CHỜ 25s ===
+  console.log(`[WAIT] Nghỉ 25 giây để làm sạch (reset) Quota của tài khoản Gemini...`);
+  await sleep(25000); 
+  // ====================================
 
   // Call #2: manual test cases
   const manualTestsResult = await generateManualTestCases(context, { apiKey });
