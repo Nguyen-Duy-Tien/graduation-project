@@ -223,48 +223,141 @@ Output schema:
  * @param {object}   options               — { apiKey }
  */
 export async function triageWithGemini(deduplicatedFindings, context, options = {}) {
-  // Giới hạn số findings gửi AI (tránh token limit)
-  const topFindings = deduplicatedFindings.slice(0, 40);
+  const CHUNK_SIZE = 10; // Giới hạn 10 lỗi mỗi cụm gửi cho AI
+  let allTriagedFindings = [];
+  let summaryForReduce = [];
 
-  const payload = {
-    projectContext: {
-      language:  context.techStack?.language,
-      framework: context.techStack?.framework,
-      features:  context.techStack?.features,
-    },
-    findings: topFindings.map((f, i) => ({
-      id:          `F-${String(i + 1).padStart(3, '0')}`,
-      source:      f.sources?.join('+') ?? f.source,
-      sourceCount: f.sourceCount ?? 1,
-      category:    f.category,
-      severity:    f.severity,
-      ruleId:      f.ruleId,
-      location:    f.location,
-      message:     f.message,
-      snippet:     f.snippet?.slice(0, 200),
-      cweId:       f.cweId,
-    })),
-    totalFindingsBeforeTriage: deduplicatedFindings.length,
-    sentForTriage:             topFindings.length,
+  console.log(`[AI] Bắt đầu phân mảnh ${deduplicatedFindings.length} lỗi thô để xử lý (Map-Reduce)...`);
+
+  // =========================================================================
+  // GIAI ĐOẠN 1 (MAP): CHIA CỤM XỬ LÝ SONG SONG ĐỂ KHÔNG BỊ RÁCH JSON
+  // =========================================================================
+  for (let i = 0; i < deduplicatedFindings.length; i += CHUNK_SIZE) {
+    const chunk = deduplicatedFindings.slice(i, i + CHUNK_SIZE);
+    const chunkNum = Math.floor(i / CHUNK_SIZE) + 1;
+    const totalChunks = Math.ceil(deduplicatedFindings.length / CHUNK_SIZE);
+    console.log(`[AI] --> Triage cụm lỗi số ${chunkNum}/${totalChunks}...`);
+
+    // Rút gọn payload gửi lên để tối ưu token
+    const chunkPayload = chunk.map((f, idx) => ({
+      id: `F-${String(i + idx + 1).padStart(3, '0')}`,
+      source: f.source,
+      severity: f.severity,
+      ruleId: f.ruleId,
+      message: f.message,
+      location: f.location,
+      snippet: f.snippet?.slice(0, 200)
+    }));
+
+    const mapPrompt = `
+      You are a precise security triager for a ${context.techStack?.framework ?? 'web'} application.
+      Analyze this subset of tool findings:
+      ${JSON.stringify(chunkPayload)}
+
+      Output STRICT JSON exactly matching this schema. Keep reasons to 1 sentence.
+      {
+        "results": [
+          {
+            "id": "F-001",
+            "triage_status": "confirmed_vulnerability" | "likely_vulnerability" | "needs_manual_review" | "false_positive",
+            "triage_reason": "1 short sentence explaining why.",
+            "risk_score": 50,
+            "remediation_summary": "1 short sentence fixing it."
+          }
+        ]
+      }
+    `;
+
+    try {
+      const mapResult = await callGeminiWithRetry(mapPrompt, "You are a precise security triager. Output ONLY JSON.", {
+        apiKey: options.apiKey,
+        temperature: 0.1,
+        maxOutputTokens: 8192
+      });
+
+      const parsed = parseJson(mapResult.text);
+
+      // Gắn kết quả AI vào dữ liệu gốc để giữ trọn vẹn 100% manh mối log
+      chunk.forEach((rawFinding, idx) => {
+        const findingId = `F-${String(i + idx + 1).padStart(3, '0')}`;
+        const aiVerdict = parsed.results?.find(r => r.id === findingId) || {};
+
+        allTriagedFindings.push({
+          id: findingId,
+          original_finding: rawFinding,
+          triage_status: aiVerdict.triage_status || 'needs_manual_review',
+          triage_reason: aiVerdict.triage_reason || 'AI missing analysis due to context limit.',
+          risk_score: aiVerdict.risk_score || 50,
+          confirmed_by_sources: rawFinding.sourceCount || 1,
+          remediation: {
+            summary: aiVerdict.remediation_summary || 'Manual review required.'
+          }
+        });
+
+        summaryForReduce.push({
+          id: findingId,
+          severity: rawFinding.severity,
+          status: aiVerdict.triage_status || 'needs_manual_review'
+        });
+      });
+    } catch (e) {
+      console.error(`[WARN] Lỗi xử lý JSON ở cụm ${chunkNum}: ${e.message}. Kích hoạt Fallback an toàn.`);
+      // Fallback: Giữ nguyên dữ liệu đẩy vào để Pipeline không bị die
+      chunk.forEach((rawFinding, idx) => {
+        allTriagedFindings.push({
+          id: `F-${String(i + idx + 1).padStart(3, '0')}`,
+          original_finding: rawFinding,
+          triage_status: 'needs_manual_review',
+          triage_reason: 'Fallback due to AI parse error.',
+          risk_score: 50,
+          remediation: { summary: 'Please review manually.' }
+        });
+      });
+    }
+  }
+
+  // =========================================================================
+  // GIAI ĐOẠN 2 (REDUCE): ĐÁNH GIÁ NGỮ CẢNH TOÀN CỤC VÀ ĐIỂM POSTURE SCORE
+  // =========================================================================
+  console.log(`[AI] Giai đoạn 2: Gọi AI đánh giá Executive Summary từ ${summaryForReduce.length} lỗi...`);
+  
+  const reducePrompt = `
+    You are a CISO. Here is a lightweight summary of all triaged findings:
+    ${JSON.stringify(summaryForReduce)}
+
+    Calculate the overall security posture and provide an executive summary.
+    Output STRICT JSON:
+    {
+      "executive_summary": {
+        "overall_risk": "CRITICAL" | "HIGH" | "MEDIUM" | "LOW",
+        "security_posture_score": 0-100,
+        "critical_count": number,
+        "high_count": number,
+        "medium_count": number,
+        "key_findings": ["1 short sentence", "1 short sentence"],
+        "immediate_actions": ["1 short sentence"]
+      }
+    }
+  `;
+
+  let finalExecutiveSummary = {};
+  try {
+    const reduceResult = await callGeminiWithRetry(reducePrompt, "You are an executive security officer.", {
+      apiKey: options.apiKey,
+      temperature: 0.1
+    });
+    const parsedReduce = parseJson(reduceResult.text);
+    finalExecutiveSummary = parsedReduce.executive_summary || parsedReduce;
+  } catch (e) {
+    console.error("[WARN] Lỗi Giai đoạn Reduce (Executive Summary):", e.message);
+    finalExecutiveSummary = { overall_risk: "UNKNOWN", security_posture_score: 0, critical_count: 0, high_count: 0, medium_count: 0, key_findings: ["Pipeline fallback executed."] };
+  }
+
+  // Trả về đúng cấu trúc mà hàm buildHtml() của Tiến đang mong đợi
+  return {
+    executive_summary: finalExecutiveSummary,
+    triaged_findings: allTriagedFindings
   };
-
-  const prompt = `Triage the following security findings for a ${context.techStack?.framework ?? 'web'} application:
-
-\`\`\`json
-${JSON.stringify(payload, null, 2)}
-\`\`\`
-
-For each finding: classify (confirmed/likely/needs_review/false_positive), calculate risk_score, provide specific remediation for this tech stack.`;
-
-  console.log(`[AI] Gemini Call #3: Triaging ${topFindings.length} findings...`);
-  const result = await callGeminiWithRetry(prompt, TRIAGE_SYSTEM, {
-    apiKey:          options.apiKey,
-    temperature:     0.1,   // Most deterministic for triage decisions
-    maxOutputTokens: 8192,
-  });
-
-  logUsage('Call#3-Triage', result.usageMetadata);
-  return parseJson(result.text);
 }
 
 // ── 4. HTML Report Builder ────────────────────────────────────────────────────
