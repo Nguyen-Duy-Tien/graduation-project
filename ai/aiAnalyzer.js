@@ -261,7 +261,7 @@ export function buildToolConfig(aiResult, context) {
   const tools = aiResult.tools ?? {};
   return {
     _meta: {
-      generatedBy:  'aiAnalyzer/gemini-2.0-flash',
+      generatedBy:  'aiAnalyzer/gemini-3.0-flash',
       generatedAt:  new Date().toISOString(),
       scanStrategy: aiResult.scan_strategy ?? 'full',
       strategyReason: aiResult.strategy_reason ?? '',
