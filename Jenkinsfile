@@ -31,7 +31,9 @@ pipeline {
             steps {
                 echo "=== Target project: ${TARGET_DIR} ==="
                 // Xoá artifact cũ từ build trước để quality gate / report không đọc nhầm
-                sh "rm -rf ${CONTEXT_DIR} ${RUNTIME_DIR}"
+                // KHÔNG xoá ${RUNTIME_DIR} vì chứa source code (sanitize.js, servicePicker.js)
+                sh "rm -rf ${CONTEXT_DIR}"
+                sh "rm -f ${RUNTIME_DIR}/*.sh ${RUNTIME_DIR}/runtime-info.json"
                 sh "mkdir -p ${CONTEXT_DIR} ${REPORTS_DIR} ${FINAL_DIR} ${RUNTIME_DIR}"
                 sh 'node -v && docker -v'
             }
