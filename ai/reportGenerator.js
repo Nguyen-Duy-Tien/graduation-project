@@ -223,7 +223,7 @@ Output schema:
  * @param {object}   options               — { apiKey }
  */
 export async function triageWithGemini(deduplicatedFindings, context, options = {}) {
-  const CHUNK_SIZE = 10; // Giới hạn 10 lỗi mỗi cụm gửi cho AI
+  const CHUNK_SIZE = 30; // Giới hạn 10 lỗi mỗi cụm gửi cho AI
   let allTriagedFindings = [];
   let summaryForReduce = [];
 
