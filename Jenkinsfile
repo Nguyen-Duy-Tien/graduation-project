@@ -30,6 +30,8 @@ pipeline {
         stage('1. Init') {
             steps {
                 echo "=== Target project: ${TARGET_DIR} ==="
+                // Xoá artifact cũ từ build trước để quality gate / report không đọc nhầm
+                sh "rm -rf ${CONTEXT_DIR} ${RUNTIME_DIR}"
                 sh "mkdir -p ${CONTEXT_DIR} ${REPORTS_DIR} ${FINAL_DIR} ${RUNTIME_DIR}"
                 sh 'node -v && docker -v'
             }
@@ -75,7 +77,8 @@ pipeline {
 
         stage('8. AI Report') {
             steps {
-                sh "node ai/reportGenerator.js ${CONTEXT_DIR}/context.json ${REPORTS_DIR} ${FINAL_DIR}"
+                // Thứ tự: <reportsDir> <contextPath> <outputDir>
+                sh "node ai/reportGenerator.js ${REPORTS_DIR} ${CONTEXT_DIR}/context.json ${FINAL_DIR}"
             }
         }
     }

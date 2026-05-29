@@ -609,6 +609,8 @@ async function main() {
   console.log(`\n[DONE] Risk: ${s?.overall_risk} | Posture: ${s?.security_posture_score}/100 | Critical: ${s?.critical_count} | High: ${s?.high_count}`);
 }
 
-if (process.argv[1] === new URL(import.meta.url).pathname) {
+import { fileURLToPath } from 'url';
+
+if (process.argv[1] && fileURLToPath(import.meta.url) === resolve(process.argv[1])) {
   main().catch(err => { console.error('[FATAL]', err.message); process.exit(1); });
 }

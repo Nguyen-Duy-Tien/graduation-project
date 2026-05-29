@@ -40,8 +40,12 @@ export function buildScript(cfg, projectInfo, runtimeInfo) {
   };
   const { cmd, extra } = modeMap[mode];
 
+  // ZAP container chạy với user 'zap' (UID 1000) → không write được /zap/wrk
+  // nếu host dir thuộc UID khác. Chmod 777 trước khi mount.
   const script = `
 echo "[DAST] ZAP ${mode} — target: ${targetUrl}"
+mkdir -p ${reportsDir}
+chmod 777 ${reportsDir}
 docker run --rm \\
   --network ${shellQuote(network)} \\
   -v ${reportsDir}:/zap/wrk:rw \\
