@@ -1,16 +1,17 @@
 {
   "name": "ai-devsecops-module",
-  "version": "1.0.0",
-  "description": "AI-assisted DevSecOps pipeline module — Context Collector (Week 7) + Gemini Analyzer (Week 8)",
+  "version": "1.1.0",
+  "description": "AI-assisted DevSecOps pipeline module — generic target + dynamic tool adapters",
   "type": "module",
   "engines": {
     "node": ">=18.0.0"
   },
   "scripts": {
-    "collect":  "node collectors/contextCollector.js",
-    "analyze":  "node ai/aiAnalyzer.js",
-    "report":   "node ai/reportGenerator.js",
-    "test":     "node collectors/contextCollector.js . --output ./test-output"
+    "collect":           "node collector/contextCollector.js",
+    "analyze":           "node ai/aiAnalyzer.js",
+    "generate-pipeline": "node ai/pipelineGenerator.js",
+    "report":            "node ai/reportGenerator.js",
+    "test":              "node --test runtime/*.test.js"
   },
   "dependencies": {
     "glob":    "^10.4.5",

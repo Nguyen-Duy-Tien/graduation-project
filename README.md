@@ -116,18 +116,61 @@ ZAP_LOGIN_URL = http://your-app/login    # URL login (nếu app cần auth)
 ```
 pipeline/ai-module/
 ├── ai/
-│   ├── aiAnalyzer.js        # Gemini Call #1 (tool selection) + #2 (manual tests)
-│   ├── geminiClient.js      # Wrapper Gemini API: callGemini, retry, parseJson
-│   └── reportGenerator.js  # Gemini Call #3 (triage) + HTML report builder
-├── collectors/
-│   ├── contextCollector.js  # Entry point: chạy 5 collector song song
-│   ├── techStack.js         # Nhận diện ngôn ngữ, framework, dependencies
-│   ├── routeScanner.js      # Quét 9 route pattern, phân loại 6 flag
-│   ├── codePattern.js       # Quét 20 dangerous pattern, 9 category
-│   └── apiSurface.js        # OpenAPI/Swagger + git diff + Docker info
-├── Jenkinsfile              # Pipeline 9 stages
-├── package.json
-└── test.js                  # 30 unit tests cho các hàm pure
+│   ├── aiAnalyzer.js          # Gemini Call #1 (tool selection) + #2 (manual tests)
+│   ├── geminiClient.js        # Wrapper Gemini API: callGemini, retry, parseJson
+│   ├── pipelineGenerator.js   # Sinh runtime-info.json + run-*.sh từ tool_config
+│   └── reportGenerator.js     # Gemini Call #3 (triage) + HTML report builder
+├── collector/
+│   ├── contextCollector.js    # Entry point: chạy 5 collector song song
+│   ├── techStack.js           # Nhận diện ngôn ngữ, framework, dependencies
+│   ├── routeScanner.js        # Quét 9 route pattern, phân loại 6 flag
+│   ├── codePattern.js         # Quét 20 dangerous pattern, 9 category
+│   └── apiSurface.js          # OpenAPI/Swagger + git diff + Docker info
+├── tools/                     # Tool adapter pattern — thêm tool mới = thêm 1 file
+│   ├── index.js               # Registry: SAST_TOOLS, DAST_TOOLS
+│   ├── semgrep.js bandit.js trivy.js
+│   └── zap.js nuclei.js nikto.js
+├── runtime/                   # Sinh ra lúc chạy (artifacts), + safety layer
+│   ├── sanitize.js            # Whitelist regex chống injection qua AI output
+│   ├── servicePicker.js       # Heuristic chọn service từ docker-compose
+│   └── runtime-info.json, run-sast.sh, deploy-target.sh, run-dast.sh, teardown.sh
+├── examples/
+│   └── vulnerable-rest-api/   # Demo target (Node/Express). Không hardcode trong pipeline.
+├── Jenkinsfile                # 8 stage cố định mỏng — không sửa khi thêm tool/đổi target
+└── package.json
+```
+
+---
+
+## Chạy trên project bất kỳ
+
+Pipeline KHÔNG hardcode target. Truyền target qua tham số Jenkins `TARGET_PROJECT_DIR`:
+
+| Trường hợp | Tham số | Hành vi |
+|---|---|---|
+| Demo (Node/Express) | `examples/vulnerable-rest-api` (mặc định) | Đầy đủ SAST + SCA + DAST |
+| Project Python Flask của bạn | `path/to/your-flask-app` | techStack auto-detect → Bandit + Semgrep p/python + ZAP |
+| Project chỉ có source, không Docker | `path/to/static-only` | DAST tự skip, chỉ chạy SAST + SCA, build SUCCESS |
+| Override service (compose phức tạp) | sửa `runtime-info.json` sau Stage 5 | Bỏ qua heuristic |
+
+Chạy local không cần Jenkins:
+
+```bash
+# 1. Collect context cho target
+node collector/contextCollector.js /path/to/target --output ./security-context-output
+
+# 2. AI chọn tool
+GEMINI_API_KEY=... node ai/aiAnalyzer.js ./security-context-output/context.json ./security-context-output
+
+# 3. Sinh shell scripts động (đây là bước MỚI thay cho hardcode Jenkins)
+node ai/pipelineGenerator.js ./security-context-output ./runtime /path/to/target
+
+# 4. Chạy SAST → deploy → DAST → report
+./runtime/run-sast.sh
+./runtime/deploy-target.sh
+./runtime/run-dast.sh
+node ai/reportGenerator.js ./security-context-output/context.json ./security-context-output/scan-reports ./final-report
+./runtime/teardown.sh
 ```
 
 ---

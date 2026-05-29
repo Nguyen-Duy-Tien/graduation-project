@@ -1,0 +1,6 @@
+# Sinh ra bởi pipelineGenerator + tool runs
+runtime/
+security-context-output/
+final-report/
+node_modules/
+*.log

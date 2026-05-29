@@ -186,6 +186,8 @@ async function main() {
 }
 
 // Chạy nếu là entry point (ESM equivalent của require.main === module)
-if (process.argv[1] === new URL(import.meta.url).pathname) {
+import { fileURLToPath } from 'url';
+
+if (process.argv[1] && fileURLToPath(import.meta.url) === resolve(process.argv[1])) {
   main();
 }

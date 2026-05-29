@@ -207,40 +207,52 @@ function parseDockerCompose(content) {
   try {
     parsed = yaml.load(content);
   } catch {
-    return { services: [], allImages: [], allPorts: [], allEnvKeys: [] };
+    return { services: [], allImages: [], allPorts: [], allEnvKeys: [], servicesDetail: [] };
   }
 
   const services  = Object.keys(parsed?.services ?? {});
   const allImages  = [];
   const allPorts   = [];
   const allEnvKeys = [];
+  const servicesDetail = [];
 
-  for (const [, svc] of Object.entries(parsed?.services ?? {})) {
+  for (const [name, svc] of Object.entries(parsed?.services ?? {})) {
     if (svc.image) allImages.push(svc.image);
 
+    const ports = [];
     for (const p of svc.ports ?? []) {
       const portStr = typeof p === 'string' ? p : String(p);
       allPorts.push(portStr);
+      ports.push(portStr);
     }
 
     // Environment keys (bỏ values để không lộ secret)
     const envs = svc.environment;
     if (envs) {
       if (Array.isArray(envs)) {
-        // Trường hợp environment viết dạng mảng: - MONGO_URI=mongodb://db...
         for (const env of envs) {
           if (typeof env === 'string') {
             allEnvKeys.push(env.split('=')[0]);
           }
         }
       } else if (typeof envs === 'object' && envs !== null) {
-        // Trường hợp environment viết dạng cặp Key-Value (Object): MONGO_URI: mongodb://db...
         allEnvKeys.push(...Object.keys(envs));
       }
     }
+
+    // Chi tiết service cho service picker (không chứa secret values)
+    servicesDetail.push({
+      name,
+      image:      svc.image ?? null,
+      build:      svc.build ?? null,
+      ports,
+      depends_on: Array.isArray(svc.depends_on)
+        ? svc.depends_on
+        : svc.depends_on ? Object.keys(svc.depends_on) : [],
+    });
   }
 
-  return { services, allImages, allPorts, allEnvKeys };
+  return { services, allImages, allPorts, allEnvKeys, servicesDetail };
 }
 
 export async function collectContainerInfo(projectRoot) {
