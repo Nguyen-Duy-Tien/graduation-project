@@ -241,7 +241,7 @@ Generate test cases for: IDOR (for idor_candidate endpoints), BFLA (for admin + 
   const result = await callGeminiWithRetry(prompt, MANUAL_TESTS_SYSTEM, {
     apiKey:          options.apiKey,
     temperature:     0.2,
-    maxOutputTokens: 6144,
+    maxOutputTokens: 8192,
   });
 
   logUsage('Call#2-ManualTests', result.usageMetadata);
@@ -261,7 +261,7 @@ export function buildToolConfig(aiResult, context) {
   const tools = aiResult.tools ?? {};
   return {
     _meta: {
-      generatedBy:  'aiAnalyzer/gemini-3.0-flash',
+      generatedBy:  'aiAnalyzer/gemini-2.5-flash',
       generatedAt:  new Date().toISOString(),
       scanStrategy: aiResult.scan_strategy ?? 'full',
       strategyReason: aiResult.strategy_reason ?? '',
