@@ -7,7 +7,7 @@
 //   callGeminiWithRetry(prompt, systemInstruction, options)  ← tự retry 3 lần
 //   parseJson(rawText)                                        ← strip fences + parse
 
-const GEMINI_ENDPOINT = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent';
+const GEMINI_ENDPOINT = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent';
 
 // Retry config
 const MAX_RETRIES    = 5; // Tăng lên 5 lần thử
