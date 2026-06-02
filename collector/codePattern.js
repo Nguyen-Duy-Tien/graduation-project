@@ -1,13 +1,14 @@
 // collectors/codePattern.js
-// Quét 20 dangerous pattern trên toàn bộ source — không phân biệt ngôn ngữ
-// 9 category: sqli, rce, jwt, mass_assign, ssrf, xss, secret, path_traversal, auth_bypass, info_leak
+// Quét dangerous pattern trên toàn bộ source — không phân biệt ngôn ngữ
+// category: sqli/nosqli, rce, jwt, mass_assign, ssrf, xss, secret,
+// path_traversal, auth_bypass, info_leak, redos
 // Mỗi pattern có severity: critical / high / medium
 
 import { readFileSync } from 'fs';
 import { relative } from 'path';
 import { glob } from 'glob';
 
-// ── 20 Dangerous Pattern Definitions ─────────────────────────────────────────
+// ── Dangerous Pattern Definitions ────────────────────────────────────────────
 
 const DANGEROUS_PATTERNS = [
   // ── sqli ──────────────────────────────────────────────────────────────────
@@ -88,6 +89,13 @@ const DANGEROUS_PATTERNS = [
     pattern:  /(?:create|update|save|assign)\s*\(\s*(?:\.\.\.)?(?:req\.body|request\.body|request\.json\(\))\s*\)/i,
   },
   {
+    id:       'mass-3',
+    category: 'mass_assign',
+    severity: 'high',
+    label:    'Mass assignment: model constructed directly from request body',
+    pattern:  /\bnew\s+[A-Z][A-Za-z0-9_]*\s*\(\s*(?:req|request)\.body\s*\)/i,
+  },
+  {
     id:       'mass-2',
     category: 'mass_assign',
     severity: 'high',
@@ -109,6 +117,29 @@ const DANGEROUS_PATTERNS = [
     severity: 'high',
     label:    'curl_exec with user input (PHP)',
     pattern:  /curl_setopt\s*\([^)]*CURLOPT_URL[^)]*\$_(?:GET|POST|REQUEST)/i,
+  },
+  {
+    id:       'ssrf-3',
+    category: 'ssrf',
+    severity: 'high',
+    label:    'HTTP client request to request-controlled URL',
+    pattern:  /\b(?:needle|request|got)\s*\(\s*(?:['"`](?:get|post|put|patch|delete)['"`]\s*,\s*)?(?:req|request)\.(?:body|query|params)\.[A-Za-z0-9_]*(?:url|uri|host|endpoint)[A-Za-z0-9_]*/i,
+  },
+
+  // ── nosqli ────────────────────────────────────────────────────────────────
+  {
+    id:       'nosqli-1',
+    category: 'nosqli',
+    severity: 'critical',
+    label:    'NoSQL query built from parsed request parameter',
+    pattern:  /find(?:One|ById|)\s*\(\s*\{[^}]*:\s*JSON\.parse\s*\(\s*decodeURI\s*\(\s*(?:req|request)\.(?:query|body|params)\./is,
+  },
+  {
+    id:       'nosqli-2',
+    category: 'nosqli',
+    severity: 'high',
+    label:    'JSON.parse on request input before database query',
+    pattern:  /JSON\.parse\s*\(\s*decodeURI\s*\(\s*(?:req|request)\.(?:query|body|params)\.[A-Za-z0-9_]+/i,
   },
 
   // ── xss ───────────────────────────────────────────────────────────────────
@@ -167,6 +198,13 @@ const DANGEROUS_PATTERNS = [
     label:    'Hardcoded role or permission check',
     pattern:  /if\s*\([^)]*(?:role|permission|isAdmin)\s*===?\s*['"](?:admin|superuser|root)['"]/i,
   },
+  {
+    id:       'auth-3',
+    category: 'auth_bypass',
+    severity: 'medium',
+    label:    'OTP or token generated with Math.random',
+    pattern:  /(?:otp|token|code|pin)[A-Za-z0-9_]*\s*=\s*Math\.floor\s*\(\s*Math\.random\s*\(/i,
+  },
 
   // ── info_leak ─────────────────────────────────────────────────────────────
   {
@@ -175,6 +213,22 @@ const DANGEROUS_PATTERNS = [
     severity: 'medium',
     label:    'Console.log / print with sensitive data',
     pattern:  /(?:console\.log|console\.error|print|logger\.debug)\s*\([^)]*(?:password|token|secret|key|credential)/i,
+  },
+  {
+    id:       'info-2',
+    category: 'info_leak',
+    severity: 'high',
+    label:    'Sensitive file exposed via sendFile',
+    pattern:  /sendFile\s*\([^)]*(?:logfile|\.log|private_key|public_key|pub_key|\.crt|\.key)[^)]*\)/i,
+  },
+
+  // ── redos ─────────────────────────────────────────────────────────────────
+  {
+    id:       'redos-1',
+    category: 'redos',
+    severity: 'medium',
+    label:    'Potential catastrophic backtracking regex',
+    pattern:  /\/[^/\n]*\([^/\n)]*[+*][^/\n)]*\)[+*][^/\n]*\//,
   },
 ];
 

@@ -2,8 +2,9 @@
 // Nhận diện ngôn ngữ, framework và ánh xạ sang tool profile
 // Đọc: package.json, requirements.txt, pom.xml, composer.json, go.mod, Gemfile
 
-import { readFileSync, existsSync } from 'fs';
-import { join } from 'path';
+import { readFileSync, existsSync, readdirSync, statSync } from 'fs';
+import { join, relative, resolve } from 'path';
+import yaml from 'js-yaml';
 
 // ── Tool profile map ──────────────────────────────────────────────────────────
 // Mỗi profile → danh sách tool và cấu hình mặc định
@@ -82,6 +83,204 @@ function safeReadText(filePath) {
   } catch {
     return '';
   }
+}
+
+function safeReadYaml(filePath) {
+  try {
+    return yaml.load(readFileSync(filePath, 'utf8'));
+  } catch {
+    return null;
+  }
+}
+
+// ── Candidate discovery for compose/monorepo projects ───────────────────────
+
+const MANIFEST_FILES = [
+  'package.json',
+  'requirements.txt',
+  'Pipfile',
+  'pyproject.toml',
+  'pom.xml',
+  'build.gradle',
+  'composer.json',
+  'go.mod',
+  'Gemfile',
+];
+
+const SKIP_DIRS = new Set([
+  'node_modules', 'vendor', '.git', '__pycache__', 'dist',
+  'build', '.venv', 'venv', 'target', '.next', 'out',
+  'coverage', '.cache', 'tmp', 'temp',
+]);
+
+const BACKEND_NAME_RE = /(^|[-_])(api|server|backend|gateway|service|app)([-_]|$)|^(api|server|backend|gateway|app|web)$/i;
+const FRONTEND_NAME_RE = /(^|[-_])(client|frontend|front|ui|webapp)([-_]|$)|^(client|frontend|ui)$/i;
+
+const BACKEND_FRAMEWORKS = new Set([
+  'nodejs-rest-api', 'python-flask', 'python-fastapi', 'python-django',
+  'java-spring', 'php-laravel', 'php-generic', 'golang-gin', 'ruby-rails',
+]);
+
+const BACKEND_DEPS = new Set([
+  'express', 'fastify', 'koa', 'restify', '@nestjs/core', '@nestjs/common',
+  'jsonwebtoken', 'passport-jwt', 'mongoose', 'sequelize', 'typeorm', 'prisma',
+]);
+
+const FRONTEND_DEPS = new Set([
+  'react', 'react-dom', 'vue', '@vue/cli-service', '@angular/core',
+  'vite', 'next', 'nuxt', 'svelte',
+]);
+
+function hasManifest(root) {
+  return MANIFEST_FILES.some(fname => existsSync(join(root, fname)));
+}
+
+function hasBackendDeps(rawDeps = []) {
+  const names = rawDeps.map(d => d.toLowerCase());
+  return names.some(d => BACKEND_DEPS.has(d));
+}
+
+function hasFrontendOnlyDeps(rawDeps = []) {
+  const names = rawDeps.map(d => d.toLowerCase());
+  const hasFrontend = names.some(d => FRONTEND_DEPS.has(d));
+  return hasFrontend && !hasBackendDeps(names);
+}
+
+function addCandidate(map, projectRoot, root, source, serviceName = null) {
+  const absRoot = resolve(root);
+  if (!existsSync(absRoot)) return;
+
+  try {
+    if (!statSync(absRoot).isDirectory()) return;
+  } catch {
+    return;
+  }
+
+  const key = absRoot.toLowerCase();
+  const existing = map.get(key);
+  if (existing) {
+    if (!existing.serviceName && serviceName) existing.serviceName = serviceName;
+    existing.sources.push(source);
+    return;
+  }
+
+  map.set(key, {
+    root: absRoot,
+    relativeRoot: relative(projectRoot, absRoot).replace(/\\/g, '/') || '.',
+    source,
+    sources: [source],
+    serviceName,
+  });
+}
+
+function collectComposeCandidates(projectRoot, map) {
+  for (const fname of ['docker-compose.yml', 'docker-compose.yaml']) {
+    const composePath = join(projectRoot, fname);
+    if (!existsSync(composePath)) continue;
+
+    const parsed = safeReadYaml(composePath);
+    for (const [serviceName, svc] of Object.entries(parsed?.services ?? {})) {
+      const build = svc?.build;
+      const context = typeof build === 'string'
+        ? build
+        : typeof build?.context === 'string' ? build.context : null;
+
+      if (!context) continue;
+      addCandidate(map, projectRoot, resolve(projectRoot, context), `compose:${fname}`, serviceName);
+    }
+  }
+}
+
+function collectSubdirCandidates(projectRoot, map) {
+  let entries = [];
+  try {
+    entries = readdirSync(projectRoot, { withFileTypes: true });
+  } catch {
+    return;
+  }
+
+  for (const entry of entries) {
+    if (!entry.isDirectory() || SKIP_DIRS.has(entry.name)) continue;
+    const childRoot = join(projectRoot, entry.name);
+    if (hasManifest(childRoot)) {
+      addCandidate(map, projectRoot, childRoot, 'subdir', entry.name);
+    }
+  }
+}
+
+function discoverProjectCandidates(projectRoot) {
+  const map = new Map();
+  addCandidate(map, projectRoot, projectRoot, 'root');
+  collectComposeCandidates(projectRoot, map);
+  collectSubdirCandidates(projectRoot, map);
+  return [...map.values()];
+}
+
+function detectAtRoot(root) {
+  return detectFromPackageJson(root)   ??
+    detectFromRequirementsTxt(root)    ??
+    detectFromPomXml(root)             ??
+    detectFromComposerJson(root)       ??
+    detectFromGoMod(root)              ??
+    detectFromGemfile(root)            ??
+    { language: 'unknown', framework: 'unknown', features: {}, depFile: null };
+}
+
+function scoreCandidate(detected, candidate) {
+  let score = 0;
+  const rel = candidate.relativeRoot.toLowerCase();
+  const service = (candidate.serviceName ?? '').toLowerCase();
+
+  if (detected.language !== 'unknown') score += 20;
+  else score -= 10;
+
+  if (detected.framework !== 'unknown' && detected.framework in PROFILE_TOOL_MAP) score += 35;
+  if (BACKEND_FRAMEWORKS.has(detected.framework)) score += 25;
+  if (detected.framework?.endsWith?.('-generic')) score -= 5;
+
+  if (detected.features?.jwt) score += 8;
+  if (detected.features?.orm) score += 6;
+  if (detected.features?.fileUpload) score += 4;
+  if (hasBackendDeps(detected.rawDeps)) score += 12;
+  if (hasFrontendOnlyDeps(detected.rawDeps)) score -= 25;
+
+  if (BACKEND_NAME_RE.test(service)) score += 25;
+  if (FRONTEND_NAME_RE.test(service)) score -= 30;
+  if (BACKEND_NAME_RE.test(rel)) score += 15;
+  if (FRONTEND_NAME_RE.test(rel)) score -= 20;
+
+  if (candidate.source === 'root' && detected.language !== 'unknown') score += 5;
+  return score;
+}
+
+function buildDetectedStack(projectRoot, candidate, detected, score, allCandidates) {
+  const profileKey = detected.framework in PROFILE_TOOL_MAP
+    ? detected.framework
+    : 'unknown';
+
+  const profile = PROFILE_TOOL_MAP[profileKey];
+  const isContainerized = existsSync(join(projectRoot, 'Dockerfile'))
+                        || existsSync(join(projectRoot, 'docker-compose.yml'))
+                        || existsSync(join(projectRoot, 'docker-compose.yaml'))
+                        || existsSync(join(candidate.root, 'Dockerfile'));
+
+  const depFilePath = detected.depFile
+    ? join(candidate.relativeRoot, detected.depFile).replace(/\\/g, '/').replace(/^\.\//, '')
+    : null;
+
+  return {
+    ...detected,
+    profileKey,
+    toolProfile: profile,
+    isContainerized,
+    detectedRoot: candidate.root,
+    relativeRoot: candidate.relativeRoot,
+    serviceName: candidate.serviceName,
+    depFilePath,
+    candidateScore: score,
+    isMonorepo: allCandidates.length > 1 || candidate.relativeRoot !== '.',
+    collectedAt: new Date().toISOString(),
+  };
 }
 
 // ── Language detectors — một hàm per file ────────────────────────────────────
@@ -277,33 +476,40 @@ function detectFromGemfile(root) {
  * @returns {Promise<object>} techStack context object
  */
 export async function collectTechStack(projectRoot) {
-  // Thử từng detector — trả về kết quả đầu tiên tìm được
-  const detected =
-    detectFromPackageJson(projectRoot)   ??
-    detectFromRequirementsTxt(projectRoot) ??
-    detectFromPomXml(projectRoot)        ??
-    detectFromComposerJson(projectRoot)  ??
-    detectFromGoMod(projectRoot)         ??
-    detectFromGemfile(projectRoot)       ??
-    { language: 'unknown', framework: 'unknown', features: {}, depFile: null };
+  const absRoot = resolve(projectRoot);
+  const candidates = discoverProjectCandidates(absRoot);
 
-  // Resolve tool profile
-  const profileKey = detected.framework in PROFILE_TOOL_MAP
-    ? detected.framework
-    : 'unknown';
+  const scored = candidates.map(candidate => {
+    const detected = detectAtRoot(candidate.root);
+    const score = scoreCandidate(detected, candidate);
+    return {
+      candidate,
+      detected,
+      score,
+      stack: buildDetectedStack(absRoot, candidate, detected, score, candidates),
+    };
+  });
 
-  const profile = PROFILE_TOOL_MAP[profileKey];
-
-  // Kiểm tra containerization (dùng kết quả từ apiSurface.js nếu có, ở đây chỉ flag)
-  const isContainerized = existsSync(join(projectRoot, 'Dockerfile'))
-                        || existsSync(join(projectRoot, 'docker-compose.yml'))
-                        || existsSync(join(projectRoot, 'docker-compose.yaml'));
+  scored.sort((a, b) => b.score - a.score);
+  const selected = scored[0]?.stack ?? buildDetectedStack(
+    absRoot,
+    { root: absRoot, relativeRoot: '.', source: 'root', sources: ['root'], serviceName: null },
+    { language: 'unknown', framework: 'unknown', features: {}, depFile: null },
+    -10,
+    []
+  );
 
   return {
-    ...detected,
-    profileKey,
-    toolProfile:     profile,
-    isContainerized,
-    collectedAt:     new Date().toISOString(),
+    ...selected,
+    serviceCandidates: scored.map(({ stack, candidate, score }) => ({
+      relativeRoot: stack.relativeRoot,
+      serviceName: stack.serviceName,
+      language: stack.language,
+      framework: stack.framework,
+      profileKey: stack.profileKey,
+      depFilePath: stack.depFilePath,
+      score,
+      sources: candidate.sources,
+    })),
   };
 }

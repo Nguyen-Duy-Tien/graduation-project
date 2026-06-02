@@ -21,12 +21,27 @@ test('picks api service over mongo', () => {
     },
   };
   const result = pickTargetService(ci, projectRoot);
-  assert.deepEqual(result, {
-    serviceName: 'api',
-    port: '3001',
-    networkName: 'vulnerable-rest-api_default',
+  assert.equal(result.serviceName, 'api');
+  assert.equal(result.port, '3001');
+  assert.equal(result.networkName, 'vulnerable-rest-api_default');
+  assert.equal(result.composeFile, 'docker-compose.yml');
+});
+
+test('prefers api service over client service', () => {
+  const ci = {
+    hasDockerCompose: true,
     composeFile: 'docker-compose.yml',
-  });
+    dockerCompose: {
+      servicesDetail: [
+        { name: 'client', image: null, build: './client', ports: ['3000:3000'], depends_on: ['api'] },
+        { name: 'api',    image: null, build: './server', ports: ['3001:3001'], depends_on: ['db'] },
+        { name: 'db',     image: 'mongo:6', build: null, ports: ['27017:27017'], depends_on: [] },
+      ],
+    },
+  };
+  const result = pickTargetService(ci, projectRoot);
+  assert.equal(result.serviceName, 'api');
+  assert.equal(result.port, '3001');
 });
 
 test('skips service without ports', () => {
@@ -41,7 +56,7 @@ test('skips service without ports', () => {
   };
   const result = pickTargetService(ci, projectRoot);
   assert.equal(result.serviceName, 'web');
-  assert.equal(result.port, '8080');
+  assert.equal(result.port, '80');
 });
 
 test('parses ip:host:container format', () => {

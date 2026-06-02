@@ -3,8 +3,8 @@
 // 9 regex pattern → route detection
 // classifyEndpoint() → 6 flag: auth, fileUpload, idor_candidate, admin, export, payment
 
-import { readFileSync, statSync } from 'fs';
-import { join, relative, extname } from 'path';
+import { existsSync, readFileSync } from 'fs';
+import { dirname, join, relative, resolve } from 'path';
 import { glob } from 'glob';
 
 // ── 9 Route Detection Patterns ────────────────────────────────────────────────
@@ -14,9 +14,10 @@ const ROUTE_PATTERNS = [
   // 1. Express / Fastify / Koa — app.get('/path', ...)
   {
     name: 'express',
-    pattern: /(?:app|router|r)\s*\.\s*(get|post|put|patch|delete|all|use)\s*\(\s*['"`]([^'"`\s]+)['"`]/gi,
-    methodGroup: 1,
-    pathGroup:   2,
+    pattern: /\b(app|appDev|router|r)\s*\.\s*(get|post|put|patch|delete|all|use)\s*\(\s*['"`]([^'"`\s]+)['"`]/gi,
+    receiverGroup: 1,
+    methodGroup: 2,
+    pathGroup:   3,
     extensions:  ['.js', '.ts', '.mjs', '.cjs'],
   },
   // 2. NestJS decorators — @Get('/path'), @Post('/path'), @Controller('/base')
@@ -140,6 +141,95 @@ function shouldSkip(filePath) {
   return parts.some(p => SKIP_DIRS.has(p));
 }
 
+function normalizeRoutePath(path) {
+  if (!path || path === '/') return '/';
+  return '/' + String(path).replace(/^\/+|\/+$/g, '');
+}
+
+function joinRoutePaths(basePath, childPath) {
+  const base = normalizeRoutePath(basePath);
+  const child = normalizeRoutePath(childPath);
+  if (base === '/') return child;
+  if (child === '/') return base;
+  return `${base}${child}`;
+}
+
+function resolveRequiredFile(fromFile, requestPath) {
+  if (!requestPath?.startsWith?.('.')) return null;
+
+  const base = resolve(dirname(fromFile), requestPath);
+  const candidates = [
+    base,
+    `${base}.js`,
+    `${base}.ts`,
+    `${base}.mjs`,
+    `${base}.cjs`,
+    join(base, 'index.js'),
+    join(base, 'index.ts'),
+  ];
+
+  return candidates.find(p => existsSync(p)) ?? null;
+}
+
+function buildExpressMountMap(files) {
+  const mountsByFile = new Map();
+  const requireRe = /\b(?:const|let|var)\s+([A-Za-z_$][\w$]*)\s*=\s*require\s*\(\s*['"]([^'"]+)['"]\s*\)/g;
+  const mountRe = /\b(?:app|appDev|router|r)\s*\.\s*use\s*\(\s*['"`]([^'"`\s]+)['"`]\s*,\s*([A-Za-z_$][\w$]*)/g;
+
+  for (const file of files) {
+    if (!/\.(?:js|ts|mjs|cjs)$/.test(file)) continue;
+
+    let content;
+    try {
+      content = readFileSync(file, 'utf8');
+    } catch {
+      continue;
+    }
+
+    const requires = new Map();
+    let match;
+    while ((match = requireRe.exec(content)) !== null) {
+      const resolvedFile = resolveRequiredFile(file, match[2]);
+      if (resolvedFile) requires.set(match[1], resolvedFile);
+    }
+
+    while ((match = mountRe.exec(content)) !== null) {
+      const basePath = match[1];
+      const variable = match[2];
+      const mountedFile = requires.get(variable);
+      if (!mountedFile) continue;
+
+      const mounts = mountsByFile.get(mountedFile) ?? [];
+      mounts.push({
+        basePath,
+        mountedFrom: file,
+        variable,
+      });
+      mountsByFile.set(mountedFile, mounts);
+    }
+  }
+
+  return mountsByFile;
+}
+
+function expandExpressRoute(route, mounts) {
+  if (route.framework !== 'express' || route.method === 'USE' || !mounts?.length) {
+    return [route];
+  }
+
+  if (!['router', 'r'].includes(route.receiver)) {
+    return [route];
+  }
+
+  return mounts.map(mount => ({
+    ...route,
+    path: joinRoutePaths(mount.basePath, route.path),
+    mountPath: mount.basePath,
+    mountedFrom: mount.mountedFrom,
+    classification: classifyEndpoint(joinRoutePaths(mount.basePath, route.path)),
+  }));
+}
+
 function extractRoutesFromFile(filePath, patternEntry) {
   let content;
   try {
@@ -159,6 +249,9 @@ function extractRoutesFromFile(filePath, patternEntry) {
     const rawMethod = patternEntry.methodGroup !== null
       ? (match[patternEntry.methodGroup] ?? 'GET').toUpperCase()
       : 'GET';
+    const receiver = patternEntry.receiverGroup
+      ? (match[patternEntry.receiverGroup] ?? null)
+      : null;
 
     // Spring/NestJS method mapping
     const method = rawMethod.replace('MAPPING', '').replace('CONTROLLER', 'BASE');
@@ -171,6 +264,7 @@ function extractRoutesFromFile(filePath, patternEntry) {
       file:           filePath,
       line:           lineNum,
       framework:      patternEntry.name,
+      receiver,
       classification: classifyEndpoint(rawPath),
       snippet:        (lines[lineNum - 1] ?? '').trim().slice(0, 120),
     });
@@ -215,10 +309,11 @@ export async function collectRoutes(projectRoot, techStack = {}) {
 
   // Unique files
   const uniqueFiles = [...new Set(allFiles)];
+  const expressMountsByFile = buildExpressMountMap(uniqueFiles);
 
   // Scan
   const allRoutes = [];
-  const seenKeys  = new Set();   // dedup: method+path
+  const seenKeys  = new Set();   // dedup: method+path+file after mount expansion
 
   for (const file of uniqueFiles) {
     for (const patternEntry of activePatterns) {
@@ -226,13 +321,23 @@ export async function collectRoutes(projectRoot, techStack = {}) {
 
       const routes = extractRoutesFromFile(file, patternEntry);
       for (const route of routes) {
-        // Relative path để output gọn hơn
-        route.file = relative(projectRoot, route.file).replace(/\\/g, '/');
+        if (route.framework === 'express' && route.method === 'USE') {
+          continue;
+        }
 
-        const key = `${route.method}:${route.path}`;
-        if (!seenKeys.has(key)) {
-          seenKeys.add(key);
-          allRoutes.push(route);
+        const expandedRoutes = expandExpressRoute(route, expressMountsByFile.get(file));
+        for (const expanded of expandedRoutes) {
+          // Relative path để output gọn hơn
+          expanded.file = relative(projectRoot, expanded.file).replace(/\\/g, '/');
+          if (expanded.mountedFrom) {
+            expanded.mountedFrom = relative(projectRoot, expanded.mountedFrom).replace(/\\/g, '/');
+          }
+
+          const key = `${expanded.method}:${expanded.path}:${expanded.file}`;
+          if (!seenKeys.has(key)) {
+            seenKeys.add(key);
+            allRoutes.push(expanded);
+          }
         }
       }
     }
