@@ -314,6 +314,11 @@ export async function triageWithGemini(deduplicatedFindings, context, options = 
         });
       });
     }
+
+    if (chunkNum < totalChunks) {
+        console.log(`[WAIT] Xong cụm ${chunkNum}. Nghỉ 15s để chống(429)...`);
+        await delay(15000);
+    }
   }
 
   // =========================================================================
