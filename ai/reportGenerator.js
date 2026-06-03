@@ -298,6 +298,8 @@ Output schema:
   ]
 }`;
 
+const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
 /**
  * Gọi Gemini để triage findings.
  * @param {object[]} deduplicatedFindings
@@ -308,6 +310,21 @@ export async function triageWithGemini(deduplicatedFindings, context, options = 
   const CHUNK_SIZE = 30; // Giới hạn 10 lỗi mỗi cụm gửi cho AI
   let allTriagedFindings = [];
   let summaryForReduce = [];
+
+  if (deduplicatedFindings.length === 0) {
+    return {
+      executive_summary: {
+        overall_risk: 'LOW',
+        security_posture_score: 100,
+        critical_count: 0,
+        high_count: 0,
+        medium_count: 0,
+        key_findings: ['No scanner findings were available for AI triage.'],
+        immediate_actions: [],
+      },
+      triaged_findings: [],
+    };
+  }
 
   console.log(`[AI] Bắt đầu phân mảnh ${deduplicatedFindings.length} lỗi thô để xử lý (Map-Reduce)...`);
 
@@ -399,7 +416,7 @@ export async function triageWithGemini(deduplicatedFindings, context, options = 
 
     if (chunkNum < totalChunks) {
         console.log(`[WAIT] Xong cụm ${chunkNum}. Nghỉ 15s để chống(429)...`);
-        await delay(15000);
+        await sleep(15000);
     }
   }
 
