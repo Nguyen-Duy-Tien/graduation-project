@@ -11,7 +11,7 @@
     "analyze":           "node ai/aiAnalyzer.js",
     "generate-pipeline": "node ai/pipelineGenerator.js",
     "report":            "node ai/reportGenerator.js",
-    "test":              "node --test runtime/*.test.js collector/*.test.js"
+    "test":              "node --test runtime/*.test.js collector/*.test.js ai/*.test.js"
   },
   "dependencies": {
     "glob":    "^10.4.5",

@@ -99,8 +99,6 @@ Vào `Manage Jenkins → Credentials → Global` và thêm:
 | ID | Loại | Mô tả |
 |---|---|---|
 | `gemini-api-key` | Secret Text | Gemini API Key từ Google AI Studio |
-| `zap-username` | Username with password | Tài khoản đăng nhập app (nếu cần auth) |
-| `zap-password` | Secret Text | Mật khẩu tương ứng |
 
 **4. Thêm biến môi trường Jenkins (tuỳ chọn):**
 
@@ -123,8 +121,8 @@ pipeline/ai-module/
 ├── collector/
 │   ├── contextCollector.js    # Entry point: chạy 5 collector song song
 │   ├── techStack.js           # Nhận diện ngôn ngữ, framework, dependencies
-│   ├── routeScanner.js        # Quét 9 route pattern, phân loại 6 flag
-│   ├── codePattern.js         # Quét 20 dangerous pattern, 9 category
+│   ├── routeScanner.js        # Quét route pattern + ghép Express mount/child route
+│   ├── codePattern.js         # Quét dangerous pattern cho OWASP API risks
 │   └── apiSurface.js          # OpenAPI/Swagger + git diff + Docker info
 ├── tools/                     # Tool adapter pattern — thêm tool mới = thêm 1 file
 │   ├── index.js               # Registry: SAST_TOOLS, DAST_TOOLS
@@ -268,8 +266,6 @@ Copy `Jenkinsfile` vào root của repo dự án, đảm bảo module nằm tạ
 ```groovy
 // Trong Jenkinsfile environment block
 GEMINI_API_KEY = credentials('gemini-api-key')   // Secret Text
-ZAP_USERNAME   = credentials('zap-username')      // Username/Password
-ZAP_PASSWORD   = credentials('zap-password')      // Secret Text
 ```
 
 ### Biến môi trường tuỳ chỉnh
@@ -283,14 +279,11 @@ environment {
 
 ### ZAP Authentication
 
-Khi AI phát hiện app cần xác thực (có JWT, login endpoint), `tool_config.json` sẽ có `authRequired: true`. Jenkinsfile tự động build `AUTH_FLAGS` cho ZAP sử dụng form-based auth. Để hoạt động cần:
-
-1. Thêm credential `zap-username` và `zap-password` vào Jenkins
-2. Set `ZAP_LOGIN_URL` (mặc định dùng `TARGET_URL/login`)
+Hiện tại Jenkinsfile chạy ZAP ở chế độ unauthenticated scan. `tool_config.json` vẫn ghi nhận `authRequired` để đưa vào báo cáo/manual tests, nhưng tự động đăng nhập ZAP bằng form-based auth chưa được implement trong pipeline.
 
 ### Build status
 
-Pipeline mark **UNSTABLE** (không fail) khi có critical finding trên nhánh `main`/`master`. Các nhánh khác chỉ log cảnh báo.
+Pipeline mark **FAILURE** khi `security-report.json` có critical finding. Đây là quality gate chính của demo.
 
 ---
 
@@ -306,7 +299,7 @@ Pipeline mark **UNSTABLE** (không fail) khi có critical finding trên nhánh `
 | `trivy-report.json` | `scan-reports/` | Kết quả SCA từ Trivy |
 | `zap-report.json` | `scan-reports/` | Kết quả DAST từ ZAP |
 | `nikto-report.json` | `scan-reports/` | Kết quả DAST từ Nikto (PHP) |
-| `nuclei-report.json` | `scan-reports/` | Kết quả DAST từ Nuclei |
+| `nuclei-report.jsonl` | `scan-reports/` | Kết quả DAST từ Nuclei dạng JSONL |
 | `security-report.html` | `final-report/` | Báo cáo HTML đầy đủ, hiển thị qua Jenkins HTML Publisher |
 | `security-report.json` | `final-report/` | Báo cáo JSON machine-readable, dùng cho tích hợp tiếp theo |
 
@@ -315,18 +308,18 @@ Pipeline mark **UNSTABLE** (không fail) khi có critical finding trên nhánh `
 ## Chạy tests
 
 ```bash
-node --test test.js
+npm test
 ```
 
-30 test cases phủ các hàm pure của module:
+Test suite hiện tại phủ các hàm pure và collector chính của module:
 
-| Nhóm | Số tests | Hàm được test |
-|---|---|---|
-| `classifyEndpoint` | 7 | auth, fileUpload, idor_candidate, admin, payment, general, multi-flag |
-| `deduplicate` | 4 | dedup theo key, sort severity, empty input |
-| `parseJson` | 7 | JSON thuần, markdown fences, leading text, array, lỗi |
-| `buildToolConfig` | 6 | scan strategy, ZAP auth flag, bandit disabled, `_meta`, defaults |
-| Report readers | 6 | missing file graceful + parse Semgrep + parse Nikto |
+| Nhóm | Hàm được test |
+|---|---|
+| `sanitize` | whitelist ruleset, ZAP mode, service name, port, severity, focus path, shell quoting |
+| `servicePicker` | chọn backend API service, bỏ DB/frontend, parse container port |
+| `techStack` | nhận diện backend manifest trong compose/subfolder |
+| `routeScanner` | ghép Express mount route với router child route |
+| `codePattern` | phát hiện pattern OWASP API benchmark |
 
 ---
 
@@ -370,7 +363,5 @@ Call #3 (reportGenerator.js)
   Output: triaged findings với risk score + remediation + executive summary
   Mục đích: loại bỏ false positive, ưu tiên findings, đưa ra hướng fix cụ thể
 ```
-
-
 
 

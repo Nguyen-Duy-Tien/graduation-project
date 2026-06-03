@@ -20,6 +20,16 @@ const ROUTE_PATTERNS = [
     pathGroup:   3,
     extensions:  ['.js', '.ts', '.mjs', '.cjs'],
   },
+  // Express regex catch-all — router.get(/.*/, ...)
+  {
+    name: 'express',
+    pattern: /\b(app|appDev|router|r)\s*\.\s*(get|post|put|patch|delete|all|use)\s*\(\s*\/\.\*\//gi,
+    receiverGroup: 1,
+    methodGroup: 2,
+    pathGroup:   null,
+    literalPath: '/',
+    extensions:  ['.js', '.ts', '.mjs', '.cjs'],
+  },
   // 2. NestJS decorators — @Get('/path'), @Post('/path'), @Controller('/base')
   {
     name: 'nestjs',
@@ -245,7 +255,7 @@ function extractRoutesFromFile(filePath, patternEntry) {
 
   while ((match = re.exec(content)) !== null) {
     const lineNum  = content.slice(0, match.index).split('\n').length;
-    const rawPath  = match[patternEntry.pathGroup]?.trim() ?? '';
+    const rawPath  = patternEntry.literalPath ?? match[patternEntry.pathGroup]?.trim() ?? '';
     const rawMethod = patternEntry.methodGroup !== null
       ? (match[patternEntry.methodGroup] ?? 'GET').toUpperCase()
       : 'GET';

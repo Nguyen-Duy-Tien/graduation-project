@@ -2,13 +2,13 @@
 // Chức năng 3 của đề tài: Security Report Generator
 //
 // Flow:
-//   readSemgrep() + readBandit() + readTrivy() + readZap()
+//   readSemgrep() + readBandit() + readTrivy() + readZap() + readNuclei() + readNikto()
 //   → deduplicate() gộp finding trùng
 //   → triageWithGemini() (Gemini Call #3) phân loại + risk score + remediation
 //   → buildHtml() render security-report.html
 
 import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'fs';
-import { join, resolve } from 'path';
+import { dirname, join, resolve } from 'path';
 import { callGeminiWithRetry, parseJson, logUsage } from './geminiClient.js';
 
 // ── 1. Tool report readers ────────────────────────────────────────────────────
@@ -134,6 +134,88 @@ export function readZap(reportPath) {
     return findings;
   } catch (e) {
     console.warn(`[readZap] Parse error: ${e.message}`);
+    return [];
+  }
+}
+
+/**
+ * Parse Nuclei JSONL report.
+ * nuclei -jsonl -> one JSON object per line.
+ */
+export function readNuclei(reportPath) {
+  if (!existsSync(reportPath)) return [];
+  try {
+    return readFileSync(reportPath, 'utf8')
+      .split(/\r?\n/)
+      .map(line => line.trim())
+      .filter(Boolean)
+      .map(line => JSON.parse(line))
+      .map(r => ({
+        source:   'nuclei',
+        ruleId:   r['template-id'] ?? r.templateID ?? r.id ?? '',
+        category: mapNucleiCategory(r),
+        severity: normalizeSeverity(r.info?.severity ?? r.severity ?? 'medium'),
+        location: r['matched-at'] ?? r.host ?? r.url ?? '',
+        file:     '',
+        line:     0,
+        message:  r.info?.name ?? r.name ?? r['template-id'] ?? 'Nuclei finding',
+        snippet:  r['extracted-results']?.length
+          ? `Extracted: ${r['extracted-results'].join(', ')}`
+          : `Matcher: ${r['matcher-name'] ?? 'N/A'}`,
+        cweId:    normalizeCwe(r.info?.classification?.['cwe-id']),
+        owasp:    r.info?.classification?.['owasp-top-ten'] ?? null,
+      }));
+  } catch (e) {
+    console.warn(`[readNuclei] Parse error: ${e.message}`);
+    return [];
+  }
+}
+
+/**
+ * Parse Nikto JSON report.
+ * Nikto JSON varies by version; support vulnerabilities/items arrays.
+ */
+export function readNikto(reportPath) {
+  if (!existsSync(reportPath)) return [];
+  try {
+    const raw = JSON.parse(readFileSync(reportPath, 'utf8'));
+    const hostItems = Array.isArray(raw) ? raw : (raw.hosts ?? raw.vulnerabilities ?? raw.items ?? []);
+    const findings = [];
+
+    for (const entry of hostItems) {
+      const items = entry.vulnerabilities ?? entry.items ?? (entry.id ? [entry] : []);
+      for (const item of items) {
+        const msg = item.msg ?? item.message ?? item.description ?? item.name ?? '';
+        findings.push({
+          source:   'nikto',
+          ruleId:   String(item.id ?? item.osvdbid ?? item.pluginid ?? item.references ?? ''),
+          category: mapNiktoCategory(msg),
+          severity: mapNiktoSeverity(msg),
+          location: item.url ?? item.uri ?? entry.ip ?? entry.hostname ?? '',
+          file:     '',
+          line:     0,
+          message:  msg || 'Nikto finding',
+          snippet:  item.method ? `Method: ${item.method}` : '',
+          cweId:    normalizeCwe(item.cwe),
+          owasp:    null,
+        });
+      }
+    }
+
+    return findings;
+  } catch (e) {
+    console.warn(`[readNikto] Parse error: ${e.message}`);
+    return [];
+  }
+}
+
+export function readManualTests(manualTestsPath) {
+  if (!manualTestsPath || !existsSync(manualTestsPath)) return [];
+  try {
+    const raw = JSON.parse(readFileSync(manualTestsPath, 'utf8'));
+    return raw.manual_test_cases ?? raw.test_cases ?? [];
+  } catch (e) {
+    console.warn(`[readManualTests] Parse error: ${e.message}`);
     return [];
   }
 }
@@ -385,6 +467,7 @@ const STATUS_BADGE = {
 export function buildHtml(triageResult, context, metadata = {}) {
   const summary  = triageResult.executive_summary ?? {};
   const findings = triageResult.triaged_findings ?? [];
+  const manualTests = metadata.manualTests ?? [];
   const ts       = new Date().toISOString();
   const project  = `${context.techStack?.language ?? '?'} / ${context.techStack?.framework ?? '?'}`;
 
@@ -424,6 +507,35 @@ export function buildHtml(triageResult, context, metadata = {}) {
       </div>`;
     }).join('\n');
 
+  const manualTestsHtml = manualTests.map(tc => {
+    const sev = String(tc.severity ?? 'MEDIUM').toLowerCase();
+    const sevColor = SEVERITY_COLORS[sev] ?? SEVERITY_COLORS.medium;
+    const steps = (tc.steps ?? []).map(step => `
+      <li>
+        <strong>Step ${escHtml(step.step ?? '')}:</strong> ${escHtml(step.action ?? step)}
+        ${step.http_request ? `<pre class="snippet">${escHtml(step.http_request)}</pre>` : ''}
+        ${step.expected_if_vulnerable ? `<div class="triage-reason"><strong>Vulnerable if:</strong> ${escHtml(step.expected_if_vulnerable)}</div>` : ''}
+      </li>
+    `).join('');
+
+    return `
+    <div class="finding manual-test">
+      <div class="finding-header">
+        <span class="severity-pill" style="background:${sevColor}20;color:${sevColor};border:1px solid ${sevColor}40">
+          ${escHtml(tc.severity ?? 'MEDIUM')}
+        </span>
+        <strong class="finding-id">${escHtml(tc.id ?? '')}</strong>
+        <span class="finding-title">${escHtml(tc.vulnerability_type ?? 'Manual Test')} - ${escHtml(tc.target_endpoint ?? '')}</span>
+      </div>
+      <div class="finding-body">
+        ${tc.preconditions?.length ? `<div class="meta-row"><span>Preconditions: ${escHtml(tc.preconditions.join('; '))}</span></div>` : ''}
+        <ol class="manual-steps">${steps}</ol>
+        ${tc.confirmed_vulnerable_indicator ? `<div class="triage-reason"><strong>Confirm:</strong> ${escHtml(tc.confirmed_vulnerable_indicator)}</div>` : ''}
+        ${tc.remediation_hint ? `<div class="remediation"><strong>Fix hint:</strong> ${escHtml(tc.remediation_hint)}</div>` : ''}
+      </div>
+    </div>`;
+  }).join('\n');
+
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -447,6 +559,8 @@ export function buildHtml(triageResult, context, metadata = {}) {
   .key-findings h2 { font-size: 1rem; margin-bottom: 0.75rem; color: var(--c-accent); }
   .key-findings li { font-size: 0.9rem; color: var(--c-muted); margin-bottom: 0.35rem; list-style: none; padding-left: 1.25rem; position: relative; }
   .key-findings li::before { content: '→'; position: absolute; left: 0; color: var(--c-accent); }
+  .manual-steps { padding-left: 1.25rem; color: var(--c-muted); font-size: 0.86rem; }
+  .manual-steps li { margin-bottom: 0.75rem; }
   h2.section-title { font-size: 1rem; font-weight: 600; margin: 2rem 0 1rem; border-bottom: 1px solid var(--c-border); padding-bottom: 0.5rem; }
   .finding { background: var(--c-surface); border: 1px solid var(--c-border); border-radius: 8px; margin-bottom: 1rem; overflow: hidden; }
   .finding-header { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem; padding: 0.75rem 1rem; background: rgba(255,255,255,0.02); border-bottom: 1px solid var(--c-border); }
@@ -505,6 +619,10 @@ export function buildHtml(triageResult, context, metadata = {}) {
   <h2 style="margin-top:0.75rem">Immediate Actions</h2>
   <ul>${summary.immediate_actions.map(a => `<li>${escHtml(a)}</li>`).join('')}</ul>` : ''}
 </div>
+
+${manualTestsHtml ? `
+<h2 class="section-title">Manual Testing Checklist</h2>
+${manualTestsHtml}` : ''}
 
 <h2 class="section-title">Vulnerability Findings</h2>
 ${findingsHtml || '<p style="color:var(--c-muted)">No confirmed findings.</p>'}
@@ -570,6 +688,61 @@ function mapZapRisk(riskVal) {
   return 'medium';
 }
 
+function normalizeSeverity(s) {
+  const v = String(s ?? '').toLowerCase();
+  if (['critical', 'high', 'medium', 'low'].includes(v)) return v;
+  if (v.includes('critical')) return 'critical';
+  if (v.includes('high')) return 'high';
+  if (v.includes('medium')) return 'medium';
+  if (v.includes('low') || v.includes('info')) return 'low';
+  return 'medium';
+}
+
+function normalizeCwe(cwe) {
+  if (!cwe) return null;
+  const value = Array.isArray(cwe) ? cwe[0] : cwe;
+  const text = String(value);
+  if (/^CWE-\d+$/i.test(text)) return text.toUpperCase();
+  const match = text.match(/\d+/);
+  return match ? `CWE-${match[0]}` : null;
+}
+
+function mapNucleiCategory(finding) {
+  const tags = [
+    ...(finding.info?.tags ? String(finding.info.tags).split(',') : []),
+    finding['template-id'] ?? '',
+    finding.info?.name ?? '',
+  ].join(' ').toLowerCase();
+
+  if (tags.includes('sqli') || tags.includes('sql')) return 'sqli';
+  if (tags.includes('xss')) return 'xss';
+  if (tags.includes('ssrf')) return 'ssrf';
+  if (tags.includes('jwt') || tags.includes('auth')) return 'auth';
+  if (tags.includes('file') || tags.includes('upload')) return 'file_upload';
+  if (tags.includes('exposure') || tags.includes('exposed') || tags.includes('disclosure')) return 'info_leak';
+  if (tags.includes('misconfig') || tags.includes('config')) return 'misconfig';
+  if (tags.includes('cve')) return 'dependency';
+  return 'general';
+}
+
+function mapNiktoCategory(message) {
+  const msg = String(message ?? '').toLowerCase();
+  if (msg.includes('xss') || msg.includes('script')) return 'xss';
+  if (msg.includes('sql')) return 'sqli';
+  if (msg.includes('header') || msg.includes('cors') || msg.includes('cookie')) return 'misconfig';
+  if (msg.includes('directory') || msg.includes('file') || msg.includes('disclosure')) return 'info_leak';
+  if (msg.includes('auth') || msg.includes('login')) return 'auth';
+  return 'general';
+}
+
+function mapNiktoSeverity(message) {
+  const msg = String(message ?? '').toLowerCase();
+  if (msg.includes('critical') || msg.includes('remote command') || msg.includes('rce')) return 'critical';
+  if (msg.includes('vulnerab') || msg.includes('xss') || msg.includes('sql') || msg.includes('disclosure')) return 'high';
+  if (msg.includes('header') || msg.includes('cookie') || msg.includes('default')) return 'medium';
+  return 'low';
+}
+
 // ── CLI runner (Stage 8 trong Jenkinsfile) ────────────────────────────────────
 
 async function main() {
@@ -590,6 +763,8 @@ async function main() {
     ...readBandit(join(reportsDir, 'bandit-report.json')),
     ...readTrivy(join(reportsDir, 'trivy-report.json')),
     ...readZap(join(reportsDir, 'zap-report.json')),
+    ...readNuclei(join(reportsDir, 'nuclei-report.jsonl')),
+    ...readNikto(join(reportsDir, 'nikto-report.json')),
   ];
   console.log(`[INFO] Total raw findings: ${allFindings.length}`);
 
@@ -598,11 +773,12 @@ async function main() {
 
   const context = JSON.parse(readFileSync(resolve(contextPath), 'utf8'));
   const triaged = await triageWithGemini(deduped, context, { apiKey });
+  const manualTests = readManualTests(join(dirname(resolve(contextPath)), 'manual_tests.json'));
 
   mkdirSync(resolve(outputDir), { recursive: true });
 
   // HTML report
-  const html = buildHtml(triaged, context);
+  const html = buildHtml(triaged, context, { manualTests });
   writeFileSync(join(resolve(outputDir), 'security-report.html'), html, 'utf8');
   console.log(`[OUTPUT] security-report.html → ${join(outputDir, 'security-report.html')}`);
 
