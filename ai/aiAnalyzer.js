@@ -171,7 +171,7 @@ Based on this context, produce the tool_config JSON. Remember: if JWT patterns a
   const result = await callGeminiWithRetry(prompt, TOOL_SELECTION_SYSTEM, {
     apiKey:          options.apiKey,
     temperature:     0.15,
-    maxOutputTokens: 4096,
+    maxOutputTokens: 8192,
   });
 
   logUsage('Call#1-ToolSelection', result.usageMetadata);
