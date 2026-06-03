@@ -305,6 +305,41 @@ Pipeline mark **FAILURE** khi `security-report.json` có critical finding. Đây
 
 ---
 
+## Đánh giá thực nghiệm
+
+Sinh bảng đánh giá cho benchmark demo:
+
+```bash
+npm run evaluate -- --target examples/vulnerable-rest-api
+```
+
+Nếu đã chạy đầy đủ pipeline và có AI report:
+
+```bash
+npm run evaluate -- \
+  --context security-context-output/context.json \
+  --report security-context-output/final-report/security-report.json \
+  --manual-tests security-context-output/manual_tests.json
+```
+
+Output mặc định: `evaluation/evaluation-report.md`.
+
+Bảng đánh giá gồm:
+
+| Nhóm chỉ số | Ý nghĩa |
+|---|---|
+| Ground truth vulnerable endpoints | Endpoint lỗ hổng đọc từ `vulnerabilities/vulnerabilities.md` |
+| Endpoints detected by collector | Số endpoint route scanner phát hiện |
+| Endpoint coverage | Tỷ lệ endpoint ground truth được scanner phát hiện |
+| Category coverage | Tỷ lệ nhóm lỗ hổng ground truth có evidence từ route/pattern collector |
+| Raw findings before AI | Số finding trước AI triage, lấy từ `security-report.json` nếu có |
+| Findings marked false positive by AI | Số finding AI phân loại `false_positive` |
+| Actionable findings after AI | Số finding còn lại sau khi lọc false positive |
+
+Lưu ý: false positive rate trước AI cần nhãn thủ công trên raw scanner findings. Script tự động chỉ tính được phân loại sau AI dựa trên `security-report.json`.
+
+---
+
 ## Chạy tests
 
 ```bash
@@ -363,5 +398,4 @@ Call #3 (reportGenerator.js)
   Output: triaged findings với risk score + remediation + executive summary
   Mục đích: loại bỏ false positive, ưu tiên findings, đưa ra hướng fix cụ thể
 ```
-
 

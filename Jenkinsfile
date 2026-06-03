@@ -43,7 +43,7 @@ pipeline {
         // Target project: tham số động — không còn hardcode "vulnerable-rest-api"
         TARGET_DIR  = "${WORKSPACE}/${params.TARGET_PROJECT_DIR}"
 
-        GEMINI_API_KEY = credentials('gemini-api-key')
+        GEMINI_API_KEY = credentials('GEMINI_API_KEY')
     }
 
     stages {

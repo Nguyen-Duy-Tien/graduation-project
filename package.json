@@ -11,6 +11,7 @@
     "analyze":           "node ai/aiAnalyzer.js",
     "generate-pipeline": "node ai/pipelineGenerator.js",
     "report":            "node ai/reportGenerator.js",
+    "evaluate":          "node evaluation/evaluateBenchmark.js",
     "test":              "node --test runtime/*.test.js collector/*.test.js ai/*.test.js"
   },
   "dependencies": {
