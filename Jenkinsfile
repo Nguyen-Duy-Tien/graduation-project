@@ -31,6 +31,12 @@ pipeline {
             defaultValue: 'examples/sqli',
             description: 'Đường dẫn (tương đối với WORKSPACE) tới thư mục project mục tiêu cần quét.'
         )
+        booleanParam(
+          name: 'KEEP_STAGING',
+          defaultValue: true,
+          description: 'Giữ môi trường staging sau khi deploy để manual test'
+      )
+
     }
 
     environment {
