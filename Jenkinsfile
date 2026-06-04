@@ -111,6 +111,17 @@ pipeline {
                 sh "node ai/reportGenerator.js ${shQuote(REPORTS_DIR)} ${shQuote("${CONTEXT_DIR}/context.json")} ${shQuote(FINAL_DIR)}"
             }
         }
+
+        stage('9. Manual Test Gate') {
+            when {
+                expression { return params.KEEP_STAGING }
+            }
+            steps {
+                echo "Manual tests: ${CONTEXT_DIR}/manual_tests.json"
+                echo "Staging API: xem runtime/runtime-info.json"
+                input message: 'Manual test?', ok: 'Tiếp tục teardown/report'
+            }
+  }
     }
 
     post {
