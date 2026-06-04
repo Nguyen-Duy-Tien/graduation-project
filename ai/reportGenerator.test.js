@@ -7,6 +7,7 @@ import {
   buildHtml,
   readNikto,
   readNuclei,
+  readZap,
   readManualTests,
 } from './reportGenerator.js';
 
@@ -52,6 +53,32 @@ test('readNikto: parses host vulnerabilities', () => {
   assert.equal(findings[0].category, 'misconfig');
 });
 
+test('readZap: keeps alert instances as separate findings', () => {
+  const dir = mkdtempSync(join(tmpdir(), 'ai-module-report-'));
+  const path = join(dir, 'zap-report.json');
+  writeFileSync(path, JSON.stringify({
+    site: [{
+      '@name': 'http://web:5000',
+      alerts: [{
+        pluginid: '40018',
+        alert: 'SQL Injection',
+        riskdesc: 'High',
+        cweid: '89',
+        instances: [
+          { method: 'GET', uri: 'http://web:5000/search', param: 'q', evidence: 'SQL syntax error' },
+          { method: 'POST', uri: 'http://web:5000/login', param: 'username', evidence: 'mysql_fetch' },
+        ],
+      }],
+    }],
+  }));
+
+  const findings = readZap(path);
+  assert.equal(findings.length, 2);
+  assert.match(findings[0].location, /GET http:\/\/web:5000\/search param=q/);
+  assert.equal(findings[1].param, 'username');
+  assert.equal(findings[1].evidence, 'mysql_fetch');
+});
+
 test('buildHtml: includes manual test checklist', () => {
   const html = buildHtml(
     {
@@ -73,6 +100,39 @@ test('buildHtml: includes manual test checklist', () => {
 
   assert.match(html, /Manual Testing Checklist/);
   assert.match(html, /PUT \/api\/users\/:id/);
+});
+
+test('buildHtml: shows exact finding location and evidence', () => {
+  const html = buildHtml(
+    {
+      executive_summary: { key_findings: [], immediate_actions: [] },
+      triaged_findings: [{
+        id: 'F-001',
+        triage_status: 'confirmed_vulnerability',
+        triage_reason: 'Evidence indicates injectable SQL behavior.',
+        risk_score: 90,
+        remediation: { summary: 'Use parameterized queries.' },
+        original_finding: {
+          source: 'zap',
+          ruleId: '40018',
+          category: 'sqli',
+          severity: 'high',
+          location: 'GET http://web:5000/search param=q',
+          param: 'q',
+          evidence: 'SQL syntax error',
+          message: 'SQL Injection',
+          cweId: 'CWE-89',
+        },
+      }],
+    },
+    { techStack: { language: 'python', framework: 'python-flask' } },
+  );
+
+  assert.match(html, /class="findings-list"/);
+  assert.match(html, /Where/);
+  assert.match(html, /GET http:\/\/web:5000\/search param=q/);
+  assert.match(html, /Evidence/);
+  assert.match(html, /SQL syntax error/);
 });
 
 test('readManualTests: reads manual_test_cases array', () => {

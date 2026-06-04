@@ -116,19 +116,38 @@ export function readZap(reportPath) {
         const risk = (alert.riskdesc ?? alert.risk ?? '').toLowerCase();
         if (risk.includes('informational') || risk.includes('false')) continue;
 
-        findings.push({
-          source:   'zap',
-          ruleId:   String(alert.pluginid ?? alert.alertRef ?? ''),
-          category: mapZapCategory(alert.alert ?? alert.name ?? ''),
-          severity: mapZapRisk(alert.riskcode ?? alert.riskdesc ?? ''),
-          location: alert.instances?.[0]?.uri ?? alert.url ?? site['@name'] ?? '',
-          file:     '',
-          line:     0,
-          message:  alert.alert ?? alert.name ?? '',
-          snippet:  `Evidence: ${alert.instances?.[0]?.evidence ?? alert.evidence ?? 'N/A'}`,
-          cweId:    alert.cweid ? `CWE-${alert.cweid}` : null,
-          owasp:    alert.wascid ? `WASC-${alert.wascid}` : null,
-        });
+        const instances = Array.isArray(alert.instances) && alert.instances.length
+          ? alert.instances
+          : [alert];
+
+        for (const instance of instances) {
+          const url = instance.uri ?? instance.url ?? alert.url ?? site['@name'] ?? '';
+          const method = instance.method ?? alert.method ?? '';
+          const param = instance.param ?? alert.param ?? '';
+          const evidence = instance.evidence ?? alert.evidence ?? '';
+          const attack = instance.attack ?? alert.attack ?? '';
+          const location = formatRequestLocation({ method, url, param });
+
+          findings.push({
+            source:      'zap',
+            ruleId:      String(alert.pluginid ?? alert.alertRef ?? ''),
+            category:    mapZapCategory(alert.alert ?? alert.name ?? ''),
+            severity:    mapZapRisk(alert.riskcode ?? alert.riskdesc ?? ''),
+            location,
+            url,
+            method,
+            param,
+            evidence,
+            attack,
+            confidence:  alert.confidence ?? alert.confidencedesc ?? '',
+            file:        '',
+            line:        0,
+            message:     alert.alert ?? alert.name ?? '',
+            snippet:     formatZapSnippet({ evidence, attack, param }),
+            cweId:       alert.cweid ? `CWE-${alert.cweid}` : null,
+            owasp:       alert.wascid ? `WASC-${alert.wascid}` : null,
+          });
+        }
       }
     }
     return findings;
@@ -232,8 +251,10 @@ export function deduplicate(allFindings) {
   for (const f of allFindings) {
     // Normalize location: chỉ dùng phần path, không dùng line number cho ZAP
     const locationKey = f.source === 'zap'
-      ? new URL(f.location.startsWith('http') ? f.location : 'http://x' + f.location).pathname.replace(/\/$/, '')
-      : `${f.file}:${f.line}`;
+      ? normalizeZapLocationKey(f)
+      : f.source === 'nuclei' || f.source === 'nikto'
+        ? `${f.location}:${f.ruleId}`
+        : `${f.file}:${f.line}`;
 
     const key = `${f.category}:${f.ruleId}:${locationKey}`;
 
@@ -342,10 +363,17 @@ export async function triageWithGemini(deduplicatedFindings, context, options = 
       id: `F-${String(i + idx + 1).padStart(3, '0')}`,
       source: f.source,
       severity: f.severity,
+      category: f.category,
       ruleId: f.ruleId,
       message: f.message,
       location: f.location,
-      snippet: f.snippet?.slice(0, 200)
+      file: f.file,
+      line: f.line,
+      url: f.url,
+      method: f.method,
+      param: f.param,
+      evidence: f.evidence?.slice(0, 200),
+      snippet: f.snippet?.slice(0, 260)
     }));
 
     const mapPrompt = `
@@ -353,7 +381,7 @@ export async function triageWithGemini(deduplicatedFindings, context, options = 
       Analyze this subset of tool findings:
       ${JSON.stringify(chunkPayload)}
 
-      Output STRICT JSON exactly matching this schema. Keep reasons to 1 sentence.
+      Output STRICT JSON exactly matching this schema. Keep reasons to 1 sentence and reference the exact file, URL, line, parameter, or evidence when available.
       {
         "results": [
           {
@@ -481,6 +509,55 @@ const STATUS_BADGE = {
   false_positive:          { label: 'False Positive', bg: '#f0fdf4', color: '#166534' },
 };
 
+function renderFindingCard(f) {
+  const original = f.original_finding ?? {};
+  const sev = original.severity ?? 'unknown';
+  const sevColor = SEVERITY_COLORS[sev] ?? SEVERITY_COLORS.unknown;
+  const badge = STATUS_BADGE[f.triage_status] ?? STATUS_BADGE.needs_manual_review;
+  const refs = f.remediation?.references?.join(', ') ?? '';
+  const evidence = original.evidence || extractEvidenceFromSnippet(original.snippet);
+  const detailRows = [
+    ['Where', formatDisplayLocation(original)],
+    ['Rule', [original.source, original.ruleId].filter(Boolean).join(' / ')],
+    ['Category', original.category],
+    ['Parameter', original.param],
+    ['Evidence', evidence],
+    ['CWE', original.cweId],
+    ['OWASP/WASC', original.owasp],
+  ].filter(([, value]) => value !== undefined && value !== null && String(value).trim() !== '');
+
+  return `
+      <div class="finding" data-severity="${escHtml(sev)}">
+        <div class="finding-header">
+          <span class="severity-pill" style="background:${sevColor}20;color:${sevColor};border:1px solid ${sevColor}40">
+            ${escHtml(String(sev).toUpperCase())}
+          </span>
+          <span class="status-badge" style="background:${badge.bg};color:${badge.color}">
+            ${escHtml(badge.label)}
+          </span>
+          <strong class="finding-id">${escHtml(f.id ?? '')}</strong>
+          <span class="finding-title">${escHtml(formatFindingTitle(f))}</span>
+          <span class="risk-score">Risk: ${escHtml(f.risk_score ?? '?')}/100</span>
+        </div>
+        <div class="finding-body">
+          <dl class="finding-details">
+            ${detailRows.map(([label, value]) => `
+            <div class="detail-row">
+              <dt>${escHtml(label)}</dt>
+              <dd>${escHtml(value)}</dd>
+            </div>`).join('')}
+          </dl>
+          ${original.snippet ? `<pre class="snippet">${escHtml(original.snippet)}</pre>` : ''}
+          <div class="triage-reason"><strong>Triage:</strong> ${escHtml(f.triage_reason ?? '')}</div>
+          <div class="remediation">
+            <strong>Fix:</strong> ${escHtml(f.remediation?.summary ?? '')}
+            ${f.remediation?.code_example ? `<pre class="code-example">${escHtml(f.remediation.code_example)}</pre>` : ''}
+            ${refs ? `<div class="refs">References: ${escHtml(refs)}</div>` : ''}
+          </div>
+        </div>
+      </div>`;
+}
+
 export function buildHtml(triageResult, context, metadata = {}) {
   const summary  = triageResult.executive_summary ?? {};
   const findings = triageResult.triaged_findings ?? [];
@@ -490,39 +567,8 @@ export function buildHtml(triageResult, context, metadata = {}) {
 
   const findingsHtml = findings
     .filter(f => f.triage_status !== 'false_positive')
-    .map(f => {
-      const sev   = f.original_finding?.severity ?? 'unknown';
-      const badge = STATUS_BADGE[f.triage_status] ?? STATUS_BADGE.needs_manual_review;
-      const refs  = f.remediation?.references?.join(', ') ?? '';
-      return `
-      <div class="finding" data-severity="${sev}">
-        <div class="finding-header">
-          <span class="severity-pill" style="background:${SEVERITY_COLORS[sev]}20;color:${SEVERITY_COLORS[sev]};border:1px solid ${SEVERITY_COLORS[sev]}40">
-            ${sev.toUpperCase()}
-          </span>
-          <span class="status-badge" style="background:${badge.bg};color:${badge.color}">
-            ${badge.label}
-          </span>
-          <span class="risk-score">Risk: ${f.risk_score ?? '?'}/100</span>
-          <strong class="finding-id">${f.id}</strong>
-          <span class="finding-title">${escHtml(f.original_finding?.message ?? '')}</span>
-        </div>
-        <div class="finding-body">
-          <div class="meta-row">
-            <span>📁 ${escHtml(f.original_finding?.location ?? '')}</span>
-            <span>🔧 ${escHtml(f.original_finding?.source ?? '')}</span>
-            ${f.original_finding?.cweId ? `<span>🏷️ ${escHtml(f.original_finding.cweId)}</span>` : ''}
-          </div>
-          ${f.original_finding?.snippet ? `<pre class="snippet">${escHtml(f.original_finding.snippet)}</pre>` : ''}
-          <div class="triage-reason"><strong>Triage:</strong> ${escHtml(f.triage_reason ?? '')}</div>
-          <div class="remediation">
-            <strong>Fix:</strong> ${escHtml(f.remediation?.summary ?? '')}
-            ${f.remediation?.code_example ? `<pre class="code-example">${escHtml(f.remediation.code_example)}</pre>` : ''}
-            ${refs ? `<div class="refs">References: ${escHtml(refs)}</div>` : ''}
-          </div>
-        </div>
-      </div>`;
-    }).join('\n');
+    .map(renderFindingCard)
+    .join('\n');
 
   const manualTestsHtml = manualTests.map(tc => {
     const sev = String(tc.severity ?? 'MEDIUM').toLowerCase();
@@ -579,18 +625,29 @@ export function buildHtml(triageResult, context, metadata = {}) {
   .manual-steps { padding-left: 1.25rem; color: var(--c-muted); font-size: 0.86rem; }
   .manual-steps li { margin-bottom: 0.75rem; }
   h2.section-title { font-size: 1rem; font-weight: 600; margin: 2rem 0 1rem; border-bottom: 1px solid var(--c-border); padding-bottom: 0.5rem; }
-  .finding { background: var(--c-surface); border: 1px solid var(--c-border); border-radius: 8px; margin-bottom: 1rem; overflow: hidden; }
-  .finding-header { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem; padding: 0.75rem 1rem; background: rgba(255,255,255,0.02); border-bottom: 1px solid var(--c-border); }
+  .findings-list { display: flex; flex-direction: column; gap: 1.5rem; }
+  .finding { background: var(--c-surface); border: 1px solid var(--c-border); border-left: 4px solid var(--c-accent); border-radius: 8px; overflow: hidden; }
+  .finding-header { display: grid; grid-template-columns: auto auto auto minmax(0, 1fr) auto; align-items: center; gap: 0.65rem; padding: 0.9rem 1rem; background: rgba(255,255,255,0.03); border-bottom: 1px solid var(--c-border); }
   .severity-pill, .status-badge { font-size: 0.7rem; font-weight: 600; padding: 0.2rem 0.5rem; border-radius: 4px; text-transform: uppercase; letter-spacing: 0.04em; }
-  .risk-score { font-size: 0.75rem; color: var(--c-muted); margin-left: auto; }
+  .risk-score { font-size: 0.75rem; color: var(--c-muted); white-space: nowrap; }
   .finding-id { font-size: 0.8rem; color: var(--c-muted); }
-  .finding-title { font-size: 0.9rem; flex: 1; min-width: 200px; }
+  .finding-title { font-size: 0.95rem; min-width: 0; overflow-wrap: anywhere; }
   .finding-body { padding: 1rem; }
+  .finding-details { display: grid; gap: 0.45rem; margin-bottom: 0.9rem; }
+  .detail-row { display: grid; grid-template-columns: 7.5rem minmax(0, 1fr); gap: 0.75rem; font-size: 0.82rem; line-height: 1.45; }
+  .detail-row dt { color: var(--c-muted); font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; }
+  .detail-row dd { color: var(--c-text); overflow-wrap: anywhere; }
   .meta-row { display: flex; flex-wrap: wrap; gap: 1rem; font-size: 0.8rem; color: var(--c-muted); margin-bottom: 0.75rem; }
   .snippet, .code-example { background: #0a1628; border: 1px solid var(--c-border); border-radius: 4px; padding: 0.6rem; font-size: 0.78rem; overflow-x: auto; color: #a5f3fc; margin: 0.5rem 0; white-space: pre-wrap; word-break: break-all; }
   .triage-reason { font-size: 0.85rem; color: #fbbf24; margin-bottom: 0.5rem; }
   .remediation { font-size: 0.85rem; color: #86efac; }
   .refs { font-size: 0.78rem; color: var(--c-muted); margin-top: 0.4rem; }
+  @media (max-width: 760px) {
+    body { padding: 1rem; }
+    .finding-header { grid-template-columns: auto auto auto; }
+    .finding-title, .risk-score { grid-column: 1 / -1; }
+    .detail-row { grid-template-columns: 1fr; gap: 0.15rem; }
+  }
   footer { margin-top: 3rem; text-align: center; font-size: 0.75rem; color: var(--c-muted); }
 </style>
 </head>
@@ -642,7 +699,7 @@ ${manualTestsHtml ? `
 ${manualTestsHtml}` : ''}
 
 <h2 class="section-title">Vulnerability Findings</h2>
-${findingsHtml || '<p style="color:var(--c-muted)">No confirmed findings.</p>'}
+${findingsHtml ? `<div class="findings-list">${findingsHtml}</div>` : '<p style="color:var(--c-muted)">No confirmed findings.</p>'}
 
 <footer>Generated by AI-assisted DevSecOps Pipeline · Gemini 3.0 Flash · ${ts}</footer>
 </body>
@@ -655,6 +712,62 @@ function escHtml(str) {
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;');
+}
+
+function formatRequestLocation({ method = '', url = '', param = '' }) {
+  return [
+    method ? String(method).toUpperCase() : '',
+    url,
+    param ? `param=${param}` : '',
+  ].filter(Boolean).join(' ');
+}
+
+function formatZapSnippet({ evidence = '', attack = '', param = '' }) {
+  const parts = [
+    evidence ? `Evidence: ${evidence}` : '',
+    attack ? `Attack: ${attack}` : '',
+    param ? `Parameter: ${param}` : '',
+  ].filter(Boolean);
+  return parts.length ? parts.join('\n') : 'Evidence: N/A';
+}
+
+function normalizeZapLocationKey(f) {
+  const url = f.url || f.location || '';
+  let path = url;
+  try {
+    path = new URL(url.startsWith('http') ? url : `http://x${url}`).pathname.replace(/\/$/, '') || '/';
+  } catch {
+    path = String(url).replace(/[?#].*$/, '').replace(/\/$/, '') || '/';
+  }
+
+  const method = String(f.method ?? '').toUpperCase();
+  const param = String(f.param ?? '');
+  const evidence = String(f.evidence ?? '').slice(0, 120);
+  return `${method}:${path}:${param}:${evidence}`;
+}
+
+function formatDisplayLocation(f) {
+  if (f.file) {
+    return f.line ? `${f.file}:${f.line}` : f.file;
+  }
+  return f.location || f.url || '';
+}
+
+function formatFindingTitle(f) {
+  const original = f.original_finding ?? {};
+  const base = original.message || original.ruleId || 'Security finding';
+  const where = original.param
+    ? `param ${original.param}`
+    : original.line
+      ? `line ${original.line}`
+      : original.url || original.location || '';
+  return where ? `${base} - ${where}` : base;
+}
+
+function extractEvidenceFromSnippet(snippet) {
+  const text = String(snippet ?? '');
+  const match = text.match(/^Evidence:\s*(.+)$/mi);
+  return match?.[1]?.trim() ?? '';
 }
 
 // ── Category/severity mappers ─────────────────────────────────────────────────
