@@ -129,10 +129,46 @@ test('buildHtml: shows exact finding location and evidence', () => {
   );
 
   assert.match(html, /class="findings-list"/);
-  assert.match(html, /Where/);
+  assert.match(html, /Vulnerability Location/);
   assert.match(html, /GET http:\/\/web:5000\/search param=q/);
   assert.match(html, /Evidence/);
   assert.match(html, /SQL syntax error/);
+  assert.match(html, /class="finding-analysis"/);
+  assert.match(html, /class="analysis-box triage-reason"/);
+  assert.match(html, /gap: 2\.25rem/);
+});
+
+test('buildHtml: lists only tools passed in metadata', () => {
+  const html = buildHtml(
+    {
+      executive_summary: { key_findings: [], immediate_actions: [] },
+      triaged_findings: [],
+    },
+    { techStack: { language: 'python', framework: 'python-flask' } },
+    { tools: ['Semgrep', 'Bandit', 'Trivy'] },
+  );
+
+  assert.match(html, /Tools: Semgrep · Bandit · Trivy · AI Triage/);
+  assert.doesNotMatch(html, /Tools: .*ZAP/);
+});
+
+test('buildHtml: uses normalized severity counts from summary', () => {
+  const html = buildHtml(
+    {
+      executive_summary: {
+        critical_count: 6,
+        high_count: 2,
+        medium_count: 1,
+        key_findings: [],
+        immediate_actions: [],
+      },
+      triaged_findings: [],
+    },
+    { techStack: { language: 'python', framework: 'python-flask' } },
+    { tools: ['Semgrep'] },
+  );
+
+  assert.match(html, />6<\/div>\s*<div class="stat-label">Critical/);
 });
 
 test('readManualTests: reads manual_test_cases array', () => {

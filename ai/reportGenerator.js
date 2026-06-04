@@ -517,9 +517,9 @@ function renderFindingCard(f) {
   const refs = f.remediation?.references?.join(', ') ?? '';
   const evidence = original.evidence || extractEvidenceFromSnippet(original.snippet);
   const detailRows = [
-    ['Where', formatDisplayLocation(original)],
+    ['Vulnerability Location', formatDisplayLocation(original)],
     ['Rule', [original.source, original.ruleId].filter(Boolean).join(' / ')],
-    ['Category', original.category],
+    ['Vulnerability Category', original.category],
     ['Parameter', original.param],
     ['Evidence', evidence],
     ['CWE', original.cweId],
@@ -548,9 +548,15 @@ function renderFindingCard(f) {
             </div>`).join('')}
           </dl>
           ${original.snippet ? `<pre class="snippet">${escHtml(original.snippet)}</pre>` : ''}
-          <div class="triage-reason"><strong>Triage:</strong> ${escHtml(f.triage_reason ?? '')}</div>
-          <div class="remediation">
-            <strong>Fix:</strong> ${escHtml(f.remediation?.summary ?? '')}
+          <div class="finding-analysis">
+            <div class="analysis-box triage-reason">
+              <div class="analysis-label">Triage</div>
+              <div class="analysis-text">${escHtml(f.triage_reason ?? '')}</div>
+            </div>
+            <div class="analysis-box remediation">
+              <div class="analysis-label">Fix</div>
+              <div class="analysis-text">${escHtml(f.remediation?.summary ?? '')}</div>
+            </div>
             ${f.remediation?.code_example ? `<pre class="code-example">${escHtml(f.remediation.code_example)}</pre>` : ''}
             ${refs ? `<div class="refs">References: ${escHtml(refs)}</div>` : ''}
           </div>
@@ -562,6 +568,8 @@ export function buildHtml(triageResult, context, metadata = {}) {
   const summary  = triageResult.executive_summary ?? {};
   const findings = triageResult.triaged_findings ?? [];
   const manualTests = metadata.manualTests ?? [];
+  const toolNames = metadata.tools?.length ? metadata.tools : inferToolNames(findings);
+  const toolLabel = [...toolNames, 'AI Triage (Gemini 3.0 Flash)'].join(' · ');
   const ts       = new Date().toISOString();
   const project  = `${context.techStack?.language ?? '?'} / ${context.techStack?.framework ?? '?'}`;
 
@@ -625,22 +633,26 @@ export function buildHtml(triageResult, context, metadata = {}) {
   .manual-steps { padding-left: 1.25rem; color: var(--c-muted); font-size: 0.86rem; }
   .manual-steps li { margin-bottom: 0.75rem; }
   h2.section-title { font-size: 1rem; font-weight: 600; margin: 2rem 0 1rem; border-bottom: 1px solid var(--c-border); padding-bottom: 0.5rem; }
-  .findings-list { display: flex; flex-direction: column; gap: 1.5rem; }
-  .finding { background: var(--c-surface); border: 1px solid var(--c-border); border-left: 4px solid var(--c-accent); border-radius: 8px; overflow: hidden; }
+  .findings-list { display: flex; flex-direction: column; gap: 2.25rem; }
+  .finding { background: var(--c-surface); border: 1px solid var(--c-border); border-left: 4px solid var(--c-accent); border-radius: 8px; overflow: hidden; box-shadow: 0 14px 28px rgba(0,0,0,0.22); }
   .finding-header { display: grid; grid-template-columns: auto auto auto minmax(0, 1fr) auto; align-items: center; gap: 0.65rem; padding: 0.9rem 1rem; background: rgba(255,255,255,0.03); border-bottom: 1px solid var(--c-border); }
   .severity-pill, .status-badge { font-size: 0.7rem; font-weight: 600; padding: 0.2rem 0.5rem; border-radius: 4px; text-transform: uppercase; letter-spacing: 0.04em; }
   .risk-score { font-size: 0.75rem; color: var(--c-muted); white-space: nowrap; }
   .finding-id { font-size: 0.8rem; color: var(--c-muted); }
   .finding-title { font-size: 0.95rem; min-width: 0; overflow-wrap: anywhere; }
-  .finding-body { padding: 1rem; }
-  .finding-details { display: grid; gap: 0.45rem; margin-bottom: 0.9rem; }
+  .finding-body { padding: 1.1rem; }
+  .finding-details { display: grid; gap: 0.45rem; margin-bottom: 1rem; padding-bottom: 1rem; border-bottom: 1px solid var(--c-border); }
   .detail-row { display: grid; grid-template-columns: 7.5rem minmax(0, 1fr); gap: 0.75rem; font-size: 0.82rem; line-height: 1.45; }
   .detail-row dt { color: var(--c-muted); font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; }
   .detail-row dd { color: var(--c-text); overflow-wrap: anywhere; }
   .meta-row { display: flex; flex-wrap: wrap; gap: 1rem; font-size: 0.8rem; color: var(--c-muted); margin-bottom: 0.75rem; }
   .snippet, .code-example { background: #0a1628; border: 1px solid var(--c-border); border-radius: 4px; padding: 0.6rem; font-size: 0.78rem; overflow-x: auto; color: #a5f3fc; margin: 0.5rem 0; white-space: pre-wrap; word-break: break-all; }
-  .triage-reason { font-size: 0.85rem; color: #fbbf24; margin-bottom: 0.5rem; }
-  .remediation { font-size: 0.85rem; color: #86efac; }
+  .finding-analysis { display: grid; gap: 0.8rem; margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--c-border); }
+  .analysis-box { border-radius: 6px; padding: 0.85rem 0.95rem; font-size: 0.86rem; line-height: 1.55; }
+  .analysis-label { font-size: 0.72rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 0.35rem; }
+  .analysis-text { color: var(--c-text); overflow-wrap: anywhere; }
+  .triage-reason { background: rgba(251,191,36,0.09); border: 1px solid rgba(251,191,36,0.28); color: #fbbf24; }
+  .remediation { background: rgba(134,239,172,0.08); border: 1px solid rgba(134,239,172,0.24); color: #86efac; }
   .refs { font-size: 0.78rem; color: var(--c-muted); margin-top: 0.4rem; }
   @media (max-width: 760px) {
     body { padding: 1rem; }
@@ -656,7 +668,7 @@ export function buildHtml(triageResult, context, metadata = {}) {
 <div class="meta">
   Project: <strong>${escHtml(project)}</strong> &nbsp;·&nbsp;
   Generated: ${ts} &nbsp;·&nbsp;
-  Tools: Semgrep · Bandit · Trivy · ZAP · AI Triage (Gemini 3.0 Flash)
+  Tools: ${escHtml(toolLabel)}
 </div>
 
 <div class="summary-grid">
@@ -768,6 +780,46 @@ function extractEvidenceFromSnippet(snippet) {
   const text = String(snippet ?? '');
   const match = text.match(/^Evidence:\s*(.+)$/mi);
   return match?.[1]?.trim() ?? '';
+}
+
+function inferToolNames(findings) {
+  const labels = {
+    semgrep: 'Semgrep',
+    bandit:  'Bandit',
+    trivy:   'Trivy',
+    zap:     'ZAP',
+    nuclei:  'Nuclei',
+    nikto:   'Nikto',
+  };
+  const names = new Set();
+  for (const finding of findings ?? []) {
+    const source = finding.original_finding?.source ?? finding.source;
+    if (labels[source]) names.add(labels[source]);
+  }
+  return [...names];
+}
+
+function normalizeTriageSummary(triageResult) {
+  const findings = (triageResult.triaged_findings ?? [])
+    .filter(f => f.triage_status !== 'false_positive');
+  const counts = { critical: 0, high: 0, medium: 0, low: 0, unknown: 0 };
+
+  for (const finding of findings) {
+    const severity = normalizeSeverity(finding.original_finding?.severity ?? 'unknown');
+    counts[severity] = (counts[severity] ?? 0) + 1;
+  }
+
+  return {
+    ...triageResult,
+    executive_summary: {
+      ...(triageResult.executive_summary ?? {}),
+      critical_count: counts.critical,
+      high_count: counts.high,
+      medium_count: counts.medium,
+      low_count: counts.low,
+      finding_count: findings.length,
+    },
+  };
 }
 
 // ── Category/severity mappers ─────────────────────────────────────────────────
@@ -888,27 +940,47 @@ async function main() {
   }
 
   console.log('[INFO] Reading scan reports...');
-  const allFindings = [
-    ...readSemgrep(join(reportsDir, 'semgrep-report.json')),
-    ...readBandit(join(reportsDir, 'bandit-report.json')),
-    ...readTrivy(join(reportsDir, 'trivy-report.json')),
-    ...readZap(join(reportsDir, 'zap-report.json')),
-    ...readNuclei(join(reportsDir, 'nuclei-report.jsonl')),
-    ...readNikto(join(reportsDir, 'nikto-report.json')),
+  const reportSpecs = [
+    { key: 'semgrep', label: 'Semgrep', file: 'semgrep-report.json', reader: readSemgrep },
+    { key: 'bandit',  label: 'Bandit',  file: 'bandit-report.json',  reader: readBandit },
+    { key: 'trivy',   label: 'Trivy',   file: 'trivy-report.json',   reader: readTrivy },
+    { key: 'zap',     label: 'ZAP',     file: 'zap-report.json',     reader: readZap },
+    { key: 'nuclei',  label: 'Nuclei',  file: 'nuclei-report.jsonl', reader: readNuclei },
+    { key: 'nikto',   label: 'Nikto',   file: 'nikto-report.json',   reader: readNikto },
   ];
+
+  const reportRuns = reportSpecs.map(spec => {
+    const path = join(reportsDir, spec.file);
+    const exists = existsSync(path);
+    const findings = exists ? spec.reader(path) : [];
+    return { ...spec, path, exists, findingCount: findings.length, findings };
+  });
+
+  const allFindings = reportRuns.flatMap(run => run.findings);
+  const toolsForReport = reportRuns
+    .filter(run => run.exists)
+    .map(run => run.label);
+  const toolRunSummary = reportRuns.map(({ key, label, file, exists, findingCount }) => ({
+    key,
+    label,
+    file,
+    exists,
+    findingCount,
+  }));
   console.log(`[INFO] Total raw findings: ${allFindings.length}`);
 
   const deduped = deduplicate(allFindings);
   console.log(`[INFO] After deduplication: ${deduped.length} unique findings`);
 
   const context = JSON.parse(readFileSync(resolve(contextPath), 'utf8'));
-  const triaged = await triageWithGemini(deduped, context, { apiKey });
+  const triaged = normalizeTriageSummary(await triageWithGemini(deduped, context, { apiKey }));
+  triaged.tool_runs = toolRunSummary;
   const manualTests = readManualTests(join(dirname(resolve(contextPath)), 'manual_tests.json'));
 
   mkdirSync(resolve(outputDir), { recursive: true });
 
   // HTML report
-  const html = buildHtml(triaged, context, { manualTests });
+  const html = buildHtml(triaged, context, { manualTests, tools: toolsForReport });
   writeFileSync(join(resolve(outputDir), 'security-report.html'), html, 'utf8');
   console.log(`[OUTPUT] security-report.html → ${join(outputDir, 'security-report.html')}`);
 
