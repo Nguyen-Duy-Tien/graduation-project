@@ -181,7 +181,7 @@ export function generatePipeline({ contextDir, runtimeDir, targetDir }) {
     ? { ...picked, dastSkipped: false }
     : { dastSkipped: true, skipReason: containerInfo.hasDockerCompose
         ? 'no app service with port mapping (only DB images?)'
-        : 'no docker-compose.yml in target' };
+        : 'no Docker Compose file in target' };
 
   // Đảm bảo runtimeDir và reportsDir tồn tại
   mkdirSync(resolve(runtimeDir), { recursive: true });

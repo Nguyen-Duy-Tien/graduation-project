@@ -21,6 +21,8 @@ const SPEC_FILENAMES = [
   'api-docs/openapi.yaml',
 ];
 
+const COMPOSE_FILENAMES = ['docker-compose.yml', 'docker-compose.yaml', 'compose.yaml', 'compose.yml'];
+
 function parseOpenApiSpec(content, filename) {
   try {
     return filename.endsWith('.json')
@@ -271,8 +273,8 @@ export async function collectContainerInfo(projectRoot) {
     result.dockerfile    = parseDockerfile(content);
   }
 
-  // docker-compose
-  for (const fname of ['docker-compose.yml', 'docker-compose.yaml']) {
+  // Docker Compose
+  for (const fname of COMPOSE_FILENAMES) {
     const composePath = join(projectRoot, fname);
     if (existsSync(composePath)) {
       const content = readFileSync(composePath, 'utf8');

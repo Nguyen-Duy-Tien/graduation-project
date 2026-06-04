@@ -113,6 +113,8 @@ const SKIP_DIRS = new Set([
   'coverage', '.cache', 'tmp', 'temp',
 ]);
 
+const COMPOSE_FILENAMES = ['docker-compose.yml', 'docker-compose.yaml', 'compose.yaml', 'compose.yml'];
+
 const BACKEND_NAME_RE = /(^|[-_])(api|server|backend|gateway|service|app)([-_]|$)|^(api|server|backend|gateway|app|web)$/i;
 const FRONTEND_NAME_RE = /(^|[-_])(client|frontend|front|ui|webapp)([-_]|$)|^(client|frontend|ui)$/i;
 
@@ -174,7 +176,7 @@ function addCandidate(map, projectRoot, root, source, serviceName = null) {
 }
 
 function collectComposeCandidates(projectRoot, map) {
-  for (const fname of ['docker-compose.yml', 'docker-compose.yaml']) {
+  for (const fname of COMPOSE_FILENAMES) {
     const composePath = join(projectRoot, fname);
     if (!existsSync(composePath)) continue;
 
@@ -260,10 +262,7 @@ function buildDetectedStack(projectRoot, candidate, detected, score, allCandidat
 
   const profile = PROFILE_TOOL_MAP[profileKey];
   const isContainerized = existsSync(join(projectRoot, 'Dockerfile'))
-                        || existsSync(join(projectRoot, 'docker-compose.yml'))
-                        || existsSync(join(projectRoot, 'docker-compose.yaml'))
-                        || existsSync(join(projectRoot, 'compose.yaml'))
-                        || existsSync(join(projectRoot, 'compose.yml'))
+                        || COMPOSE_FILENAMES.some(fname => existsSync(join(projectRoot, fname)))
                         || existsSync(join(candidate.root, 'Dockerfile'));
 
   const depFilePath = detected.depFile
