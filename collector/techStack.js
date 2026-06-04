@@ -262,6 +262,8 @@ function buildDetectedStack(projectRoot, candidate, detected, score, allCandidat
   const isContainerized = existsSync(join(projectRoot, 'Dockerfile'))
                         || existsSync(join(projectRoot, 'docker-compose.yml'))
                         || existsSync(join(projectRoot, 'docker-compose.yaml'))
+                        || existsSync(join(projectRoot, 'compose.yaml'))
+                        || existsSync(join(projectRoot, 'compose.yml'))
                         || existsSync(join(candidate.root, 'Dockerfile'));
 
   const depFilePath = detected.depFile
