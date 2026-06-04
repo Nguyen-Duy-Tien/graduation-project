@@ -1,0 +1,41 @@
+services:
+  db:
+    image: mysql:5.7
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-prootpass"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpass
+      MYSQL_DATABASE: vulndb
+      MYSQL_USER: vuln
+      MYSQL_PASSWORD: vulnpass
+    volumes:
+      - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    ports:
+      - "3306:3306"
+    networks:
+      - sqlinet
+      
+  web:
+    build: ./web
+    environment:
+      FLASK_ENV: development
+      FLASK_RUN_HOST: 0.0.0.0
+      DB_HOST: db
+      DB_USER: vuln
+      DB_PASS: vulnpass
+      DB_NAME: vulndb
+      SHOW_ERRORS: "true"   # set "false" if you don't want to show DB errors
+    ports:
+      - "5000:5000"
+    depends_on:
+      db:
+        condition: service_healthy # run Web when DB "healthy"
+    networks:
+      - sqlinet
+
+networks:
+  sqlinet:
+    driver: bridge

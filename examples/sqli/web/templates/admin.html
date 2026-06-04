@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block content %}
+<h4>Admin: All users (full secrets visible)</h4>
+
+{% if err %}
+<div class="alert alert-danger">{{ err }}</div>
+{% endif %}
+
+{% if rows %}
+<table class="table table-sm">
+  <thead><tr><th>id</th><th>username</th><th>email</th><th>full_info</th><th>cc_number</th><th>api_key</th></tr></thead>
+  <tbody>
+  {% for r in rows %}
+    <tr>
+      <td>{{ r.id }}</td>
+      <td>{{ r.username }}</td>
+      <td>{{ r.email }}</td>
+      <td><pre style="margin:0">{{ r.full_info }}</pre></td>
+      <td><code>{{ r.cc_number }}</code></td>
+      <td><code>{{ r.api_key }}</code></td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% else %}
+<p>No users found.</p>
+{% endif %}
+{% endblock %}

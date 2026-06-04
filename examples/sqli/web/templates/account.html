@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block title %}My Account{% endblock %}
+{% block content %}
+<h2 class="mb-4">Account Settings</h2>
+
+{% if err %}
+<div class="alert alert-danger"><strong>Database Error:</strong> {{ err }}</div>
+{% endif %}
+
+{% if rows %}
+    {% set u = rows[0] %}
+    <div class="row">
+        <!-- Cột hiển thị thông tin (Read-only) -->
+        <div class="col-md-6">
+            <div class="card mb-4">
+                <div class="card-header bg-light">Account Details</div>
+                <div class="card-body">
+                    <p><strong>Username:</strong> {{ u.username }}</p>
+                    <p><strong>Email:</strong> {{ u.email }}</p>
+                    <p><strong>Role:</strong> <span class="badge bg-secondary">{{ u.role }}</span></p>
+                    <p><strong>Profile / Bio:</strong> {{ u.full_info }}</p> 
+                    <hr>
+                    <p class="text-muted small">Sensitive Data:</p>
+                    <p><strong>Credit Card:</strong> <code>{{ u.cc_masked }}</code></p>
+                    <p><strong>API Key:</strong> <code>{{ u.api_key_masked }}</code></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Cột chỉnh sửa (Vulnerable to Blind SQLi) -->
+        <div class="col-md-6">
+            <div class="card border-primary">
+                <div class="card-header bg-primary text-white">Edit Profile</div>
+                <div class="card-body">
+                    <form method="POST" action="{{ url_for('account') }}">
+                        <div class="mb-3">
+                            <label for="full_info" class="form-label">Bio / Full Info</label>
+                            <!-- Nơi tấn công Blind SQLi (Update) -->
+                            <textarea class="form-control" id="full_info" name="full_info" rows="3">{{ u.full_info }}</textarea>
+                            <div class="form-text text-muted">Update your public bio information.</div>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Update Profile</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+{% else %}
+    <p>No user data found.</p>
+{% endif %}
+
+{% if raw %}
+<div class="mt-5"><hr><small class="text-muted">Debug (Last Query): <code>{{ raw }}</code></small></div>
+{% endif %}
+{% endblock %}

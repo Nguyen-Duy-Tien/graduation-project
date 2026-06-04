@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+
+{% block title %}Home{% endblock %}
+
+{% block content %}
+<div class="p-5 mb-4 bg-light rounded-3 shadow-sm">
+    <div class="container-fluid py-5">
+        <h1 class="display-5 fw-bold text-primary">Vulnerable Web Application</h1>
+        <p class="col-md-8 fs-4 text-muted">
+            Welcome to the SQL Injection Practice Lab. This environment simulates a real-world web application containing various security flaws.
+        </p>
+        <hr class="my-4">
+        <p>
+            Your mission, should you choose to accept it, is to identify and exploit vulnerabilities across different modules of this system.
+            Remember: <em>Input validation is key, and trust is a vulnerability.</em>
+        </p>
+    </div>
+</div>
+
+<div class="row g-4">
+    <!-- Module 1: Search Portal -->
+    <div class="col-md-6">
+        <div class="card h-100 border-0 shadow-sm">
+            <div class="card-body">
+                <h3 class="card-title h4 text-dark">
+                    <i class="bi bi-search me-2"></i>Customer Search Portal
+                </h3>
+                <p class="card-text text-secondary">
+                    Access our public directory to find customer information. 
+                    <br><small class="text-muted">(Hint: Can you see more than just customers?)</small>
+                </p>
+                <a href="{{ url_for('search') }}" class="btn btn-outline-primary">Go to Search</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Module 2: User Authentication -->
+    <div class="col-md-6">
+        <div class="card h-100 border-0 shadow-sm">
+            <div class="card-body">
+                <h3 class="card-title h4 text-dark">
+                    <i class="bi bi-person-badge me-2"></i>Member Area
+                </h3>
+                <p class="card-text text-secondary">
+                    Secure login for members and administrators. Manage your profile and settings.
+                    <br><small class="text-muted">(Hint: Sometimes, you don't need a password.)</small>
+                </p>
+                {% if user %}
+                    <a href="{{ url_for('account') }}" class="btn btn-outline-success">My Account</a>
+                {% else %}
+                    <div class="d-flex gap-2">
+                        <a href="{{ url_for('login') }}" class="btn btn-outline-primary">Login</a>
+                        <a href="{{ url_for('forgot_password') }}" class="btn btn-outline-secondary">Forgot Password</a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

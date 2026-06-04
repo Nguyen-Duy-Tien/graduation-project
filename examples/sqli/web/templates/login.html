@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}Login{% endblock %}
+{% block content %}
+<div class="row justify-content-center mt-5">
+    <div class="col-md-4">
+        <h2 class="text-center mb-4">Login</h2>
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <form method="POST">
+                    <div class="mb-3">
+                        <label class="form-label">Username</label>
+                        <input type="text" name="username" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Password</label>
+                        <input type="password" name="password" class="form-control">
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">Sign In</button>
+                </form>
+            </div>
+        </div>
+        
+        <!-- Link Forgot Password mới thêm -->
+        <div class="text-center mt-3">
+            <a href="{{ url_for('forgot_password') }}" class="text-decoration-none">Forgot Password?</a>
+        </div>
+
+        {% if err %}
+        <div class="alert alert-danger mt-3">{{ err }}</div>
+        {% endif %}
+        {% if raw %}
+        <div class="alert alert-secondary mt-3 font-monospace small">{{ raw }}</div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
