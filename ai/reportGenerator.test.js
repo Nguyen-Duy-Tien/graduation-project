@@ -149,6 +149,42 @@ test('buildHtml: shows exact finding location and evidence', () => {
   assert.match(html, /gap: 2\.25rem/);
 });
 
+test('buildHtml: shows tool run counts and AI filtered findings', () => {
+  const html = buildHtml(
+    {
+      executive_summary: { key_findings: [], immediate_actions: [] },
+      tool_runs: [
+        { key: 'semgrep', label: 'Semgrep', file: 'semgrep-report.json', exists: true, findingCount: 4 },
+        { key: 'zap', label: 'ZAP', file: 'zap-report.json', exists: false, findingCount: 0 },
+      ],
+      triaged_findings: [{
+        id: 'F-010',
+        triage_status: 'false_positive',
+        triage_reason: 'Dependency not reachable in runtime path.',
+        risk_score: 5,
+        remediation: { summary: 'No action required.' },
+        original_finding: {
+          source: 'semgrep',
+          ruleId: 'test.rule',
+          category: 'general',
+          severity: 'low',
+          file: 'app.js',
+          line: 10,
+          message: 'Scanner-only finding',
+        },
+      }],
+    },
+    { techStack: { language: 'nodejs', framework: 'nodejs-rest-api' } },
+  );
+
+  assert.match(html, /Tool Run Summary/);
+  assert.match(html, /Semgrep/);
+  assert.match(html, /4 findings/);
+  assert.match(html, /missing zap-report\.json/);
+  assert.match(html, /AI Filtered Findings/);
+  assert.match(html, /Scanner-only finding/);
+});
+
 test('buildHtml: lists only tools passed in metadata', () => {
   const html = buildHtml(
     {
