@@ -581,6 +581,14 @@ export function buildHtml(triageResult, context, metadata = {}) {
   const manualTestsHtml = manualTests.map(tc => {
     const sev = String(tc.severity ?? 'MEDIUM').toLowerCase();
     const sevColor = SEVERITY_COLORS[sev] ?? SEVERITY_COLORS.medium;
+    const evidence = tc.evidence ?? {};
+    const evidenceRows = [
+      evidence.route ? ['Route evidence', evidence.route] : null,
+      evidence.classification?.length ? ['Classification', evidence.classification.join(', ')] : null,
+      evidence.middleware?.length ? ['Middleware', evidence.middleware.join(', ')] : null,
+      evidence.risk_signals?.length ? ['Risk signals', evidence.risk_signals.join(', ')] : null,
+      evidence.schema_fields?.length ? ['Schema fields', evidence.schema_fields.join(', ')] : null,
+    ].filter(Boolean);
     const steps = (tc.steps ?? []).map(step => `
       <li>
         <strong>Step ${escHtml(step.step ?? '')}:</strong> ${escHtml(step.action ?? step)}
@@ -599,6 +607,15 @@ export function buildHtml(triageResult, context, metadata = {}) {
         <span class="finding-title">${escHtml(tc.vulnerability_type ?? 'Manual Test')} - ${escHtml(tc.target_endpoint ?? '')}</span>
       </div>
       <div class="finding-body">
+        ${tc.why_generated ? `<div class="analysis-box evidence-box"><div class="analysis-label">Why Generated</div><div class="analysis-text">${escHtml(tc.why_generated)}</div></div>` : ''}
+        ${evidenceRows.length ? `
+        <dl class="finding-details manual-evidence">
+          ${evidenceRows.map(([label, value]) => `
+          <div class="detail-row">
+            <dt>${escHtml(label)}</dt>
+            <dd>${escHtml(value)}</dd>
+          </div>`).join('')}
+        </dl>` : ''}
         ${tc.preconditions?.length ? `<div class="meta-row"><span>Preconditions: ${escHtml(tc.preconditions.join('; '))}</span></div>` : ''}
         <ol class="manual-steps">${steps}</ol>
         ${tc.confirmed_vulnerable_indicator ? `<div class="triage-reason"><strong>Confirm:</strong> ${escHtml(tc.confirmed_vulnerable_indicator)}</div>` : ''}
@@ -651,6 +668,8 @@ export function buildHtml(triageResult, context, metadata = {}) {
   .analysis-box { border-radius: 6px; padding: 0.85rem 0.95rem; font-size: 0.86rem; line-height: 1.55; }
   .analysis-label { font-size: 0.72rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 0.35rem; }
   .analysis-text { color: var(--c-text); overflow-wrap: anywhere; }
+  .evidence-box { background: rgba(56,189,248,0.08); border: 1px solid rgba(56,189,248,0.22); color: var(--c-text); margin-bottom: 0.9rem; }
+  .manual-evidence { margin-bottom: 0.9rem; }
   .triage-reason { background: rgba(251,191,36,0.09); border: 1px solid rgba(251,191,36,0.28); color: #fbbf24; }
   .remediation { background: rgba(134,239,172,0.08); border: 1px solid rgba(134,239,172,0.24); color: #86efac; }
   .refs { font-size: 0.78rem; color: var(--c-muted); margin-top: 0.4rem; }

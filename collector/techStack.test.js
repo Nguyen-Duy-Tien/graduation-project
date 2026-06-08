@@ -1,10 +1,13 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { resolve } from 'path';
 import { collectTechStack } from './techStack.js';
+import { resolveVulnerableRestApiTarget } from './testTarget.js';
 
 test('collectTechStack: detects backend manifest from compose service subfolder', async () => {
-  const stack = await collectTechStack(resolve('examples/vulnerable-rest-api'));
+  const target = resolveVulnerableRestApiTarget();
+  assert.ok(target, 'vulnerable-rest-api fixture not found');
+
+  const stack = await collectTechStack(target);
 
   assert.equal(stack.language, 'nodejs');
   assert.equal(stack.framework, 'nodejs-rest-api');

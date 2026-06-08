@@ -80,12 +80,15 @@ const MANUAL_TESTS_SYSTEM = `You are a senior web application penetration tester
 Your task: generate detailed manual test cases for vulnerability classes that automated tools CANNOT detect — specifically IDOR, Broken Function Level Authorization (BFLA), JWT logic flaws, race conditions, and mass assignment. These require multi-session interaction or business logic understanding.
 
 Base your test cases on the actual endpoint list provided. Do NOT invent endpoints not in the input.
+Treat each test case as a verification hypothesis, not as a confirmed vulnerability.
 
 CRITICAL REQUIREMENTS:
 - Output ONLY valid JSON. No explanation, no markdown.
 - Each test case must have concrete, actionable steps a junior pentester can follow.
 - Reference specific endpoint paths from the input data.
 - Include the exact HTTP requests (method, path, headers, body) where possible.
+- Prefer test cases backed by route middleware evidence, role expectations, ownership signals, dangerous code patterns, or sensitive schema fields.
+- Every test case must include why_generated and evidence so DevOps can trace why the checklist item exists.
 
 Output schema (strict):
 {
@@ -95,6 +98,14 @@ Output schema (strict):
       "vulnerability_type": "IDOR" | "BFLA" | "JWT_Logic_Flaw" | "Race_Condition" | "Mass_Assignment" | "Auth_Bypass",
       "target_endpoint": "METHOD /path",
       "severity": "CRITICAL" | "HIGH" | "MEDIUM",
+      "why_generated": "string explaining the exact signal that caused this test",
+      "evidence": {
+        "route": "file:line",
+        "classification": ["string"],
+        "middleware": ["string"],
+        "risk_signals": ["string"],
+        "schema_fields": ["string"]
+      },
       "preconditions": ["string"],
       "steps": [
         {
@@ -110,6 +121,74 @@ Output schema (strict):
     }
   ]
 }`;
+
+const MANUAL_TEST_RELEVANT_FLAGS = [
+  'idor_candidate',
+  'fileUpload',
+  'auth',
+  'admin',
+  'payment',
+  'authz',
+  'missing_auth',
+  'missing_admin',
+  'missing_ownership_check',
+];
+
+function isManualTestRelevantEndpoint(route) {
+  return route.classification?.some(c => MANUAL_TEST_RELEVANT_FLAGS.includes(c))
+    || route.security?.riskSignals?.length > 0;
+}
+
+function endpointRiskScore(route) {
+  const flags = new Set(route.classification ?? []);
+  const signals = route.security?.riskSignals ?? [];
+  let score = signals.length * 3;
+
+  if (flags.has('missing_auth')) score += 9;
+  if (flags.has('missing_admin')) score += 8;
+  if (flags.has('missing_ownership_check')) score += 8;
+  if (flags.has('idor_candidate')) score += 6;
+  if (flags.has('authz')) score += 5;
+  if (flags.has('admin')) score += 5;
+  if (flags.has('auth')) score += 4;
+  if (flags.has('fileUpload')) score += 4;
+  if (['POST', 'PUT', 'PATCH', 'DELETE'].includes(route.method)) score += 2;
+
+  return score;
+}
+
+function compactEndpoint(ep) {
+  return {
+    method: ep.method,
+    path: ep.path,
+    classification: ep.classification,
+    file: ep.file,
+    line: ep.line,
+    snippet: ep.snippet,
+    security: ep.security ? {
+      middleware: ep.security.middleware ?? [],
+      hasAuthMiddleware: ep.security.hasAuthMiddleware ?? false,
+      hasAdminMiddleware: ep.security.hasAdminMiddleware ?? false,
+      hasRoleCheck: ep.security.hasRoleCheck ?? false,
+      hasOwnershipCheck: ep.security.hasOwnershipCheck ?? false,
+      hasValidationMiddleware: ep.security.hasValidationMiddleware ?? false,
+      riskSignals: ep.security.riskSignals ?? [],
+      expectedRoles: ep.security.expectedRoles ?? {},
+    } : undefined,
+  };
+}
+
+function compactSchemaModel(model) {
+  return {
+    name: model.name,
+    file: model.file,
+    line: model.line,
+    schemaType: model.schemaType,
+    sensitiveFields: model.sensitiveFields ?? [],
+    ownershipFields: model.ownershipFields ?? [],
+    massAssignmentTargets: model.massAssignmentTargets ?? [],
+  };
+}
 
 // ── Gemini Call #1: Tool Selection ────────────────────────────────────────────
 
@@ -191,13 +270,15 @@ export async function generateManualTestCases(context, options = {}) {
 
   // Chỉ gửi endpoints có flag liên quan để prompt không quá dài
   const relevantEndpoints = (routes.routes ?? []).filter(r =>
-    r.classification.some(c => ['idor_candidate', 'fileUpload', 'auth', 'admin', 'payment'].includes(c))
-  ).slice(0, 25);
+    isManualTestRelevantEndpoint(r)
+  )
+    .sort((a, b) => endpointRiskScore(b) - endpointRiskScore(a))
+    .slice(0, 30);
 
   // Nếu không có endpoint nào relevant, thêm sample từ highRiskRoutes
   const endpointsForAI = relevantEndpoints.length > 0
     ? relevantEndpoints
-    : (routes.highRiskRoutes ?? []).slice(0, 15);
+    : (routes.highRiskRoutes ?? []).slice(0, 20);
 
   if (endpointsForAI.length === 0) {
     console.log('[AI] Gemini Call #2: No relevant endpoints found — generating generic test cases');
@@ -207,6 +288,11 @@ export async function generateManualTestCases(context, options = {}) {
   const jwtEvidence    = context.codePatterns?.byCategory?.jwt?.findings?.slice(0, 3) ?? [];
   const idorEvidence   = context.codePatterns?.byCategory?.['auth_bypass']?.findings?.slice(0, 3) ?? [];
   const uploadEvidence = context.codePatterns?.byCategory?.['path_traversal']?.findings?.slice(0, 3) ?? [];
+  const massAssignmentEvidence = context.codePatterns?.byCategory?.mass_assign?.findings?.slice(0, 5) ?? [];
+  const authBypassEvidence = context.codePatterns?.byCategory?.auth_bypass?.findings?.slice(0, 5) ?? [];
+  const sensitiveModels = (context.schemas?.modelsWithSensitiveFields ?? [])
+    .map(compactSchemaModel)
+    .slice(0, 12);
 
   const payload = {
     techStack: {
@@ -214,17 +300,22 @@ export async function generateManualTestCases(context, options = {}) {
       framework: context.techStack?.framework,
       features:  context.techStack?.features,
     },
-    endpoints: endpointsForAI.map(ep => ({
-      method:         ep.method,
-      path:           ep.path,
-      classification: ep.classification,
-      file:           ep.file,
-      line:           ep.line,
-    })),
+    endpointSelectionPolicy: {
+      source: 'automated route scanner, middleware analyzer, code pattern scanner, and schema scanner',
+      relevantFlags: MANUAL_TEST_RELEVANT_FLAGS,
+      note: 'These are candidates for manual verification, not confirmed vulnerabilities.',
+    },
+    endpoints: endpointsForAI.map(compactEndpoint),
+    schemaContext: {
+      totalModels: context.schemas?.totalModels ?? 0,
+      sensitiveFieldCount: context.schemas?.sensitiveFieldCount ?? 0,
+      modelsWithSensitiveFields: sensitiveModels,
+    },
     codeEvidence: {
       jwt:         jwtEvidence,
-      authBypass:  idorEvidence,
+      authBypass:  authBypassEvidence.length ? authBypassEvidence : idorEvidence,
       fileUpload:  uploadEvidence,
+      massAssignment: massAssignmentEvidence,
     },
     classificationStats: routes.classificationStats ?? {},
   };
@@ -235,7 +326,14 @@ export async function generateManualTestCases(context, options = {}) {
 ${JSON.stringify(payload, null, 2)}
 \`\`\`
 
-Generate test cases for: IDOR (for idor_candidate endpoints), BFLA (for admin + auth endpoints), JWT logic flaws (if jwt code evidence exists), file upload bypass (if fileUpload endpoints exist), and mass assignment (for POST/PUT endpoints). Create at least one test case per vulnerability class that has evidence.`;
+Generate test cases for:
+- IDOR/BOLA when an endpoint has idor_candidate or missing_ownership_check. Use two normal users and object IDs.
+- BFLA/Auth_Bypass when a state-changing endpoint has authz, missing_auth, missing_admin, or role expectations showing anonymous/user should be rejected.
+- Mass_Assignment when POST/PUT/PATCH endpoints align with sensitive schema fields or massAssignment code evidence. Include payload fields from schemaContext.massAssignmentTargets.
+- JWT logic flaws only when jwt code evidence or auth endpoints exist.
+- Race condition only when endpoint/business context suggests repeatable state change, credit, balance, quota, invite, order, or payment behavior.
+
+Do not invent endpoints. For each test case, set why_generated and evidence using endpoint.security, classification, codeEvidence, and schemaContext. Create at most 12 high-value test cases.`;
 
   console.log('[AI] Gemini Call #2: Generating manual test cases...');
   const result = await callGeminiWithRetry(prompt, MANUAL_TESTS_SYSTEM, {

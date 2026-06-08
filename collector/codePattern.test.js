@@ -1,10 +1,13 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { resolve } from 'path';
 import { collectCodePatterns } from './codePattern.js';
+import { resolveVulnerableRestApiTarget } from './testTarget.js';
 
 test('collectCodePatterns: detects OWASP API benchmark patterns', async () => {
-  const result = await collectCodePatterns(resolve('examples/vulnerable-rest-api'));
+  const target = resolveVulnerableRestApiTarget();
+  assert.ok(target, 'vulnerable-rest-api fixture not found');
+
+  const result = await collectCodePatterns(target);
   const ids = new Set(result.topFindings.map(f => f.patternId));
   const allByCategory = result.byCategory;
 

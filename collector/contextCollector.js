@@ -16,12 +16,13 @@ import { join, resolve } from 'path';
 import { collectTechStack }     from './techStack.js';
 import { collectRoutes }        from './routeScanner.js';
 import { collectCodePatterns }  from './codePattern.js';
+import { collectSchemas }       from './schemaScanner.js';
 import { collectApiSurface, collectGitDiff, collectContainerInfo } from './apiSurface.js';
 
 // ── Merge helper ──────────────────────────────────────────────────────────────
 
 function buildContext(projectRoot, results) {
-  const [techStack, routes, codePatterns, apiSurface, gitDiff, containerInfo] = results;
+  const [techStack, routes, codePatterns, schemas, apiSurface, gitDiff, containerInfo] = results;
 
   // Unified attack surface summary (dùng bởi AI prompt)
   const attackSurfaceSummary = {
@@ -32,6 +33,11 @@ function buildContext(projectRoot, results) {
       total:       codePatterns.totalFindings,
       bySeverity:  codePatterns.bySeverity,
       categories:  Object.keys(codePatterns.byCategory),
+    },
+    schemaSummary:       {
+      totalModels:          schemas.totalModels,
+      sensitiveFieldCount:  schemas.sensitiveFieldCount,
+      modelsWithSensitiveFields: schemas.modelsWithSensitiveFields?.length ?? 0,
     },
     hasSwaggerSpec:      apiSurface.specFound,
     scanRecommendation:  gitDiff.recommendation,
@@ -48,6 +54,7 @@ function buildContext(projectRoot, results) {
     techStack,
     routes,
     codePatterns,
+    schemas,
     apiSurface,
     gitDiff,
     containerInfo,
@@ -86,10 +93,10 @@ export async function collectContext(projectRoot) {
   log('techStack', `Detected: ${techStack.language} / ${techStack.framework}`);
 
   // Bước 2: chạy 5 collector còn lại song song
-  log('PARALLEL', 'Running 5 collectors in parallel...');
+  log('PARALLEL', 'Running collectors in parallel...');
   const startTime = Date.now();
 
-  const [routes, codePatterns, apiSurface, gitDiff, containerInfo] = await Promise.all([
+  const [routes, codePatterns, schemas, apiSurface, gitDiff, containerInfo] = await Promise.all([
     collectRoutes(absRoot, techStack).then(r => {
       log('routeScanner', `Found ${r.totalEndpoints} endpoints (${r.highRiskCount} high-risk)`);
       return r;
@@ -104,6 +111,14 @@ export async function collectContext(projectRoot) {
     }).catch(err => {
       logError('codePattern', err);
       return { totalFindings: 0, bySeverity: {}, byCategory: {}, topFindings: [], filesScanned: 0 };
+    }),
+
+    collectSchemas(absRoot).then(r => {
+      log('schemaScanner', `Found ${r.totalModels} models (${r.sensitiveFieldCount} sensitive fields)`);
+      return r;
+    }).catch(err => {
+      logError('schemaScanner', err);
+      return { totalModels: 0, models: [], modelsWithSensitiveFields: [], sensitiveFieldCount: 0, fieldIndex: {}, filesScanned: 0 };
     }),
 
     collectApiSurface(absRoot).then(r => {
@@ -138,7 +153,7 @@ export async function collectContext(projectRoot) {
   log('PARALLEL', `All collectors done in ${elapsed}ms`);
 
   // Bước 3: merge thành context object
-  const context = buildContext(absRoot, [techStack, routes, codePatterns, apiSurface, gitDiff, containerInfo]);
+  const context = buildContext(absRoot, [techStack, routes, codePatterns, schemas, apiSurface, gitDiff, containerInfo]);
 
   // Print summary
   const s = context.attackSurfaceSummary;
@@ -147,6 +162,7 @@ export async function collectContext(projectRoot) {
   console.log('═'.repeat(56));
   console.log(`  Endpoints found   : ${s.totalEndpoints} (${s.highRiskEndpoints} high-risk)`);
   console.log(`  Dangerous patterns: ${s.dangerousPatterns.total} (critical: ${s.dangerousPatterns.bySeverity?.critical ?? 0})`);
+  console.log(`  Sensitive fields  : ${s.schemaSummary.sensitiveFieldCount} in ${s.schemaSummary.modelsWithSensitiveFields} models`);
   console.log(`  Swagger spec      : ${s.hasSwaggerSpec ? 'yes' : 'no — AI will infer'}`);
   console.log(`  Scan strategy     : ${s.scanRecommendation}`);
   console.log(`  Containerized     : ${s.isContainerized}`);

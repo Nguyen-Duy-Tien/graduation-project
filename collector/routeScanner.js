@@ -107,7 +107,7 @@ const CLASSIFICATION_RULES = {
   ],
   idor_candidate: [
     // Path param :id, {id}, <id>, atau query ?id=
-    /:(?:id|user_?id|account_?id|order_?id|post_?id|item_?id|record_?id)\b/i,
+    /:(?:id|name|username|slug|uuid|user_?id|account_?id|order_?id|post_?id|item_?id|record_?id)\b/i,
     /\{(?:id|userId|accountId)\}/i,
     /\/\d+(?:\/|$)/,                   // Numeric segment: /api/users/123
     /\[id\]|\[userId\]/i,              // Next.js dynamic routes
@@ -138,6 +138,20 @@ export function classifyEndpoint(path) {
   return flags.length > 0 ? flags : ['general'];
 }
 
+const UNSAFE_METHODS = new Set(['POST', 'PUT', 'PATCH', 'DELETE']);
+
+const TOKEN_EXCLUDE = new Set([
+  'async', 'function', 'return', 'true', 'false', 'null', 'undefined',
+  'req', 'request', 'res', 'response', 'next',
+]);
+
+const AUTH_NAME_RE = /(?:^|[._-])(?:auth|authenticate|authenticated|requireauth|jwt|session|passport|verifytoken|verifyjwt)(?:$|[._-])/i;
+const ADMIN_NAME_RE = /(?:^|[._-])(?:admin|requireadmin|isadmin|superuser|root|authorize|rbac|permission|role|roles)(?:$|[._-])/i;
+const VALIDATION_NAME_RE = /(?:validate|validator|schema|joi|zod|celebrate|sanitize|objectid)/i;
+const ROLE_CHECK_RE = /(?:\b[A-Za-z_$][\w$]*\.)?(?:role|roles|permission|permissions|isAdmin|is_admin|scope|scopes)\s*(?:===|==|!==|!=)|\.(?:includes|some)\s*\([^)]*['"`](?:ADMIN|admin|superuser|root)['"`]/i;
+const REQ_USER_RE = /\b(?:req|request)\.user\b|\bctx\.state\.user\b|\bc\.get\s*\(\s*['"]user['"]\s*\)/i;
+const OWNERSHIP_RE = /\b(?:owner|ownerId|owner_id|userId|user_id|accountId|account_id|tenantId|tenant_id|createdBy|created_by)\b|\b(?:req|request)\.user\.(?:_id|id|userId)\b/i;
+
 // ── File scanner helpers ──────────────────────────────────────────────────────
 
 const SKIP_DIRS = new Set([
@@ -162,6 +176,259 @@ function joinRoutePaths(basePath, childPath) {
   if (base === '/') return child;
   if (child === '/') return base;
   return `${base}${child}`;
+}
+
+function addFlag(flags, flag) {
+  if (flags.includes('general')) {
+    flags.splice(flags.indexOf('general'), 1);
+  }
+  if (!flags.includes(flag)) flags.push(flag);
+}
+
+function findMatchingParen(text, openIndex) {
+  let depth = 0;
+  let quote = null;
+  let escaped = false;
+  let lineComment = false;
+  let blockComment = false;
+
+  for (let i = openIndex; i < text.length; i++) {
+    const ch = text[i];
+    const next = text[i + 1];
+
+    if (lineComment) {
+      if (ch === '\n') lineComment = false;
+      continue;
+    }
+
+    if (blockComment) {
+      if (ch === '*' && next === '/') {
+        blockComment = false;
+        i++;
+      }
+      continue;
+    }
+
+    if (quote) {
+      if (escaped) {
+        escaped = false;
+      } else if (ch === '\\') {
+        escaped = true;
+      } else if (ch === quote) {
+        quote = null;
+      }
+      continue;
+    }
+
+    if (ch === '/' && next === '/') {
+      lineComment = true;
+      i++;
+      continue;
+    }
+
+    if (ch === '/' && next === '*') {
+      blockComment = true;
+      i++;
+      continue;
+    }
+
+    if (ch === '"' || ch === "'" || ch === '`') {
+      quote = ch;
+      continue;
+    }
+
+    if (ch === '(') depth++;
+    else if (ch === ')') {
+      depth--;
+      if (depth === 0) return i;
+    }
+  }
+
+  return -1;
+}
+
+function getRouteCallParts(content, matchIndex, matchedLength) {
+  const openParen = content.indexOf('(', matchIndex);
+  if (openParen === -1) return { callText: '', argsAfterPath: '' };
+
+  const closeParen = findMatchingParen(content, openParen);
+  if (closeParen === -1) return { callText: '', argsAfterPath: '' };
+
+  return {
+    callText: content.slice(matchIndex, closeParen + 1),
+    argsAfterPath: content.slice(matchIndex + matchedLength, closeParen),
+  };
+}
+
+function extractMiddlewarePrefix(argsAfterPath) {
+  const tail = String(argsAfterPath ?? '').replace(/^\s*,\s*/, '');
+  const markers = [
+    /\basync\s*\(/,
+    /\basync\s+function\b/,
+    /\bfunction\b/,
+    /\(\s*(?:req|request|ctx|c)\b[\s\S]{0,120}?\)\s*=>/,
+    /\b(?:req|request|ctx|c)\s*=>/,
+  ];
+
+  const markerIndex = markers
+    .map(re => {
+      const match = re.exec(tail);
+      return match ? match.index : -1;
+    })
+    .filter(i => i >= 0)
+    .sort((a, b) => a - b)[0];
+
+  return markerIndex >= 0 ? tail.slice(0, markerIndex) : tail;
+}
+
+function extractMiddlewareNames(argsAfterPath) {
+  const prefix = extractMiddlewarePrefix(argsAfterPath);
+  const names = [];
+  const re = /[A-Za-z_$][\w$]*(?:\.[A-Za-z_$][\w$]*)?/g;
+  let match;
+
+  while ((match = re.exec(prefix)) !== null) {
+    const token = match[0];
+    const leaf = token.split('.').pop();
+    if (!leaf || TOKEN_EXCLUDE.has(leaf)) continue;
+    if (!names.includes(token)) names.push(token);
+  }
+
+  return names;
+}
+
+function hasMiddlewareName(names, re) {
+  return names.some(name => re.test(name));
+}
+
+function buildRoleExpectations({ method, flags, hasAuthMiddleware, hasRoleCheck }) {
+  const unsafe = UNSAFE_METHODS.has(method);
+  const authEndpoint = flags.includes('auth');
+  const adminEndpoint = flags.includes('admin');
+
+  if (authEndpoint) {
+    return {
+      anonymous: 'allowed for login/reset flow; validate abuse separately',
+      user: 'not applicable or already authenticated',
+      admin: 'not applicable or already authenticated',
+    };
+  }
+
+  if (!hasAuthMiddleware) {
+    return {
+      anonymous: unsafe ? 'should reject unsafe state change or require explicit public design' : 'public or limited data only',
+      user: 'same as anonymous unless route enforces auth elsewhere',
+      admin: 'same as anonymous unless route enforces auth elsewhere',
+    };
+  }
+
+  if (hasRoleCheck || adminEndpoint) {
+    return {
+      anonymous: '401 expected',
+      user: '403 expected unless explicitly privileged',
+      admin: 'allowed when request is valid',
+    };
+  }
+
+  return {
+    anonymous: '401 expected',
+    user: unsafe ? 'allowed only for owned objects or permitted business action' : 'allowed only for permitted data',
+    admin: 'allowed when request is valid',
+  };
+}
+
+function extractRouteSecurity(argsAfterPath, callText) {
+  const middleware = extractMiddlewareNames(argsAfterPath);
+  const hasAuthMiddleware = hasMiddlewareName(middleware, AUTH_NAME_RE);
+  const hasAdminMiddleware = hasMiddlewareName(middleware, ADMIN_NAME_RE);
+  const hasValidationMiddleware = hasMiddlewareName(middleware, VALIDATION_NAME_RE);
+  const hasReqUserReference = REQ_USER_RE.test(callText);
+  const hasOwnershipCheck = hasReqUserReference || OWNERSHIP_RE.test(callText);
+  const hasRoleCheck = hasAdminMiddleware || ROLE_CHECK_RE.test(callText);
+
+  return {
+    middleware,
+    hasAuthMiddleware,
+    hasAdminMiddleware,
+    hasValidationMiddleware,
+    hasReqUserReference,
+    hasOwnershipCheck,
+    hasRoleCheck,
+  };
+}
+
+function baseSecurity(security = {}) {
+  const {
+    riskSignals,
+    expectedRoles,
+    missingAuthSignal,
+    missingAdminSignal,
+    missingOwnershipSignal,
+    weakFunctionAuthzSignal,
+    ...base
+  } = security;
+  return base;
+}
+
+function finalizeRouteMetadata(method, path, security) {
+  const flags = classifyEndpoint(path);
+  const riskSignals = [];
+  const unsafe = UNSAFE_METHODS.has(method);
+  const authEndpoint = flags.includes('auth');
+  const adminEndpoint = flags.includes('admin');
+  const idorCandidate = flags.includes('idor_candidate');
+  const hasAuthMiddleware = Boolean(security?.hasAuthMiddleware);
+  const hasRoleCheck = Boolean(security?.hasRoleCheck);
+
+  let missingAuthSignal = false;
+  let missingAdminSignal = false;
+  let missingOwnershipSignal = false;
+  let weakFunctionAuthzSignal = false;
+
+  if (unsafe && !authEndpoint) {
+    addFlag(flags, 'authz');
+  }
+
+  if (unsafe && !authEndpoint && !hasAuthMiddleware) {
+    missingAuthSignal = true;
+    addFlag(flags, 'missing_auth');
+    riskSignals.push('write_route_without_auth_middleware');
+  }
+
+  if (unsafe && !authEndpoint && hasAuthMiddleware && !hasRoleCheck) {
+    weakFunctionAuthzSignal = true;
+    riskSignals.push('state_changing_route_without_role_check');
+  }
+
+  if (adminEndpoint && !hasRoleCheck) {
+    missingAdminSignal = true;
+    addFlag(flags, 'missing_admin');
+    riskSignals.push('admin_endpoint_without_role_check');
+  }
+
+  if (idorCandidate && hasAuthMiddleware && !security?.hasOwnershipCheck) {
+    missingOwnershipSignal = true;
+    addFlag(flags, 'missing_ownership_check');
+    riskSignals.push('object_identifier_route_without_req_user_ownership_check');
+  }
+
+  return {
+    classification: flags,
+    security: {
+      ...security,
+      riskSignals,
+      missingAuthSignal,
+      missingAdminSignal,
+      missingOwnershipSignal,
+      weakFunctionAuthzSignal,
+      expectedRoles: buildRoleExpectations({
+        method,
+        flags,
+        hasAuthMiddleware,
+        hasRoleCheck,
+      }),
+    },
+  };
 }
 
 function resolveRequiredFile(fromFile, requestPath) {
@@ -231,13 +498,19 @@ function expandExpressRoute(route, mounts) {
     return [route];
   }
 
-  return mounts.map(mount => ({
-    ...route,
-    path: joinRoutePaths(mount.basePath, route.path),
-    mountPath: mount.basePath,
-    mountedFrom: mount.mountedFrom,
-    classification: classifyEndpoint(joinRoutePaths(mount.basePath, route.path)),
-  }));
+  return mounts.map(mount => {
+    const fullPath = joinRoutePaths(mount.basePath, route.path);
+    const finalized = finalizeRouteMetadata(route.method, fullPath, baseSecurity(route.security));
+
+    return {
+      ...route,
+      path: fullPath,
+      mountPath: mount.basePath,
+      mountedFrom: mount.mountedFrom,
+      classification: finalized.classification,
+      security: finalized.security,
+    };
+  });
 }
 
 function extractRoutesFromFile(filePath, patternEntry) {
@@ -262,11 +535,25 @@ function extractRoutesFromFile(filePath, patternEntry) {
     const receiver = patternEntry.receiverGroup
       ? (match[patternEntry.receiverGroup] ?? null)
       : null;
+    const callParts = getRouteCallParts(content, match.index, match[0].length);
+    const extractedSecurity = patternEntry.name === 'express'
+      ? extractRouteSecurity(callParts.argsAfterPath, callParts.callText)
+      : {
+          middleware: [],
+          hasAuthMiddleware: false,
+          hasAdminMiddleware: false,
+          hasValidationMiddleware: false,
+          hasReqUserReference: REQ_USER_RE.test(callParts.callText),
+          hasOwnershipCheck: OWNERSHIP_RE.test(callParts.callText),
+          hasRoleCheck: ROLE_CHECK_RE.test(callParts.callText),
+        };
 
     // Spring/NestJS method mapping
     const method = rawMethod.replace('MAPPING', '').replace('CONTROLLER', 'BASE');
 
     if (!rawPath || rawPath.length > 200) continue;
+
+    const finalized = finalizeRouteMetadata(method, rawPath, extractedSecurity);
 
     results.push({
       method,
@@ -275,7 +562,8 @@ function extractRoutesFromFile(filePath, patternEntry) {
       line:           lineNum,
       framework:      patternEntry.name,
       receiver,
-      classification: classifyEndpoint(rawPath),
+      classification: finalized.classification,
+      security:       finalized.security,
       snippet:        (lines[lineNum - 1] ?? '').trim().slice(0, 120),
     });
   }
@@ -363,7 +651,15 @@ export async function collectRoutes(projectRoot, techStack = {}) {
 
   // High-risk endpoints — idor_candidate hoặc fileUpload hoặc admin
   const highRiskRoutes = allRoutes.filter(r =>
-    r.classification.some(c => ['idor_candidate', 'fileUpload', 'admin'].includes(c))
+    r.classification.some(c => [
+      'idor_candidate',
+      'fileUpload',
+      'admin',
+      'authz',
+      'missing_auth',
+      'missing_admin',
+      'missing_ownership_check',
+    ].includes(c))
   );
 
   return {

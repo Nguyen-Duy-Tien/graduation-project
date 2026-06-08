@@ -92,6 +92,14 @@ test('buildHtml: includes manual test checklist', () => {
         vulnerability_type: 'IDOR',
         target_endpoint: 'PUT /api/users/:id',
         severity: 'HIGH',
+        why_generated: 'Endpoint has object id and lacks ownership evidence.',
+        evidence: {
+          route: 'server/routes/users.js:31',
+          classification: ['idor_candidate', 'missing_ownership_check'],
+          middleware: ['auth', 'validateObjectId'],
+          risk_signals: ['object_identifier_route_without_req_user_ownership_check'],
+          schema_fields: ['role', 'credit'],
+        },
         steps: [{ step: 1, action: 'Use account A token and change account B id.' }],
         remediation_hint: 'Enforce object ownership checks.',
       }],
@@ -100,6 +108,9 @@ test('buildHtml: includes manual test checklist', () => {
 
   assert.match(html, /Manual Testing Checklist/);
   assert.match(html, /PUT \/api\/users\/:id/);
+  assert.match(html, /Why Generated/);
+  assert.match(html, /Endpoint has object id and lacks ownership evidence/);
+  assert.match(html, /object_identifier_route_without_req_user_ownership_check/);
 });
 
 test('buildHtml: shows exact finding location and evidence', () => {
