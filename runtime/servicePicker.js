@@ -158,12 +158,26 @@ function scoreService(svc, projectRoot) {
 
 // Convention docker-compose: network mặc định = <basename>_default
 // basename được lowercase và lọc ký tự không hợp lệ
-function deriveNetworkName(projectRoot) {
+function deriveComposeProjectName(projectRoot) {
   const base = basename(projectRoot)
     .toLowerCase()
     .replace(/[^a-z0-9_-]/g, '');
-  if (!base) return 'default_default';
-  return `${base}_default`;
+  return base || 'default';
+}
+
+function deriveNetworkName(projectRoot, networkKey = 'default') {
+  return `${deriveComposeProjectName(projectRoot)}_${networkKey}`;
+}
+
+function resolveServiceNetworkName(containerInfo, svc, projectRoot) {
+  const networkKeys = svc.networks?.length ? svc.networks : ['default'];
+  const selectedKey = networkKeys[0];
+  const detail = (containerInfo.dockerCompose?.networksDetail ?? [])
+    .find(network => network.name === selectedKey);
+
+  if (detail?.actualName) return detail.actualName;
+  if (detail?.external) return selectedKey;
+  return deriveNetworkName(projectRoot, selectedKey);
 }
 
 /**
@@ -201,7 +215,7 @@ export function pickTargetService(containerInfo, projectRoot) {
       if (!port) continue;
       port = assertPort(port);
 
-      const networkName = assertNetworkName(deriveNetworkName(projectRoot));
+      const networkName = assertNetworkName(resolveServiceNetworkName(containerInfo, svc, projectRoot));
       const composeFile = containerInfo.composeFile ?? 'docker-compose.yml';
 
       return { serviceName, port, networkName, composeFile, serviceScore: score };

@@ -22,3 +22,10 @@ test('collectCodePatterns: detects OWASP API benchmark patterns', async () => {
   assert.ok(result.bySeverity.critical >= 1);
   assert.ok(result.totalFindings > 2);
 });
+
+test('collectCodePatterns: detects Python f-string SQL injection in Flask sample', async () => {
+  const result = await collectCodePatterns('examples/sqli');
+
+  assert.ok(result.byCategory.sqli?.findings.some(f => f.patternId === 'sqli-2'));
+  assert.ok(result.totalFindings >= 1);
+});

@@ -24,7 +24,7 @@ const DANGEROUS_PATTERNS = [
     category: 'sqli',
     severity: 'critical',
     label:    'f-string or template literal SQL injection',
-    pattern:  /(?:f['"]|`)[^'"` ]*SELECT[^'"` ]*\$\{|f['"][^'"]*SELECT[^'"]*\{/i,
+    pattern:  /(?:f['"][\s\S]{0,240}\b(?:SELECT|UPDATE|INSERT|DELETE)\b[\s\S]{0,240}\{[^}]+\}|`[\s\S]{0,240}\b(?:SELECT|UPDATE|INSERT|DELETE)\b[\s\S]{0,240}\$\{[^}]+\})/i,
   },
   {
     id:       'sqli-3',

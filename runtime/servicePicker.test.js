@@ -71,6 +71,26 @@ test('parses ip:host:container format', () => {
   assert.equal(pickTargetService(ci, projectRoot).port, '5000');
 });
 
+test('uses declared compose service network for DAST scanners', () => {
+  const ci = {
+    hasDockerCompose: true,
+    composeFile: 'compose.yaml',
+    dockerCompose: {
+      networksDetail: [{ name: 'sqlinet', actualName: null, external: false }],
+      servicesDetail: [
+        { name: 'db', image: 'mysql:5.7', ports: ['3306:3306'], networks: ['sqlinet'] },
+        { name: 'web', image: null, build: './web', ports: ['5000:5000'], networks: ['sqlinet'], depends_on: ['db'] },
+      ],
+    },
+  };
+
+  const result = pickTargetService(ci, '/tmp/sqli');
+  assert.equal(result.serviceName, 'web');
+  assert.equal(result.port, '5000');
+  assert.equal(result.networkName, 'sqli_sqlinet');
+  assert.equal(result.composeFile, 'compose.yaml');
+});
+
 test('skips port range', () => {
   const ci = {
     hasDockerCompose: true,

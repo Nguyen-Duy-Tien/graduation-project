@@ -209,10 +209,16 @@ function parseDockerCompose(content) {
   try {
     parsed = yaml.load(content);
   } catch {
-    return { services: [], allImages: [], allPorts: [], allEnvKeys: [], servicesDetail: [] };
+    return { services: [], allImages: [], allPorts: [], allEnvKeys: [], networks: [], servicesDetail: [] };
   }
 
   const services  = Object.keys(parsed?.services ?? {});
+  const networks  = Object.keys(parsed?.networks ?? {});
+  const networksDetail = Object.entries(parsed?.networks ?? {}).map(([name, cfg]) => ({
+    name,
+    actualName: typeof cfg?.name === 'string' ? cfg.name : null,
+    external: cfg?.external === true || cfg?.external?.external === true,
+  }));
   const allImages  = [];
   const allPorts   = [];
   const allEnvKeys = [];
@@ -248,13 +254,16 @@ function parseDockerCompose(content) {
       image:      svc.image ?? null,
       build:      svc.build ?? null,
       ports,
+      networks:   Array.isArray(svc.networks)
+        ? svc.networks
+        : svc.networks && typeof svc.networks === 'object' ? Object.keys(svc.networks) : [],
       depends_on: Array.isArray(svc.depends_on)
         ? svc.depends_on
         : svc.depends_on ? Object.keys(svc.depends_on) : [],
     });
   }
 
-  return { services, allImages, allPorts, allEnvKeys, servicesDetail };
+  return { services, allImages, allPorts, allEnvKeys, networks, networksDetail, servicesDetail };
 }
 
 export async function collectContainerInfo(projectRoot) {
