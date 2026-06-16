@@ -11,7 +11,7 @@
 //   { serviceName, port, networkName, composeFile } | null
 
 import { existsSync, readFileSync } from 'fs';
-import { basename, join, resolve } from 'path';
+import { basename, dirname, join, resolve } from 'path';
 import {
   assertServiceName, assertNetworkName, assertPort,
 } from './sanitize.js';
@@ -38,8 +38,9 @@ const DB_IMAGE_PATTERNS = [
 ];
 
 const DB_SERVICE_RE = /(^|[-_])(db|database|mongo|postgres|mysql|mariadb|redis|cache)([-_]|$)|^(db|mongo|postgres|mysql|redis)$/i;
-const BACKEND_NAME_RE = /(^|[-_])(api|server|backend|gateway|service|app)([-_]|$)|^(api|server|backend|gateway|app|web)$/i;
+const BACKEND_NAME_RE = /(^|[-_])(api|server|backend|gateway|service|app|web)([-_]|$)|^(api|server|backend|gateway|app|web)$/i;
 const FRONTEND_NAME_RE = /(^|[-_])(client|frontend|front|ui|webapp)([-_]|$)|^(client|frontend|ui)$/i;
+const NON_TARGET_SERVICE_RE = /(^|[-_])(chatbot|mcp|mailhog|smtp|worker|queue|adminer|phpmyadmin)([-_]|$)|^(chatbot|mailhog|smtp)$/i;
 
 const BACKEND_DEPS = new Set([
   'express', 'fastify', 'koa', 'restify', '@nestjs/core', '@nestjs/common',
@@ -64,11 +65,15 @@ function isDbImage(image) {
 //   "127.0.0.1:5000:5000" → "5000"
 //   "3001-3010:3001-3010" → null (range, bỏ)
 function parseTargetPort(portEntry) {
-  if (typeof portEntry !== 'string' && typeof portEntry !== 'number') return null;
-  const parts = String(portEntry).split(':');
-  if (parts.length > 3) return null;
+  if (typeof portEntry === 'object' && portEntry !== null) {
+    const target = portEntry.target ?? portEntry.containerPort;
+    return target ? parseTargetPort(String(target)) : null;
+  }
 
-  let candidate = parts[parts.length - 1];
+  if (typeof portEntry !== 'string' && typeof portEntry !== 'number') return null;
+  const text = String(portEntry).trim();
+  const lastColon = text.lastIndexOf(':');
+  let candidate = lastColon >= 0 ? text.slice(lastColon + 1) : text;
 
   // Loại bỏ range "3001-3010"
   if (candidate.includes('-')) return null;
@@ -87,11 +92,11 @@ function safeReadJson(filePath) {
   }
 }
 
-function resolveBuildContext(projectRoot, build) {
+function resolveBuildContext(composeRoot, build) {
   const context = typeof build === 'string'
     ? build
     : typeof build?.context === 'string' ? build.context : null;
-  return context ? resolve(projectRoot, context) : null;
+  return context ? resolve(composeRoot, context) : null;
 }
 
 function scoreNodeManifest(root) {
@@ -127,16 +132,17 @@ function scoreNonNodeManifest(root) {
   return score;
 }
 
-function scoreService(svc, projectRoot) {
+function scoreService(svc, projectRoot, composeRoot) {
   let score = 0;
   const name = svc.name ?? '';
-  const buildContext = resolveBuildContext(projectRoot, svc.build);
+  const buildContext = resolveBuildContext(composeRoot, svc.build);
   const buildText = typeof svc.build === 'string'
     ? svc.build
     : typeof svc.build?.context === 'string' ? svc.build.context : '';
   const text = `${name} ${buildText} ${svc.image ?? ''}`.toLowerCase();
 
   if (BACKEND_NAME_RE.test(name)) score += 40;
+  if (NON_TARGET_SERVICE_RE.test(name)) score -= 60;
   if (FRONTEND_NAME_RE.test(name)) score -= 45;
   if (BACKEND_NAME_RE.test(buildText)) score += 20;
   if (FRONTEND_NAME_RE.test(buildText)) score -= 25;
@@ -145,7 +151,9 @@ function scoreService(svc, projectRoot) {
 
   for (const p of svc.ports ?? []) {
     const targetPort = parseTargetPort(p);
+    if (['80', '443'].includes(targetPort)) score += 25;
     if (['3001', '4000', '5000', '8000', '8080'].includes(targetPort)) score += 5;
+    if (['8025', '1025'].includes(targetPort)) score -= 25;
   }
 
   if (buildContext && existsSync(buildContext)) {
@@ -165,11 +173,11 @@ function deriveComposeProjectName(projectRoot) {
   return base || 'default';
 }
 
-function deriveNetworkName(projectRoot, networkKey = 'default') {
-  return `${deriveComposeProjectName(projectRoot)}_${networkKey}`;
+function deriveNetworkName(projectRoot, networkKey = 'default', composeProjectName = null) {
+  return `${composeProjectName ?? deriveComposeProjectName(projectRoot)}_${networkKey}`;
 }
 
-function resolveServiceNetworkName(containerInfo, svc, projectRoot) {
+function resolveServiceNetworkName(containerInfo, svc, projectRoot, composeProjectName) {
   const networkKeys = svc.networks?.length ? svc.networks : ['default'];
   const selectedKey = networkKeys[0];
   const detail = (containerInfo.dockerCompose?.networksDetail ?? [])
@@ -177,7 +185,7 @@ function resolveServiceNetworkName(containerInfo, svc, projectRoot) {
 
   if (detail?.actualName) return detail.actualName;
   if (detail?.external) return selectedKey;
-  return deriveNetworkName(projectRoot, selectedKey);
+  return deriveNetworkName(projectRoot, selectedKey, composeProjectName);
 }
 
 /**
@@ -192,13 +200,21 @@ export function pickTargetService(containerInfo, projectRoot) {
 
   const detail = containerInfo.dockerCompose?.servicesDetail ?? [];
   if (detail.length === 0) return null;
+  const composeFile = containerInfo.composeFile ?? 'docker-compose.yml';
+  const composeDir = containerInfo.composeDir && containerInfo.composeDir !== '.'
+    ? containerInfo.composeDir
+    : dirname(composeFile);
+  const composeRoot = composeDir && composeDir !== '.'
+    ? resolve(projectRoot, composeDir)
+    : projectRoot;
+  const composeProjectName = deriveComposeProjectName(projectRoot);
 
   // Lọc ứng viên: không phải DB và có port mapping
   const candidates = detail.filter(svc => !isDbImage(svc.image) && svc.ports.length > 0);
   if (candidates.length === 0) return null;
 
   const scoredCandidates = candidates
-    .map((svc, index) => ({ svc, index, score: scoreService(svc, projectRoot) }))
+    .map((svc, index) => ({ svc, index, score: scoreService(svc, projectRoot, composeRoot) }))
     .sort((a, b) => b.score - a.score || a.index - b.index);
 
   // Pick service backend/API có điểm cao nhất hợp lệ sau sanitize
@@ -215,10 +231,14 @@ export function pickTargetService(containerInfo, projectRoot) {
       if (!port) continue;
       port = assertPort(port);
 
-      const networkName = assertNetworkName(resolveServiceNetworkName(containerInfo, svc, projectRoot));
-      const composeFile = containerInfo.composeFile ?? 'docker-compose.yml';
+      const networkName = assertNetworkName(resolveServiceNetworkName(
+        containerInfo,
+        svc,
+        projectRoot,
+        composeProjectName,
+      ));
 
-      return { serviceName, port, networkName, composeFile, serviceScore: score };
+      return { serviceName, port, networkName, composeFile, composeProjectName, serviceScore: score };
     } catch (err) {
       console.warn(`[servicePicker] skip ${svc.name}: ${err.message}`);
     }

@@ -71,6 +71,39 @@ test('parses ip:host:container format', () => {
   assert.equal(pickTargetService(ci, projectRoot).port, '5000');
 });
 
+test('parses compose env default syntax in port mappings', () => {
+  const ci = {
+    hasDockerCompose: true,
+    dockerCompose: {
+      servicesDetail: [
+        { name: 'crapi-web', image: 'crapi/crapi-web:latest', ports: ['${LISTEN_IP:-127.0.0.1}:8888:80'] },
+      ],
+    },
+  };
+
+  const result = pickTargetService(ci, '/tmp/crapi');
+  assert.equal(result.serviceName, 'crapi-web');
+  assert.equal(result.port, '80');
+});
+
+test('prefers crAPI web target over chatbot and mail UI', () => {
+  const ci = {
+    hasDockerCompose: true,
+    composeFile: 'deploy/docker/docker-compose.yml',
+    dockerCompose: {
+      servicesDetail: [
+        { name: 'crapi-chatbot', image: 'crapi/crapi-chatbot:latest', ports: ['${LISTEN_IP:-127.0.0.1}:5500:5500'] },
+        { name: 'crapi-web', image: 'crapi/crapi-web:latest', ports: ['${LISTEN_IP:-127.0.0.1}:8888:80'] },
+        { name: 'mailhog', image: 'crapi/mailhog:latest', ports: ['${LISTEN_IP:-127.0.0.1}:8025:8025'] },
+      ],
+    },
+  };
+
+  const result = pickTargetService(ci, '/tmp/crapi');
+  assert.equal(result.serviceName, 'crapi-web');
+  assert.equal(result.port, '80');
+});
+
 test('uses declared compose service network for DAST scanners', () => {
   const ci = {
     hasDockerCompose: true,
@@ -89,6 +122,46 @@ test('uses declared compose service network for DAST scanners', () => {
   assert.equal(result.port, '5000');
   assert.equal(result.networkName, 'sqli_sqlinet');
   assert.equal(result.composeFile, 'compose.yaml');
+});
+
+test('uses root project name for nested compose networks', () => {
+  const ci = {
+    hasDockerCompose: true,
+    composeFile: 'deploy/docker/docker-compose.yml',
+    composeDir: 'deploy/docker',
+    dockerCompose: {
+      networksDetail: [{ name: 'crapi-net', actualName: null, external: false }],
+      servicesDetail: [
+        { name: 'gateway', image: 'crapi/gateway', ports: ['8888:80'], networks: ['crapi-net'], depends_on: ['mongodb'] },
+        { name: 'mongodb', image: 'mongo:5', ports: ['27017:27017'], networks: ['crapi-net'] },
+      ],
+    },
+  };
+
+  const result = pickTargetService(ci, '/tmp/crapi');
+  assert.equal(result.serviceName, 'gateway');
+  assert.equal(result.port, '80');
+  assert.equal(result.networkName, 'crapi_crapi-net');
+  assert.equal(result.composeFile, 'deploy/docker/docker-compose.yml');
+  assert.equal(result.composeProjectName, 'crapi');
+});
+
+test('resolves nested compose build contexts from compose directory', () => {
+  const ci = {
+    hasDockerCompose: true,
+    composeFile: 'deploy/docker/docker-compose.yml',
+    composeDir: 'deploy/docker',
+    dockerCompose: {
+      servicesDetail: [
+        { name: 'frontend', image: null, build: '../../client', ports: ['3000:3000'], depends_on: ['api'] },
+        { name: 'api', image: null, build: '../../server', ports: ['3001:3001'], depends_on: ['db'] },
+      ],
+    },
+  };
+
+  const result = pickTargetService(ci, '/tmp/vulnerable-rest-api');
+  assert.equal(result.serviceName, 'api');
+  assert.equal(result.composeProjectName, 'vulnerable-rest-api');
 });
 
 test('skips port range', () => {

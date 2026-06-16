@@ -98,15 +98,16 @@ exit 0
 
   const targetDir   = shellQuote(projectInfo.targetDir);
   const composeFile = shellQuote(runtimeInfo.composeFile);
+  const projectName = shellQuote(runtimeInfo.composeProjectName ?? runtimeInfo.serviceName);
   const service     = shellQuote(runtimeInfo.serviceName);
 
   return `${SHEBANG}
 echo "[DEPLOY] docker-compose up -d (target: ${runtimeInfo.serviceName}:${runtimeInfo.port})"
 cd ${targetDir}
-docker-compose -f ${composeFile} up -d --build
+docker-compose -p ${projectName} -f ${composeFile} up -d --build
 echo "[DEPLOY] Waiting 15s for services to be ready..."
 sleep 15
-docker-compose -f ${composeFile} ps ${service} || true
+docker-compose -p ${projectName} -f ${composeFile} ps ${service} || true
 `;
 }
 
@@ -141,10 +142,11 @@ function renderTeardownScript(runtimeInfo, projectInfo) {
   }
   const targetDir   = shellQuote(projectInfo.targetDir);
   const composeFile = shellQuote(runtimeInfo.composeFile);
+  const projectName = shellQuote(runtimeInfo.composeProjectName ?? runtimeInfo.serviceName);
   return `${SHEBANG}
 echo "[TEARDOWN] docker-compose down -v"
 cd ${targetDir}
-docker-compose -f ${composeFile} down -v || true
+docker-compose -p ${projectName} -f ${composeFile} down -v || true
 `;
 }
 

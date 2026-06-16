@@ -22,6 +22,61 @@ const SPEC_FILENAMES = [
 ];
 
 const COMPOSE_FILENAMES = ['docker-compose.yml', 'docker-compose.yaml', 'compose.yaml', 'compose.yml'];
+const COMPOSE_SEARCH_MAX_DEPTH = 4;
+const COMPOSE_SKIP_DIRS = new Set([
+  'node_modules', 'vendor', '.git', '__pycache__', 'dist', 'build',
+  '.venv', 'venv', 'target', '.next', 'out', 'coverage', '.cache',
+  'tmp', 'temp',
+]);
+
+function toPosixPath(path) {
+  return path.replace(/\\/g, '/');
+}
+
+function composePathScore(relPath) {
+  const depth = relPath.split('/').length - 1;
+  let score = depth * 10;
+
+  if (/^deploy\/docker\//i.test(relPath)) score -= 5;
+  if (/^docker\//i.test(relPath)) score -= 3;
+  return score;
+}
+
+function findComposeFile(projectRoot) {
+  const matches = [];
+
+  function walk(absDir, relDir, depth) {
+    let entries = [];
+    try {
+      entries = readdirSync(absDir, { withFileTypes: true });
+    } catch {
+      return;
+    }
+
+    for (const entry of entries) {
+      const relPath = relDir ? `${relDir}/${entry.name}` : entry.name;
+      const absPath = join(projectRoot, ...relPath.split('/'));
+
+      if (entry.isFile() && COMPOSE_FILENAMES.includes(entry.name)) {
+        matches.push(relPath);
+        continue;
+      }
+
+      if (
+        entry.isDirectory()
+        && depth < COMPOSE_SEARCH_MAX_DEPTH
+        && !COMPOSE_SKIP_DIRS.has(entry.name)
+        && !entry.isSymbolicLink()
+      ) {
+        walk(absPath, relPath, depth + 1);
+      }
+    }
+  }
+
+  walk(projectRoot, '', 0);
+  matches.sort((a, b) => composePathScore(a) - composePathScore(b) || a.localeCompare(b));
+  return matches[0] ?? null;
+}
 
 function parseOpenApiSpec(content, filename) {
   try {
@@ -282,15 +337,18 @@ export async function collectContainerInfo(projectRoot) {
     result.dockerfile    = parseDockerfile(content);
   }
 
-  // Docker Compose
-  for (const fname of COMPOSE_FILENAMES) {
-    const composePath = join(projectRoot, fname);
+  // Docker Compose, including common nested layouts such as deploy/docker/docker-compose.yml
+  const composeFile = findComposeFile(projectRoot);
+  if (composeFile) {
+    const composePath = join(projectRoot, ...composeFile.split('/'));
     if (existsSync(composePath)) {
       const content = readFileSync(composePath, 'utf8');
       result.hasDockerCompose = true;
       result.dockerCompose    = parseDockerCompose(content);
-      result.composeFile      = fname;
-      break;
+      result.composeFile      = toPosixPath(composeFile);
+      result.composeDir       = composeFile.includes('/')
+        ? composeFile.split('/').slice(0, -1).join('/')
+        : '.';
     }
   }
 
