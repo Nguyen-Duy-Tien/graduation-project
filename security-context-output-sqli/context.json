@@ -1,0 +1,915 @@
+{
+  "_meta": {
+    "version": "1.0.0",
+    "collectedAt": "2026-06-16T10:40:11.715Z",
+    "projectRoot": "C:\\Users\\Admin\\Documents\\do an\\graduation-project\\examples\\sqli",
+    "module": "context-collector-week7"
+  },
+  "techStack": {
+    "language": "python",
+    "framework": "python-flask",
+    "features": {
+      "jwt": false,
+      "orm": false,
+      "fileUpload": false
+    },
+    "depFile": "requirements.txt",
+    "profileKey": "python-flask",
+    "toolProfile": {
+      "sast": {
+        "tool": "semgrep",
+        "rulesets": [
+          "p/python",
+          "p/flask",
+          "p/injection"
+        ]
+      },
+      "dast": {
+        "tool": "zap",
+        "mode": "full-scan"
+      },
+      "active": [
+        "semgrep",
+        "bandit",
+        "zap",
+        "trivy"
+      ]
+    },
+    "isContainerized": true,
+    "detectedRoot": "C:\\Users\\Admin\\Documents\\do an\\graduation-project\\examples\\sqli\\web",
+    "relativeRoot": "web",
+    "serviceName": "web",
+    "depFilePath": "web/requirements.txt",
+    "candidateScore": 120,
+    "isMonorepo": true,
+    "collectedAt": "2026-06-16T10:40:11.572Z",
+    "serviceCandidates": [
+      {
+        "relativeRoot": "web",
+        "serviceName": "web",
+        "language": "python",
+        "framework": "python-flask",
+        "profileKey": "python-flask",
+        "depFilePath": "web/requirements.txt",
+        "score": 120,
+        "sources": [
+          "compose:compose.yaml",
+          "subdir"
+        ]
+      },
+      {
+        "relativeRoot": ".",
+        "serviceName": null,
+        "language": "unknown",
+        "framework": "unknown",
+        "profileKey": "unknown",
+        "depFilePath": null,
+        "score": -10,
+        "sources": [
+          "root"
+        ]
+      }
+    ]
+  },
+  "routes": {
+    "totalEndpoints": 16,
+    "classificationStats": {
+      "general": 6,
+      "auth": 6,
+      "export": 2,
+      "admin": 2,
+      "missing_admin": 2
+    },
+    "highRiskCount": 2,
+    "routes": [
+      {
+        "method": "GET",
+        "path": "/",
+        "file": "web/fix-sqli-app.py",
+        "line": 73,
+        "framework": "flask_fastapi",
+        "receiver": null,
+        "classification": [
+          "general"
+        ],
+        "security": {
+          "middleware": [],
+          "hasAuthMiddleware": false,
+          "hasAdminMiddleware": false,
+          "hasValidationMiddleware": false,
+          "hasReqUserReference": false,
+          "hasOwnershipCheck": false,
+          "hasRoleCheck": false,
+          "riskSignals": [],
+          "missingAuthSignal": false,
+          "missingAdminSignal": false,
+          "missingOwnershipSignal": false,
+          "weakFunctionAuthzSignal": false,
+          "expectedRoles": {
+            "anonymous": "public or limited data only",
+            "user": "same as anonymous unless route enforces auth elsewhere",
+            "admin": "same as anonymous unless route enforces auth elsewhere"
+          }
+        },
+        "snippet": "@app.route(\"/\")"
+      },
+      {
+        "method": "GET",
+        "path": "/login",
+        "file": "web/fix-sqli-app.py",
+        "line": 78,
+        "framework": "flask_fastapi",
+        "receiver": null,
+        "classification": [
+          "auth"
+        ],
+        "security": {
+          "middleware": [],
+          "hasAuthMiddleware": false,
+          "hasAdminMiddleware": false,
+          "hasValidationMiddleware": false,
+          "hasReqUserReference": false,
+          "hasOwnershipCheck": false,
+          "hasRoleCheck": false,
+          "riskSignals": [],
+          "missingAuthSignal": false,
+          "missingAdminSignal": false,
+          "missingOwnershipSignal": false,
+          "weakFunctionAuthzSignal": false,
+          "expectedRoles": {
+            "anonymous": "allowed for login/reset flow; validate abuse separately",
+            "user": "not applicable or already authenticated",
+            "admin": "not applicable or already authenticated"
+          }
+        },
+        "snippet": "@app.route(\"/login\", methods=[\"GET\",\"POST\"])"
+      },
+      {
+        "method": "GET",
+        "path": "/logout",
+        "file": "web/fix-sqli-app.py",
+        "line": 101,
+        "framework": "flask_fastapi",
+        "receiver": null,
+        "classification": [
+          "auth"
+        ],
+        "security": {
+          "middleware": [],
+          "hasAuthMiddleware": false,
+          "hasAdminMiddleware": false,
+          "hasValidationMiddleware": false,
+          "hasReqUserReference": false,
+          "hasOwnershipCheck": false,
+          "hasRoleCheck": false,
+          "riskSignals": [],
+          "missingAuthSignal": false,
+          "missingAdminSignal": false,
+          "missingOwnershipSignal": false,
+          "weakFunctionAuthzSignal": false,
+          "expectedRoles": {
+            "anonymous": "allowed for login/reset flow; validate abuse separately",
+            "user": "not applicable or already authenticated",
+            "admin": "not applicable or already authenticated"
+          }
+        },
+        "snippet": "@app.route(\"/logout\")"
+      },
+      {
+        "method": "GET",
+        "path": "/search",
+        "file": "web/fix-sqli-app.py",
+        "line": 107,
+        "framework": "flask_fastapi",
+        "receiver": null,
+        "classification": [
+          "export"
+        ],
+        "security": {
+          "middleware": [],
+          "hasAuthMiddleware": false,
+          "hasAdminMiddleware": false,
+          "hasValidationMiddleware": false,
+          "hasReqUserReference": false,
+          "hasOwnershipCheck": false,
+          "hasRoleCheck": false,
+          "riskSignals": [],
+          "missingAuthSignal": false,
+          "missingAdminSignal": false,
+          "missingOwnershipSignal": false,
+          "weakFunctionAuthzSignal": false,
+          "expectedRoles": {
+            "anonymous": "public or limited data only",
+            "user": "same as anonymous unless route enforces auth elsewhere",
+            "admin": "same as anonymous unless route enforces auth elsewhere"
+          }
+        },
+        "snippet": "@app.route(\"/search\", methods=[\"GET\",\"POST\"])"
+      },
+      {
+        "method": "GET",
+        "path": "/account",
+        "file": "web/fix-sqli-app.py",
+        "line": 130,
+        "framework": "flask_fastapi",
+        "receiver": null,
+        "classification": [
+          "general"
+        ],
+        "security": {
+          "middleware": [],
+          "hasAuthMiddleware": false,
+          "hasAdminMiddleware": false,
+          "hasValidationMiddleware": false,
+          "hasReqUserReference": false,
+          "hasOwnershipCheck": false,
+          "hasRoleCheck": false,
+          "riskSignals": [],
+          "missingAuthSignal": false,
+          "missingAdminSignal": false,
+          "missingOwnershipSignal": false,
+          "weakFunctionAuthzSignal": false,
+          "expectedRoles": {
+            "anonymous": "public or limited data only",
+            "user": "same as anonymous unless route enforces auth elsewhere",
+            "admin": "same as anonymous unless route enforces auth elsewhere"
+          }
+        },
+        "snippet": "@app.route(\"/account\", methods=[\"GET\", \"POST\"])"
+      },
+      {
+        "method": "GET",
+        "path": "/forgot-password",
+        "file": "web/fix-sqli-app.py",
+        "line": 172,
+        "framework": "flask_fastapi",
+        "receiver": null,
+        "classification": [
+          "auth"
+        ],
+        "security": {
+          "middleware": [],
+          "hasAuthMiddleware": false,
+          "hasAdminMiddleware": false,
+          "hasValidationMiddleware": false,
+          "hasReqUserReference": false,
+          "hasOwnershipCheck": false,
+          "hasRoleCheck": false,
+          "riskSignals": [],
+          "missingAuthSignal": false,
+          "missingAdminSignal": false,
+          "missingOwnershipSignal": false,
+          "weakFunctionAuthzSignal": false,
+          "expectedRoles": {
+            "anonymous": "allowed for login/reset flow; validate abuse separately",
+            "user": "not applicable or already authenticated",
+            "admin": "not applicable or already authenticated"
+          }
+        },
+        "snippet": "@app.route(\"/forgot-password\", methods=[\"GET\", \"POST\"])"
+      },
+      {
+        "method": "GET",
+        "path": "/user",
+        "file": "web/fix-sqli-app.py",
+        "line": 187,
+        "framework": "flask_fastapi",
+        "receiver": null,
+        "classification": [
+          "general"
+        ],
+        "security": {
+          "middleware": [],
+          "hasAuthMiddleware": false,
+          "hasAdminMiddleware": false,
+          "hasValidationMiddleware": false,
+          "hasReqUserReference": false,
+          "hasOwnershipCheck": false,
+          "hasRoleCheck": false,
+          "riskSignals": [],
+          "missingAuthSignal": false,
+          "missingAdminSignal": false,
+          "missingOwnershipSignal": false,
+          "weakFunctionAuthzSignal": false,
+          "expectedRoles": {
+            "anonymous": "public or limited data only",
+            "user": "same as anonymous unless route enforces auth elsewhere",
+            "admin": "same as anonymous unless route enforces auth elsewhere"
+          }
+        },
+        "snippet": "@app.route(\"/user\")"
+      },
+      {
+        "method": "GET",
+        "path": "/admin",
+        "file": "web/fix-sqli-app.py",
+        "line": 197,
+        "framework": "flask_fastapi",
+        "receiver": null,
+        "classification": [
+          "admin",
+          "missing_admin"
+        ],
+        "security": {
+          "middleware": [],
+          "hasAuthMiddleware": false,
+          "hasAdminMiddleware": false,
+          "hasValidationMiddleware": false,
+          "hasReqUserReference": false,
+          "hasOwnershipCheck": false,
+          "hasRoleCheck": false,
+          "riskSignals": [
+            "admin_endpoint_without_role_check"
+          ],
+          "missingAuthSignal": false,
+          "missingAdminSignal": true,
+          "missingOwnershipSignal": false,
+          "weakFunctionAuthzSignal": false,
+          "expectedRoles": {
+            "anonymous": "public or limited data only",
+            "user": "same as anonymous unless route enforces auth elsewhere",
+            "admin": "same as anonymous unless route enforces auth elsewhere"
+          }
+        },
+        "snippet": "@app.route(\"/admin\")"
+      },
+      {
+        "method": "GET",
+        "path": "/",
+        "file": "web/app.py",
+        "line": 66,
+        "framework": "flask_fastapi",
+        "receiver": null,
+        "classification": [
+          "general"
+        ],
+        "security": {
+          "middleware": [],
+          "hasAuthMiddleware": false,
+          "hasAdminMiddleware": false,
+          "hasValidationMiddleware": false,
+          "hasReqUserReference": false,
+          "hasOwnershipCheck": false,
+          "hasRoleCheck": false,
+          "riskSignals": [],
+          "missingAuthSignal": false,
+          "missingAdminSignal": false,
+          "missingOwnershipSignal": false,
+          "weakFunctionAuthzSignal": false,
+          "expectedRoles": {
+            "anonymous": "public or limited data only",
+            "user": "same as anonymous unless route enforces auth elsewhere",
+            "admin": "same as anonymous unless route enforces auth elsewhere"
+          }
+        },
+        "snippet": "@app.route(\"/\")"
+      },
+      {
+        "method": "GET",
+        "path": "/login",
+        "file": "web/app.py",
+        "line": 71,
+        "framework": "flask_fastapi",
+        "receiver": null,
+        "classification": [
+          "auth"
+        ],
+        "security": {
+          "middleware": [],
+          "hasAuthMiddleware": false,
+          "hasAdminMiddleware": false,
+          "hasValidationMiddleware": false,
+          "hasReqUserReference": false,
+          "hasOwnershipCheck": false,
+          "hasRoleCheck": false,
+          "riskSignals": [],
+          "missingAuthSignal": false,
+          "missingAdminSignal": false,
+          "missingOwnershipSignal": false,
+          "weakFunctionAuthzSignal": false,
+          "expectedRoles": {
+            "anonymous": "allowed for login/reset flow; validate abuse separately",
+            "user": "not applicable or already authenticated",
+            "admin": "not applicable or already authenticated"
+          }
+        },
+        "snippet": "@app.route(\"/login\", methods=[\"GET\",\"POST\"])"
+      },
+      {
+        "method": "GET",
+        "path": "/logout",
+        "file": "web/app.py",
+        "line": 91,
+        "framework": "flask_fastapi",
+        "receiver": null,
+        "classification": [
+          "auth"
+        ],
+        "security": {
+          "middleware": [],
+          "hasAuthMiddleware": false,
+          "hasAdminMiddleware": false,
+          "hasValidationMiddleware": false,
+          "hasReqUserReference": false,
+          "hasOwnershipCheck": false,
+          "hasRoleCheck": false,
+          "riskSignals": [],
+          "missingAuthSignal": false,
+          "missingAdminSignal": false,
+          "missingOwnershipSignal": false,
+          "weakFunctionAuthzSignal": false,
+          "expectedRoles": {
+            "anonymous": "allowed for login/reset flow; validate abuse separately",
+            "user": "not applicable or already authenticated",
+            "admin": "not applicable or already authenticated"
+          }
+        },
+        "snippet": "@app.route(\"/logout\")"
+      },
+      {
+        "method": "GET",
+        "path": "/search",
+        "file": "web/app.py",
+        "line": 97,
+        "framework": "flask_fastapi",
+        "receiver": null,
+        "classification": [
+          "export"
+        ],
+        "security": {
+          "middleware": [],
+          "hasAuthMiddleware": false,
+          "hasAdminMiddleware": false,
+          "hasValidationMiddleware": false,
+          "hasReqUserReference": false,
+          "hasOwnershipCheck": false,
+          "hasRoleCheck": false,
+          "riskSignals": [],
+          "missingAuthSignal": false,
+          "missingAdminSignal": false,
+          "missingOwnershipSignal": false,
+          "weakFunctionAuthzSignal": false,
+          "expectedRoles": {
+            "anonymous": "public or limited data only",
+            "user": "same as anonymous unless route enforces auth elsewhere",
+            "admin": "same as anonymous unless route enforces auth elsewhere"
+          }
+        },
+        "snippet": "@app.route(\"/search\", methods=[\"GET\",\"POST\"])"
+      },
+      {
+        "method": "GET",
+        "path": "/account",
+        "file": "web/app.py",
+        "line": 113,
+        "framework": "flask_fastapi",
+        "receiver": null,
+        "classification": [
+          "general"
+        ],
+        "security": {
+          "middleware": [],
+          "hasAuthMiddleware": false,
+          "hasAdminMiddleware": false,
+          "hasValidationMiddleware": false,
+          "hasReqUserReference": false,
+          "hasOwnershipCheck": false,
+          "hasRoleCheck": false,
+          "riskSignals": [],
+          "missingAuthSignal": false,
+          "missingAdminSignal": false,
+          "missingOwnershipSignal": false,
+          "weakFunctionAuthzSignal": false,
+          "expectedRoles": {
+            "anonymous": "public or limited data only",
+            "user": "same as anonymous unless route enforces auth elsewhere",
+            "admin": "same as anonymous unless route enforces auth elsewhere"
+          }
+        },
+        "snippet": "@app.route(\"/account\", methods=[\"GET\", \"POST\"])"
+      },
+      {
+        "method": "GET",
+        "path": "/forgot-password",
+        "file": "web/app.py",
+        "line": 164,
+        "framework": "flask_fastapi",
+        "receiver": null,
+        "classification": [
+          "auth"
+        ],
+        "security": {
+          "middleware": [],
+          "hasAuthMiddleware": false,
+          "hasAdminMiddleware": false,
+          "hasValidationMiddleware": false,
+          "hasReqUserReference": false,
+          "hasOwnershipCheck": false,
+          "hasRoleCheck": false,
+          "riskSignals": [],
+          "missingAuthSignal": false,
+          "missingAdminSignal": false,
+          "missingOwnershipSignal": false,
+          "weakFunctionAuthzSignal": false,
+          "expectedRoles": {
+            "anonymous": "allowed for login/reset flow; validate abuse separately",
+            "user": "not applicable or already authenticated",
+            "admin": "not applicable or already authenticated"
+          }
+        },
+        "snippet": "@app.route(\"/forgot-password\", methods=[\"GET\", \"POST\"])"
+      },
+      {
+        "method": "GET",
+        "path": "/user",
+        "file": "web/app.py",
+        "line": 180,
+        "framework": "flask_fastapi",
+        "receiver": null,
+        "classification": [
+          "general"
+        ],
+        "security": {
+          "middleware": [],
+          "hasAuthMiddleware": false,
+          "hasAdminMiddleware": false,
+          "hasValidationMiddleware": false,
+          "hasReqUserReference": false,
+          "hasOwnershipCheck": false,
+          "hasRoleCheck": false,
+          "riskSignals": [],
+          "missingAuthSignal": false,
+          "missingAdminSignal": false,
+          "missingOwnershipSignal": false,
+          "weakFunctionAuthzSignal": false,
+          "expectedRoles": {
+            "anonymous": "public or limited data only",
+            "user": "same as anonymous unless route enforces auth elsewhere",
+            "admin": "same as anonymous unless route enforces auth elsewhere"
+          }
+        },
+        "snippet": "@app.route(\"/user\")"
+      },
+      {
+        "method": "GET",
+        "path": "/admin",
+        "file": "web/app.py",
+        "line": 187,
+        "framework": "flask_fastapi",
+        "receiver": null,
+        "classification": [
+          "admin",
+          "missing_admin"
+        ],
+        "security": {
+          "middleware": [],
+          "hasAuthMiddleware": false,
+          "hasAdminMiddleware": false,
+          "hasValidationMiddleware": false,
+          "hasReqUserReference": false,
+          "hasOwnershipCheck": false,
+          "hasRoleCheck": false,
+          "riskSignals": [
+            "admin_endpoint_without_role_check"
+          ],
+          "missingAuthSignal": false,
+          "missingAdminSignal": true,
+          "missingOwnershipSignal": false,
+          "weakFunctionAuthzSignal": false,
+          "expectedRoles": {
+            "anonymous": "public or limited data only",
+            "user": "same as anonymous unless route enforces auth elsewhere",
+            "admin": "same as anonymous unless route enforces auth elsewhere"
+          }
+        },
+        "snippet": "@app.route(\"/admin\")"
+      }
+    ],
+    "highRiskRoutes": [
+      {
+        "method": "GET",
+        "path": "/admin",
+        "file": "web/fix-sqli-app.py",
+        "line": 197,
+        "framework": "flask_fastapi",
+        "receiver": null,
+        "classification": [
+          "admin",
+          "missing_admin"
+        ],
+        "security": {
+          "middleware": [],
+          "hasAuthMiddleware": false,
+          "hasAdminMiddleware": false,
+          "hasValidationMiddleware": false,
+          "hasReqUserReference": false,
+          "hasOwnershipCheck": false,
+          "hasRoleCheck": false,
+          "riskSignals": [
+            "admin_endpoint_without_role_check"
+          ],
+          "missingAuthSignal": false,
+          "missingAdminSignal": true,
+          "missingOwnershipSignal": false,
+          "weakFunctionAuthzSignal": false,
+          "expectedRoles": {
+            "anonymous": "public or limited data only",
+            "user": "same as anonymous unless route enforces auth elsewhere",
+            "admin": "same as anonymous unless route enforces auth elsewhere"
+          }
+        },
+        "snippet": "@app.route(\"/admin\")"
+      },
+      {
+        "method": "GET",
+        "path": "/admin",
+        "file": "web/app.py",
+        "line": 187,
+        "framework": "flask_fastapi",
+        "receiver": null,
+        "classification": [
+          "admin",
+          "missing_admin"
+        ],
+        "security": {
+          "middleware": [],
+          "hasAuthMiddleware": false,
+          "hasAdminMiddleware": false,
+          "hasValidationMiddleware": false,
+          "hasReqUserReference": false,
+          "hasOwnershipCheck": false,
+          "hasRoleCheck": false,
+          "riskSignals": [
+            "admin_endpoint_without_role_check"
+          ],
+          "missingAuthSignal": false,
+          "missingAdminSignal": true,
+          "missingOwnershipSignal": false,
+          "weakFunctionAuthzSignal": false,
+          "expectedRoles": {
+            "anonymous": "public or limited data only",
+            "user": "same as anonymous unless route enforces auth elsewhere",
+            "admin": "same as anonymous unless route enforces auth elsewhere"
+          }
+        },
+        "snippet": "@app.route(\"/admin\")"
+      }
+    ],
+    "filesScanned": 2
+  },
+  "codePatterns": {
+    "totalFindings": 6,
+    "bySeverity": {
+      "critical": 6,
+      "high": 0,
+      "medium": 0
+    },
+    "byCategory": {
+      "sqli": {
+        "count": 6,
+        "findings": [
+          {
+            "patternId": "sqli-2",
+            "category": "sqli",
+            "severity": "critical",
+            "label": "f-string or template literal SQL injection",
+            "file": "web/app.py",
+            "line": 77,
+            "snippet": "q = f\"SELECT id, username, role FROM users WHERE username = '{username}' AND password = '{password}' LIMIT 1;\"",
+            "matched": "f\"SELECT id, username, role FROM users WHERE username = '{username}' AND passwor"
+          },
+          {
+            "patternId": "sqli-2",
+            "category": "sqli",
+            "severity": "critical",
+            "label": "f-string or template literal SQL injection",
+            "file": "web/app.py",
+            "line": 109,
+            "snippet": "q = f\"SELECT id, first_name, last_name FROM customers WHERE id = '{term}' OR first_name LIKE '%{term}%';\"",
+            "matched": "f\"SELECT id, first_name, last_name FROM customers WHERE id = '{term}' OR first_n"
+          },
+          {
+            "patternId": "sqli-2",
+            "category": "sqli",
+            "severity": "critical",
+            "label": "f-string or template literal SQL injection",
+            "file": "web/app.py",
+            "line": 125,
+            "snippet": "update_q = f\"UPDATE users SET full_info = '{new_info}' WHERE id = '{uid}';\"",
+            "matched": "f\"UPDATE users SET full_info = '{new_info}' WHERE id = '{uid}';\"\r\n        \r\n    "
+          },
+          {
+            "patternId": "sqli-2",
+            "category": "sqli",
+            "severity": "critical",
+            "label": "f-string or template literal SQL injection",
+            "file": "web/app.py",
+            "line": 144,
+            "snippet": "q = f\"SELECT id, username, role, full_info, email, cc_number, api_key FROM users WHERE id = '{uid}';\"",
+            "matched": "f\"SELECT id, username, role, full_info, email, cc_number, api_key FROM users WHE"
+          },
+          {
+            "patternId": "sqli-2",
+            "category": "sqli",
+            "severity": "critical",
+            "label": "f-string or template literal SQL injection",
+            "file": "web/app.py",
+            "line": 171,
+            "snippet": "q = f\"SELECT id FROM users WHERE email = '{email}'\"",
+            "matched": "f\"SELECT id FROM users WHERE email = '{email}"
+          }
+        ]
+      }
+    },
+    "topFindings": [
+      {
+        "patternId": "sqli-2",
+        "category": "sqli",
+        "severity": "critical",
+        "label": "f-string or template literal SQL injection",
+        "file": "web/app.py",
+        "line": 77,
+        "snippet": "q = f\"SELECT id, username, role FROM users WHERE username = '{username}' AND password = '{password}' LIMIT 1;\"",
+        "matched": "f\"SELECT id, username, role FROM users WHERE username = '{username}' AND passwor"
+      },
+      {
+        "patternId": "sqli-2",
+        "category": "sqli",
+        "severity": "critical",
+        "label": "f-string or template literal SQL injection",
+        "file": "web/app.py",
+        "line": 109,
+        "snippet": "q = f\"SELECT id, first_name, last_name FROM customers WHERE id = '{term}' OR first_name LIKE '%{term}%';\"",
+        "matched": "f\"SELECT id, first_name, last_name FROM customers WHERE id = '{term}' OR first_n"
+      },
+      {
+        "patternId": "sqli-2",
+        "category": "sqli",
+        "severity": "critical",
+        "label": "f-string or template literal SQL injection",
+        "file": "web/app.py",
+        "line": 125,
+        "snippet": "update_q = f\"UPDATE users SET full_info = '{new_info}' WHERE id = '{uid}';\"",
+        "matched": "f\"UPDATE users SET full_info = '{new_info}' WHERE id = '{uid}';\"\r\n        \r\n    "
+      },
+      {
+        "patternId": "sqli-2",
+        "category": "sqli",
+        "severity": "critical",
+        "label": "f-string or template literal SQL injection",
+        "file": "web/app.py",
+        "line": 144,
+        "snippet": "q = f\"SELECT id, username, role, full_info, email, cc_number, api_key FROM users WHERE id = '{uid}';\"",
+        "matched": "f\"SELECT id, username, role, full_info, email, cc_number, api_key FROM users WHE"
+      },
+      {
+        "patternId": "sqli-2",
+        "category": "sqli",
+        "severity": "critical",
+        "label": "f-string or template literal SQL injection",
+        "file": "web/app.py",
+        "line": 171,
+        "snippet": "q = f\"SELECT id FROM users WHERE email = '{email}'\"",
+        "matched": "f\"SELECT id FROM users WHERE email = '{email}"
+      },
+      {
+        "patternId": "sqli-2",
+        "category": "sqli",
+        "severity": "critical",
+        "label": "f-string or template literal SQL injection",
+        "file": "web/app.py",
+        "line": 183,
+        "snippet": "q = f\"SELECT id, username, full_info, email, cc_number, api_key FROM users WHERE id = '{uid}';\"",
+        "matched": "f\"SELECT id, username, full_info, email, cc_number, api_key FROM users WHERE id "
+      }
+    ],
+    "filesScanned": 2
+  },
+  "schemas": {
+    "totalModels": 0,
+    "models": [],
+    "modelsWithSensitiveFields": [],
+    "sensitiveFieldCount": 0,
+    "fieldIndex": {
+      "bySensitiveField": {}
+    },
+    "filesScanned": 2
+  },
+  "apiSurface": {
+    "specFound": false,
+    "specFile": null,
+    "specSummary": null,
+    "note": "No OpenAPI/Swagger spec found — AI will infer attack surface from source code only"
+  },
+  "gitDiff": {
+    "gitAvailable": true,
+    "commitHash": "f1c5b14",
+    "changedFiles": [],
+    "sensitiveChanged": [],
+    "changedFileCount": 0,
+    "sensitiveFileCount": 0,
+    "recommendation": "full",
+    "rationale": "Security-sensitive files modified or no git history — run full scan"
+  },
+  "containerInfo": {
+    "hasDockerfile": false,
+    "hasDockerCompose": true,
+    "dockerfile": null,
+    "dockerCompose": {
+      "services": [
+        "db",
+        "web"
+      ],
+      "allImages": [
+        "mysql:5.7"
+      ],
+      "allPorts": [
+        "3306:3306",
+        "5000:5000"
+      ],
+      "allEnvKeys": [
+        "MYSQL_ROOT_PASSWORD",
+        "MYSQL_DATABASE",
+        "MYSQL_USER",
+        "MYSQL_PASSWORD",
+        "FLASK_ENV",
+        "FLASK_RUN_HOST",
+        "DB_HOST",
+        "DB_USER",
+        "DB_PASS",
+        "DB_NAME",
+        "SHOW_ERRORS"
+      ],
+      "networks": [
+        "sqlinet"
+      ],
+      "networksDetail": [
+        {
+          "name": "sqlinet",
+          "actualName": null,
+          "external": false
+        }
+      ],
+      "servicesDetail": [
+        {
+          "name": "db",
+          "image": "mysql:5.7",
+          "build": null,
+          "ports": [
+            "3306:3306"
+          ],
+          "networks": [
+            "sqlinet"
+          ],
+          "depends_on": []
+        },
+        {
+          "name": "web",
+          "image": null,
+          "build": "./web",
+          "ports": [
+            "5000:5000"
+          ],
+          "networks": [
+            "sqlinet"
+          ],
+          "depends_on": [
+            "db"
+          ]
+        }
+      ]
+    },
+    "composeFile": "compose.yaml",
+    "composeDir": "."
+  },
+  "attackSurfaceSummary": {
+    "totalEndpoints": 16,
+    "highRiskEndpoints": 2,
+    "classificationStats": {
+      "general": 6,
+      "auth": 6,
+      "export": 2,
+      "admin": 2,
+      "missing_admin": 2
+    },
+    "dangerousPatterns": {
+      "total": 6,
+      "bySeverity": {
+        "critical": 6,
+        "high": 0,
+        "medium": 0
+      },
+      "categories": [
+        "sqli"
+      ]
+    },
+    "schemaSummary": {
+      "totalModels": 0,
+      "sensitiveFieldCount": 0,
+      "modelsWithSensitiveFields": 0
+    },
+    "hasSwaggerSpec": false,
+    "scanRecommendation": "full",
+    "isContainerized": true
+  }
+}
