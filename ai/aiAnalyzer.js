@@ -136,6 +136,10 @@ const MANUAL_TEST_RELEVANT_FLAGS = [
 
 const DEFAULT_MANUAL_TEST_BATCH_SIZE = 4;
 const DEFAULT_MANUAL_TEST_BATCH_DELAY_MS = 5000;
+const DEFAULT_MANUAL_TEST_MAX_OUTPUT_TOKENS = 8192;
+const MANUAL_TEST_CODE_EVIDENCE_LIMIT = 2;
+const MANUAL_TEST_SCHEMA_LIMIT = 6;
+const MANUAL_TEST_SNIPPET_LIMIT = 220;
 
 function getPositiveIntegerEnv(name, fallback) {
   const value = Number.parseInt(process.env[name] ?? '', 10);
@@ -155,6 +159,12 @@ function normalizeManualTestIds(testCases) {
     ...tc,
     id: `TC-AI-${String(index + 1).padStart(3, '0')}`,
   }));
+}
+
+function truncateText(value, maxLength = MANUAL_TEST_SNIPPET_LIMIT) {
+  if (value == null) return value;
+  const text = String(value).replace(/\s+/g, ' ').trim();
+  return text.length > maxLength ? `${text.slice(0, maxLength - 3)}...` : text;
 }
 
 function isManualTestRelevantEndpoint(route) {
@@ -187,7 +197,7 @@ function compactEndpoint(ep) {
     classification: ep.classification,
     file: ep.file,
     line: ep.line,
-    snippet: ep.snippet,
+    snippet: truncateText(ep.snippet),
     security: ep.security ? {
       middleware: ep.security.middleware ?? [],
       hasAuthMiddleware: ep.security.hasAuthMiddleware ?? false,
@@ -199,6 +209,86 @@ function compactEndpoint(ep) {
       expectedRoles: ep.security.expectedRoles ?? {},
     } : undefined,
   };
+}
+
+function tokenizeForRelevance(...values) {
+  const stopWords = new Set([
+    'api', 'v1', 'v2', 'get', 'post', 'put', 'patch', 'delete', 'id',
+    'route', 'routes', 'controller', 'controllers', 'service', 'services',
+  ]);
+  return new Set(values
+    .filter(Boolean)
+    .join(' ')
+    .replace(/([a-z])([A-Z])/g, '$1 $2')
+    .toLowerCase()
+    .split(/[^a-z0-9]+/)
+    .filter(token => token.length >= 3 && !stopWords.has(token)));
+}
+
+function hasAnyToken(text, tokens) {
+  const normalized = String(text ?? '').toLowerCase();
+  for (const token of tokens) {
+    if (normalized.includes(token)) return true;
+  }
+  return false;
+}
+
+function routeBatchTokens(endpointBatch) {
+  return tokenizeForRelevance(...endpointBatch.flatMap(route => [
+    route.path,
+    route.file,
+    ...(route.classification ?? []),
+    ...(route.security?.riskSignals ?? []),
+  ]));
+}
+
+function relevantCodeEvidenceForBatch(context, endpointBatch) {
+  const flags = new Set(endpointBatch.flatMap(route => route.classification ?? []));
+  const tokens = routeBatchTokens(endpointBatch);
+  const byCategory = context.codePatterns?.byCategory ?? {};
+
+  const categories = new Set();
+  if (flags.has('auth') || flags.has('missing_auth') || flags.has('authz') || flags.has('missing_admin')) {
+    categories.add('auth_bypass');
+  }
+  if (flags.has('auth')) categories.add('jwt');
+  if (flags.has('fileUpload')) categories.add('path_traversal');
+  if (endpointBatch.some(route => ['POST', 'PUT', 'PATCH'].includes(route.method))) {
+    categories.add('mass_assign');
+  }
+
+  const result = {};
+  for (const category of categories) {
+    const findings = byCategory[category]?.findings ?? [];
+    const relevant = findings
+      .filter(finding => hasAnyToken(`${finding.file} ${finding.label} ${finding.snippet}`, tokens))
+      .slice(0, MANUAL_TEST_CODE_EVIDENCE_LIMIT);
+    result[category] = relevant.length
+      ? relevant
+      : findings.slice(0, MANUAL_TEST_CODE_EVIDENCE_LIMIT);
+  }
+  return result;
+}
+
+function relevantSchemaForBatch(context, endpointBatch) {
+  const tokens = routeBatchTokens(endpointBatch);
+  const models = (context.schemas?.modelsWithSensitiveFields ?? [])
+    .map(compactSchemaModel);
+
+  const directMatches = models.filter(model => hasAnyToken([
+    model.name,
+    model.file,
+    ...(model.sensitiveFields ?? []).map(item => item.field),
+    ...(model.ownershipFields ?? []),
+    ...(model.massAssignmentTargets ?? []),
+  ].join(' '), tokens));
+
+  const fallbackMatches = models.filter(model =>
+    (model.ownershipFields ?? []).length > 0 || (model.massAssignmentTargets ?? []).length > 0
+  );
+
+  const selected = directMatches.length ? directMatches : fallbackMatches;
+  return selected.slice(0, MANUAL_TEST_SCHEMA_LIMIT);
 }
 
 function compactSchemaModel(model) {
@@ -450,17 +540,12 @@ export async function generateManualTestCases(context, options = {}) {
     };
   }
 
-  const jwtEvidence = context.codePatterns?.byCategory?.jwt?.findings ?? [];
-  const idorEvidence = context.codePatterns?.byCategory?.auth_bypass?.findings ?? [];
-  const uploadEvidence = context.codePatterns?.byCategory?.path_traversal?.findings ?? [];
-  const massAssignmentEvidence = context.codePatterns?.byCategory?.mass_assign?.findings ?? [];
-  const authBypassEvidence = context.codePatterns?.byCategory?.auth_bypass?.findings ?? [];
-  const sensitiveModels = (context.schemas?.modelsWithSensitiveFields ?? []).map(compactSchemaModel);
-
   const batchSize = options.batchSize
     ?? getPositiveIntegerEnv('MANUAL_TEST_BATCH_SIZE', DEFAULT_MANUAL_TEST_BATCH_SIZE);
   const batchDelayMs = options.batchDelayMs
     ?? getPositiveIntegerEnv('MANUAL_TEST_BATCH_DELAY_MS', DEFAULT_MANUAL_TEST_BATCH_DELAY_MS);
+  const maxOutputTokens = options.maxOutputTokens
+    ?? getPositiveIntegerEnv('MANUAL_TEST_MAX_OUTPUT_TOKENS', DEFAULT_MANUAL_TEST_MAX_OUTPUT_TOKENS);
   const endpointBatches = chunkArray(endpointsForAI, batchSize);
   const allTestCases = [];
   const batchMeta = [];
@@ -468,6 +553,10 @@ export async function generateManualTestCases(context, options = {}) {
   console.log(`[AI] Gemini Call #2: Generating manual test cases in ${endpointBatches.length} batch(es), ${batchSize} endpoints/batch...`);
 
   for (const [batchIndex, endpointBatch] of endpointBatches.entries()) {
+    const batchCodeEvidence = relevantCodeEvidenceForBatch(context, endpointBatch);
+    const batchSchemas = relevantSchemaForBatch(context, endpointBatch);
+    const batchEvidenceCount = Object.values(batchCodeEvidence)
+      .reduce((sum, findings) => sum + (findings?.length ?? 0), 0);
     const payload = {
       batch: {
         index: batchIndex + 1,
@@ -488,14 +577,9 @@ export async function generateManualTestCases(context, options = {}) {
       schemaContext: {
         totalModels: context.schemas?.totalModels ?? 0,
         sensitiveFieldCount: context.schemas?.sensitiveFieldCount ?? 0,
-        modelsWithSensitiveFields: sensitiveModels,
+        selectedModelsWithSensitiveFields: batchSchemas,
       },
-      codeEvidence: {
-        jwt: jwtEvidence,
-        authBypass: authBypassEvidence.length ? authBypassEvidence : idorEvidence,
-        fileUpload: uploadEvidence,
-        massAssignment: massAssignmentEvidence,
-      },
+      codeEvidence: batchCodeEvidence,
       classificationStats: routes.classificationStats ?? {},
     };
 
@@ -512,16 +596,19 @@ Generate test cases for:
 - JWT logic flaws only when jwt code evidence or auth endpoints exist.
 - Race condition only when endpoint/business context suggests repeatable state change, credit, balance, quota, invite, order, or payment behavior.
 
-Do not invent endpoints. For each test case, set why_generated and evidence using endpoint.security, classification, codeEvidence, and schemaContext. Generate all high-value manual test cases justified by this batch. Return complete JSON only.`;
+Do not invent endpoints. Generate at most one strongest manual test per endpoint unless two distinct vulnerability classes are clearly justified. Keep why_generated, http_request, expected_if_vulnerable, and remediation_hint concise. Return complete JSON only.`;
 
-    console.log(`[AI] Gemini Call #2.${batchIndex + 1}/${endpointBatches.length}: Manual tests for ${endpointBatch.length} endpoint(s)...`);
+    console.log(`[AI] Gemini Call #2.${batchIndex + 1}/${endpointBatches.length}: Manual tests for ${endpointBatch.length} endpoint(s), ${batchSchemas.length} schema model(s), ${batchEvidenceCount} code evidence item(s)...`);
     const result = await callGeminiWithRetry(prompt, MANUAL_TESTS_SYSTEM, {
       apiKey: options.apiKey,
       temperature: 0.2,
-      maxOutputTokens: 8192,
+      maxOutputTokens,
     });
 
     logUsage(`Call#2.${batchIndex + 1}-ManualTests`, result.usageMetadata);
+    if (result.finishReason === 'MAX_TOKENS') {
+      throw new Error(`Manual test batch ${batchIndex + 1}/${endpointBatches.length} exceeded Gemini output limit. Reduce MANUAL_TEST_BATCH_SIZE or tighten the prompt.`);
+    }
     const parsed = parseJson(result.text);
     const testCases = parsed.manual_test_cases ?? parsed.test_cases ?? [];
     allTestCases.push(...testCases);
