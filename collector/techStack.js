@@ -113,6 +113,7 @@ const SKIP_DIRS = new Set([
   'coverage', '.cache', 'tmp', 'temp',
 ]);
 
+
 const COMPOSE_FILENAMES = ['docker-compose.yml', 'docker-compose.yaml', 'compose.yaml', 'compose.yml'];
 
 const BACKEND_NAME_RE = /(^|[-_])(api|server|backend|gateway|service|app)([-_]|$)|^(api|server|backend|gateway|app|web)$/i;
