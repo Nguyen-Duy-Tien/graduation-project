@@ -292,12 +292,13 @@ export async function generateManualTestCasesSingleRequest(context, options = {}
   const { routes } = context;
 
   // Chỉ gửi endpoints có flag liên quan để prompt không quá dài
-  const allEndpoints = (routes.routes ?? [])
+  const relevantEndpoints = (routes.routes ?? [])
+    .filter(isManualTestRelevantEndpoint)
     .sort((a, b) => endpointRiskScore(b) - endpointRiskScore(a));
 
   // Nếu không có endpoint nào relevant, thêm sample từ highRiskRoutes
-  const endpointsForAI = allEndpoints.length > 0
-    ? allEndpoints
+  const endpointsForAI = relevantEndpoints.length > 0
+    ? relevantEndpoints
     : (routes.highRiskRoutes ?? []);
 
   if (endpointsForAI.length === 0) {
@@ -427,11 +428,12 @@ export function buildToolConfig(aiResult, context) {
 
 export async function generateManualTestCases(context, options = {}) {
   const { routes } = context;
-  const allEndpoints = (routes.routes ?? [])
+  const relevantEndpoints = (routes.routes ?? [])
+    .filter(isManualTestRelevantEndpoint)
     .sort((a, b) => endpointRiskScore(b) - endpointRiskScore(a));
 
-  const endpointsForAI = allEndpoints.length > 0
-    ? allEndpoints
+  const endpointsForAI = relevantEndpoints.length > 0
+    ? relevantEndpoints
     : (routes.highRiskRoutes ?? []);
 
   if (endpointsForAI.length === 0) {
@@ -541,7 +543,7 @@ Do not invent endpoints. For each test case, set why_generated and evidence usin
     _meta: {
       generatedBy: 'aiAnalyzer/gemini-2.5-flash',
       strategy: 'batched-manual-test-generation',
-      endpointScope: 'all-routes',
+      endpointScope: 'manual-test-relevant-flags',
       batchSize,
       totalBatches: endpointBatches.length,
       endpointCount: endpointsForAI.length,
