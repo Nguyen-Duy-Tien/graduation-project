@@ -28,7 +28,7 @@ pipeline {
     parameters {
         string(
             name: 'TARGET_PROJECT_DIR',
-            defaultValue: 'examples/sqli',
+            defaultValue: 'benchmarks/juice-shop',
             description: 'Đường dẫn (tương đối với WORKSPACE) tới thư mục project mục tiêu cần quét.'
         )
         booleanParam(
