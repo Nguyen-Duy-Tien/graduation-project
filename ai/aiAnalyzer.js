@@ -134,6 +134,29 @@ const MANUAL_TEST_RELEVANT_FLAGS = [
   'missing_ownership_check',
 ];
 
+const DEFAULT_MANUAL_TEST_BATCH_SIZE = 8;
+const DEFAULT_MANUAL_TEST_BATCH_DELAY_MS = 5000;
+
+function getPositiveIntegerEnv(name, fallback) {
+  const value = Number.parseInt(process.env[name] ?? '', 10);
+  return Number.isFinite(value) && value > 0 ? value : fallback;
+}
+
+function chunkArray(items, size) {
+  const chunks = [];
+  for (let i = 0; i < items.length; i += size) {
+    chunks.push(items.slice(i, i + size));
+  }
+  return chunks;
+}
+
+function normalizeManualTestIds(testCases) {
+  return testCases.map((tc, index) => ({
+    ...tc,
+    id: `TC-AI-${String(index + 1).padStart(3, '0')}`,
+  }));
+}
+
 function isManualTestRelevantEndpoint(route) {
   return route.classification?.some(c => MANUAL_TEST_RELEVANT_FLAGS.includes(c))
     || route.security?.riskSignals?.length > 0;
@@ -265,34 +288,30 @@ Based on this context, produce the tool_config JSON. Remember: if JWT patterns a
  * @param {object} options  — { apiKey }
  * @returns {Promise<object>}  — { manual_test_cases: [...] }
  */
-export async function generateManualTestCases(context, options = {}) {
+export async function generateManualTestCasesSingleRequest(context, options = {}) {
   const { routes } = context;
 
   // Chỉ gửi endpoints có flag liên quan để prompt không quá dài
-  const relevantEndpoints = (routes.routes ?? []).filter(r =>
-    isManualTestRelevantEndpoint(r)
-  )
-    .sort((a, b) => endpointRiskScore(b) - endpointRiskScore(a))
-    .slice(0, 30);
+  const allEndpoints = (routes.routes ?? [])
+    .sort((a, b) => endpointRiskScore(b) - endpointRiskScore(a));
 
   // Nếu không có endpoint nào relevant, thêm sample từ highRiskRoutes
-  const endpointsForAI = relevantEndpoints.length > 0
-    ? relevantEndpoints
-    : (routes.highRiskRoutes ?? []).slice(0, 20);
+  const endpointsForAI = allEndpoints.length > 0
+    ? allEndpoints
+    : (routes.highRiskRoutes ?? []);
 
   if (endpointsForAI.length === 0) {
     console.log('[AI] Gemini Call #2: No relevant endpoints found — generating generic test cases');
   }
 
   // Kèm code pattern evidence để AI có context
-  const jwtEvidence    = context.codePatterns?.byCategory?.jwt?.findings?.slice(0, 3) ?? [];
-  const idorEvidence   = context.codePatterns?.byCategory?.['auth_bypass']?.findings?.slice(0, 3) ?? [];
-  const uploadEvidence = context.codePatterns?.byCategory?.['path_traversal']?.findings?.slice(0, 3) ?? [];
-  const massAssignmentEvidence = context.codePatterns?.byCategory?.mass_assign?.findings?.slice(0, 5) ?? [];
-  const authBypassEvidence = context.codePatterns?.byCategory?.auth_bypass?.findings?.slice(0, 5) ?? [];
+  const jwtEvidence    = context.codePatterns?.byCategory?.jwt?.findings ?? [];
+  const idorEvidence   = context.codePatterns?.byCategory?.['auth_bypass']?.findings ?? [];
+  const uploadEvidence = context.codePatterns?.byCategory?.['path_traversal']?.findings ?? [];
+  const massAssignmentEvidence = context.codePatterns?.byCategory?.mass_assign?.findings ?? [];
+  const authBypassEvidence = context.codePatterns?.byCategory?.auth_bypass?.findings ?? [];
   const sensitiveModels = (context.schemas?.modelsWithSensitiveFields ?? [])
-    .map(compactSchemaModel)
-    .slice(0, 12);
+    .map(compactSchemaModel);
 
   const payload = {
     techStack: {
@@ -333,7 +352,7 @@ Generate test cases for:
 - JWT logic flaws only when jwt code evidence or auth endpoints exist.
 - Race condition only when endpoint/business context suggests repeatable state change, credit, balance, quota, invite, order, or payment behavior.
 
-Do not invent endpoints. For each test case, set why_generated and evidence using endpoint.security, classification, codeEvidence, and schemaContext. Create at most 12 high-value test cases.`;
+Do not invent endpoints. For each test case, set why_generated and evidence using endpoint.security, classification, codeEvidence, and schemaContext. Generate all high-value manual test cases justified by the provided endpoints. Return complete JSON only.`;
 
   console.log('[AI] Gemini Call #2: Generating manual test cases...');
   const result = await callGeminiWithRetry(prompt, MANUAL_TESTS_SYSTEM, {
@@ -403,6 +422,132 @@ export function buildToolConfig(aiResult, context) {
       reason:  tools.nikto?.reason  ?? '',
     },
     priorityFindings: aiResult.priority_findings ?? [],
+  };
+}
+
+export async function generateManualTestCases(context, options = {}) {
+  const { routes } = context;
+  const allEndpoints = (routes.routes ?? [])
+    .sort((a, b) => endpointRiskScore(b) - endpointRiskScore(a));
+
+  const endpointsForAI = allEndpoints.length > 0
+    ? allEndpoints
+    : (routes.highRiskRoutes ?? []);
+
+  if (endpointsForAI.length === 0) {
+    return {
+      _meta: {
+        generatedBy: 'aiAnalyzer/gemini-2.5-flash',
+        strategy: 'batched-manual-test-generation',
+        batchSize: 0,
+        totalBatches: 0,
+        endpointCount: 0,
+        batchMeta: [],
+      },
+      manual_test_cases: [],
+    };
+  }
+
+  const jwtEvidence = context.codePatterns?.byCategory?.jwt?.findings ?? [];
+  const idorEvidence = context.codePatterns?.byCategory?.auth_bypass?.findings ?? [];
+  const uploadEvidence = context.codePatterns?.byCategory?.path_traversal?.findings ?? [];
+  const massAssignmentEvidence = context.codePatterns?.byCategory?.mass_assign?.findings ?? [];
+  const authBypassEvidence = context.codePatterns?.byCategory?.auth_bypass?.findings ?? [];
+  const sensitiveModels = (context.schemas?.modelsWithSensitiveFields ?? []).map(compactSchemaModel);
+
+  const batchSize = options.batchSize
+    ?? getPositiveIntegerEnv('MANUAL_TEST_BATCH_SIZE', DEFAULT_MANUAL_TEST_BATCH_SIZE);
+  const batchDelayMs = options.batchDelayMs
+    ?? getPositiveIntegerEnv('MANUAL_TEST_BATCH_DELAY_MS', DEFAULT_MANUAL_TEST_BATCH_DELAY_MS);
+  const endpointBatches = chunkArray(endpointsForAI, batchSize);
+  const allTestCases = [];
+  const batchMeta = [];
+
+  console.log(`[AI] Gemini Call #2: Generating manual test cases in ${endpointBatches.length} batch(es), ${batchSize} endpoints/batch...`);
+
+  for (const [batchIndex, endpointBatch] of endpointBatches.entries()) {
+    const payload = {
+      batch: {
+        index: batchIndex + 1,
+        total: endpointBatches.length,
+        endpointCount: endpointBatch.length,
+      },
+      techStack: {
+        language: context.techStack?.language,
+        framework: context.techStack?.framework,
+        features: context.techStack?.features,
+      },
+      endpointSelectionPolicy: {
+        source: 'automated route scanner, middleware analyzer, code pattern scanner, and schema scanner',
+        relevantFlags: MANUAL_TEST_RELEVANT_FLAGS,
+        note: 'These are candidates for manual verification, not confirmed vulnerabilities.',
+      },
+      endpoints: endpointBatch.map(compactEndpoint),
+      schemaContext: {
+        totalModels: context.schemas?.totalModels ?? 0,
+        sensitiveFieldCount: context.schemas?.sensitiveFieldCount ?? 0,
+        modelsWithSensitiveFields: sensitiveModels,
+      },
+      codeEvidence: {
+        jwt: jwtEvidence,
+        authBypass: authBypassEvidence.length ? authBypassEvidence : idorEvidence,
+        fileUpload: uploadEvidence,
+        massAssignment: massAssignmentEvidence,
+      },
+      classificationStats: routes.classificationStats ?? {},
+    };
+
+    const prompt = `Generate detailed manual penetration test cases for this batch of web application endpoints. Focus on vulnerabilities that automated tools cannot detect:
+
+\`\`\`json
+${JSON.stringify(payload, null, 2)}
+\`\`\`
+
+Generate test cases for:
+- IDOR/BOLA when an endpoint has idor_candidate or missing_ownership_check. Use two normal users and object IDs.
+- BFLA/Auth_Bypass when a state-changing endpoint has authz, missing_auth, missing_admin, or role expectations showing anonymous/user should be rejected.
+- Mass_Assignment when POST/PUT/PATCH endpoints align with sensitive schema fields or massAssignment code evidence. Include payload fields from schemaContext.massAssignmentTargets.
+- JWT logic flaws only when jwt code evidence or auth endpoints exist.
+- Race condition only when endpoint/business context suggests repeatable state change, credit, balance, quota, invite, order, or payment behavior.
+
+Do not invent endpoints. For each test case, set why_generated and evidence using endpoint.security, classification, codeEvidence, and schemaContext. Generate all high-value manual test cases justified by this batch. Return complete JSON only.`;
+
+    console.log(`[AI] Gemini Call #2.${batchIndex + 1}/${endpointBatches.length}: Manual tests for ${endpointBatch.length} endpoint(s)...`);
+    const result = await callGeminiWithRetry(prompt, MANUAL_TESTS_SYSTEM, {
+      apiKey: options.apiKey,
+      temperature: 0.2,
+      maxOutputTokens: 8192,
+    });
+
+    logUsage(`Call#2.${batchIndex + 1}-ManualTests`, result.usageMetadata);
+    const parsed = parseJson(result.text);
+    const testCases = parsed.manual_test_cases ?? parsed.test_cases ?? [];
+    allTestCases.push(...testCases);
+    batchMeta.push({
+      batch: batchIndex + 1,
+      endpoints: endpointBatch.length,
+      generatedTests: testCases.length,
+      finishReason: result.finishReason,
+      usageMetadata: result.usageMetadata,
+    });
+
+    if (batchIndex < endpointBatches.length - 1 && batchDelayMs > 0) {
+      console.log(`[WAIT] Waiting ${batchDelayMs}ms before next manual-test batch...`);
+      await sleep(batchDelayMs);
+    }
+  }
+
+  return {
+    _meta: {
+      generatedBy: 'aiAnalyzer/gemini-2.5-flash',
+      strategy: 'batched-manual-test-generation',
+      endpointScope: 'all-routes',
+      batchSize,
+      totalBatches: endpointBatches.length,
+      endpointCount: endpointsForAI.length,
+      batchMeta,
+    },
+    manual_test_cases: normalizeManualTestIds(allTestCases),
   };
 }
 
