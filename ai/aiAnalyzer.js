@@ -134,7 +134,7 @@ const MANUAL_TEST_RELEVANT_FLAGS = [
   'missing_ownership_check',
 ];
 
-const DEFAULT_MANUAL_TEST_BATCH_SIZE = 6;
+const DEFAULT_MANUAL_TEST_BATCH_SIZE = 4;
 const DEFAULT_MANUAL_TEST_BATCH_DELAY_MS = 5000;
 
 function getPositiveIntegerEnv(name, fallback) {
