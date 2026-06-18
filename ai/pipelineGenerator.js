@@ -15,6 +15,7 @@ import {
   readFileSync, writeFileSync, mkdirSync, existsSync, chmodSync,
 } from 'fs';
 import { join, resolve, isAbsolute } from 'path';
+import yaml from 'js-yaml';
 
 import { SAST_TOOLS, DAST_TOOLS } from '../tools/index.js';
 import { pickTargetService }      from '../runtime/servicePicker.js';
@@ -64,6 +65,80 @@ function isToolConfigValid(cfg) {
   // Phải có ít nhất 1 tool enabled
   return ['semgrep', 'bandit', 'trivy', 'zap', 'nuclei', 'nikto']
     .some(k => cfg[k]?.enabled === true);
+}
+
+const ROOT_COMPOSE_FILENAMES = ['docker-compose.yml', 'docker-compose.yaml', 'compose.yaml', 'compose.yml'];
+
+function parseComposeForRuntime(content) {
+  let parsed;
+  try {
+    parsed = yaml.load(content);
+  } catch {
+    return null;
+  }
+
+  const services = Object.entries(parsed?.services ?? {});
+  if (services.length === 0) return null;
+
+  const allImages = [];
+  const allPorts = [];
+  const servicesDetail = [];
+  const networks = Object.keys(parsed?.networks ?? {});
+  const networksDetail = Object.entries(parsed?.networks ?? {}).map(([name, cfg]) => ({
+    name,
+    actualName: typeof cfg?.name === 'string' ? cfg.name : null,
+    external: cfg?.external === true || cfg?.external?.external === true,
+  }));
+
+  for (const [name, svc] of services) {
+    if (svc.image) allImages.push(svc.image);
+    const ports = (svc.ports ?? []).map(p => typeof p === 'string' ? p : String(p));
+    allPorts.push(...ports);
+    servicesDetail.push({
+      name,
+      image:      svc.image ?? null,
+      build:      svc.build ?? null,
+      ports,
+      networks:   Array.isArray(svc.networks)
+        ? svc.networks
+        : svc.networks && typeof svc.networks === 'object' ? Object.keys(svc.networks) : [],
+      depends_on: Array.isArray(svc.depends_on)
+        ? svc.depends_on
+        : svc.depends_on ? Object.keys(svc.depends_on) : [],
+    });
+  }
+
+  return {
+    services: services.map(([name]) => name),
+    allImages,
+    allPorts,
+    allEnvKeys: [],
+    networks,
+    networksDetail,
+    servicesDetail,
+  };
+}
+
+function collectRootComposeFallback(targetDir) {
+  for (const filename of ROOT_COMPOSE_FILENAMES) {
+    const path = join(targetDir, filename);
+    if (!existsSync(path)) continue;
+
+    const dockerCompose = parseComposeForRuntime(readFileSync(path, 'utf8'));
+    if (!dockerCompose) continue;
+
+    console.warn(`[pipelineGenerator] context missing Docker Compose; recovered ${filename} from targetDir`);
+    return {
+      hasDockerfile: existsSync(join(targetDir, 'Dockerfile')),
+      hasDockerCompose: true,
+      dockerfile: null,
+      dockerCompose,
+      composeFile: filename,
+      composeDir: '.',
+    };
+  }
+
+  return null;
 }
 
 // ── Script renderers ──────────────────────────────────────────────────────────
@@ -177,7 +252,9 @@ export function generatePipeline({ contextDir, runtimeDir, targetDir }) {
   };
 
   // runtimeInfo: chọn service từ container info
-  const containerInfo = context.containerInfo ?? {};
+  const containerInfo = context.containerInfo?.hasDockerCompose
+    ? context.containerInfo
+    : (collectRootComposeFallback(resolvedTargetDir) ?? context.containerInfo ?? {});
   const picked = pickTargetService(containerInfo, resolvedTargetDir);
   const runtimeInfo = picked
     ? { ...picked, dastSkipped: false }
