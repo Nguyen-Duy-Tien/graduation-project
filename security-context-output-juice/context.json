@@ -1,7 +1,7 @@
 {
   "_meta": {
     "version": "1.0.0",
-    "collectedAt": "2026-06-16T09:40:27.969Z",
+    "collectedAt": "2026-06-18T09:44:27.427Z",
     "projectRoot": "C:\\Users\\Admin\\Documents\\do an\\graduation-project\\benchmarks\\juice-shop",
     "module": "context-collector-week7"
   },
@@ -105,7 +105,7 @@
     "depFilePath": "package.json",
     "candidateScore": 90,
     "isMonorepo": true,
-    "collectedAt": "2026-06-16T09:40:13.103Z",
+    "collectedAt": "2026-06-18T09:44:14.739Z",
     "serviceCandidates": [
       {
         "relativeRoot": ".",
@@ -15821,6 +15821,29 @@
         "massAssignmentTargets": []
       },
       {
+        "name": "WelcomeComponent",
+        "line": 19,
+        "fields": [
+          "dialog",
+          "configurationService",
+          "cookieService",
+          "welcomeBannerStatusCookieKey",
+          "welcomeBannerStatus",
+          "next",
+          "config",
+          "minWidth",
+          "width",
+          "position",
+          "top",
+          "error"
+        ],
+        "schemaType": "class",
+        "file": "frontend/src/app/welcome/welcome.component.ts",
+        "sensitiveFields": [],
+        "ownershipFields": [],
+        "massAssignmentTargets": []
+      },
+      {
         "name": "Web3SandboxModule",
         "line": 37,
         "fields": [
@@ -15945,6 +15968,65 @@
         "massAssignmentTargets": [
           "code",
           "contractBytecode"
+        ]
+      },
+      {
+        "name": "UserDetailsComponent",
+        "line": 25,
+        "fields": [
+          "dialogData",
+          "userService",
+          "user",
+          "next",
+          "error"
+        ],
+        "schemaType": "class",
+        "file": "frontend/src/app/user-details/user-details.component.ts",
+        "sensitiveFields": [],
+        "ownershipFields": [],
+        "massAssignmentTargets": []
+      },
+      {
+        "name": "TwoFactorAuthEnterComponent",
+        "line": 35,
+        "fields": [
+          "twoFactorAuthService",
+          "cookieService",
+          "userService",
+          "router",
+          "ngZone",
+          "twoFactorForm",
+          "UntypedFormGroup",
+          "token",
+          "errored",
+          "fields",
+          "TokenEnterFormFields",
+          "next",
+          "expires",
+          "isLoggedIn",
+          "true",
+          "error"
+        ],
+        "schemaType": "class",
+        "file": "frontend/src/app/two-factor-auth-enter/two-factor-auth-enter.component.ts",
+        "sensitiveFields": [
+          {
+            "field": "token",
+            "tags": [
+              "token"
+            ]
+          },
+          {
+            "field": "TokenEnterFormFields",
+            "tags": [
+              "token"
+            ]
+          }
+        ],
+        "ownershipFields": [],
+        "massAssignmentTargets": [
+          "token",
+          "TokenEnterFormFields"
         ]
       },
       {
@@ -16078,29 +16160,6 @@
         ]
       },
       {
-        "name": "WelcomeComponent",
-        "line": 19,
-        "fields": [
-          "dialog",
-          "configurationService",
-          "cookieService",
-          "welcomeBannerStatusCookieKey",
-          "welcomeBannerStatus",
-          "next",
-          "config",
-          "minWidth",
-          "width",
-          "position",
-          "top",
-          "error"
-        ],
-        "schemaType": "class",
-        "file": "frontend/src/app/welcome/welcome.component.ts",
-        "sensitiveFields": [],
-        "ownershipFields": [],
-        "massAssignmentTargets": []
-      },
-      {
         "name": "WalletComponent",
         "line": 24,
         "fields": [
@@ -16143,20 +16202,47 @@
         ]
       },
       {
-        "name": "UserDetailsComponent",
-        "line": 25,
+        "name": "TrackResultComponent",
+        "line": 32,
         "fields": [
-          "dialogData",
-          "userService",
-          "user",
-          "next",
-          "error"
+          "route",
+          "trackOrderService",
+          "sanitizer",
+          "displayedColumns",
+          "dataSource",
+          "results",
+          "any",
+          "status",
+          "Status",
+          "orderId",
+          "orderNo",
+          "email",
+          "totalPrice",
+          "products",
+          "eta",
+          "bonus",
+          "data"
         ],
         "schemaType": "class",
-        "file": "frontend/src/app/user-details/user-details.component.ts",
-        "sensitiveFields": [],
+        "file": "frontend/src/app/track-result/track-result.component.ts",
+        "sensitiveFields": [
+          {
+            "field": "email",
+            "tags": [
+              "pii"
+            ]
+          },
+          {
+            "field": "totalPrice",
+            "tags": [
+              "business_value"
+            ]
+          }
+        ],
         "ownershipFields": [],
-        "massAssignmentTargets": []
+        "massAssignmentTargets": [
+          "totalPrice"
+        ]
       },
       {
         "name": "TwoFactorAuthComponent",
@@ -16254,118 +16340,6 @@
         ]
       },
       {
-        "name": "SidenavComponent",
-        "line": 32,
-        "fields": [
-          "administrationService",
-          "challengeService",
-          "ngZone",
-          "io",
-          "userService",
-          "cookieService",
-          "router",
-          "configurationService",
-          "loginGuard",
-          "applicationName",
-          "showGitHubLink",
-          "userEmail",
-          "scoreBoardVisible",
-          "version",
-          "showPrivacySubmenu",
-          "showOrdersSubmenu",
-          "isShowing",
-          "offerScoreBoardTutorial",
-          "sidenavToggle",
-          "next",
-          "error",
-          "key",
-          "name",
-          "challenges",
-          "user",
-          "onToggleSidenav",
-          "config",
-          "payload",
-          "role",
-          "module"
-        ],
-        "schemaType": "class",
-        "file": "frontend/src/app/sidenav/sidenav.component.ts",
-        "sensitiveFields": [
-          {
-            "field": "userEmail",
-            "tags": [
-              "pii"
-            ]
-          },
-          {
-            "field": "role",
-            "tags": [
-              "privilege"
-            ]
-          }
-        ],
-        "ownershipFields": [],
-        "massAssignmentTargets": [
-          "role"
-        ]
-      },
-      {
-        "name": "MockSocket",
-        "line": 27,
-        "fields": [
-          "str",
-          "callback"
-        ],
-        "schemaType": "class",
-        "file": "frontend/src/app/sidenav/sidenav.component.spec.ts",
-        "sensitiveFields": [],
-        "ownershipFields": [],
-        "massAssignmentTargets": []
-      },
-      {
-        "name": "TwoFactorAuthEnterComponent",
-        "line": 35,
-        "fields": [
-          "twoFactorAuthService",
-          "cookieService",
-          "userService",
-          "router",
-          "ngZone",
-          "twoFactorForm",
-          "UntypedFormGroup",
-          "token",
-          "errored",
-          "fields",
-          "TokenEnterFormFields",
-          "next",
-          "expires",
-          "isLoggedIn",
-          "true",
-          "error"
-        ],
-        "schemaType": "class",
-        "file": "frontend/src/app/two-factor-auth-enter/two-factor-auth-enter.component.ts",
-        "sensitiveFields": [
-          {
-            "field": "token",
-            "tags": [
-              "token"
-            ]
-          },
-          {
-            "field": "TokenEnterFormFields",
-            "tags": [
-              "token"
-            ]
-          }
-        ],
-        "ownershipFields": [],
-        "massAssignmentTargets": [
-          "token",
-          "TokenEnterFormFields"
-        ]
-      },
-      {
         "name": "TokenSaleComponent",
         "line": 25,
         "fields": [
@@ -16377,101 +16351,6 @@
         ],
         "schemaType": "class",
         "file": "frontend/src/app/token-sale/token-sale.component.ts",
-        "sensitiveFields": [],
-        "ownershipFields": [],
-        "massAssignmentTargets": []
-      },
-      {
-        "name": "TrackResultComponent",
-        "line": 32,
-        "fields": [
-          "route",
-          "trackOrderService",
-          "sanitizer",
-          "displayedColumns",
-          "dataSource",
-          "results",
-          "any",
-          "status",
-          "Status",
-          "orderId",
-          "orderNo",
-          "email",
-          "totalPrice",
-          "products",
-          "eta",
-          "bonus",
-          "data"
-        ],
-        "schemaType": "class",
-        "file": "frontend/src/app/track-result/track-result.component.ts",
-        "sensitiveFields": [
-          {
-            "field": "email",
-            "tags": [
-              "pii"
-            ]
-          },
-          {
-            "field": "totalPrice",
-            "tags": [
-              "business_value"
-            ]
-          }
-        ],
-        "ownershipFields": [],
-        "massAssignmentTargets": [
-          "totalPrice"
-        ]
-      },
-      {
-        "name": "ScoreBoardComponent",
-        "line": 45,
-        "fields": [
-          "challengeService",
-          "hintService",
-          "configurationService",
-          "sanitizer",
-          "ngZone",
-          "io",
-          "router",
-          "route",
-          "allChallenges",
-          "filteredChallenges",
-          "filterSetting",
-          "FilterSetting",
-          "applicationConfiguration",
-          "null",
-          "lastUnlockedChallengeKey",
-          "isInitialized",
-          "subscriptions",
-          "dataLoaderSubscription",
-          "sort",
-          "transformedChallenges",
-          "hintText",
-          "ChallengeId",
-          "nextHint",
-          "hintsUnlocked",
-          "hintsAvailable",
-          "tagList",
-          "originalDescription",
-          "description",
-          "routerSubscription",
-          "queryParams",
-          "key",
-          "solved",
-          "codingChallengeStatus",
-          "restrictToTutorialChallengesFirst",
-          "index",
-          "challenge",
-          "challengeKey",
-          "hintId",
-          "unlocked",
-          "next",
-          "error"
-        ],
-        "schemaType": "class",
-        "file": "frontend/src/app/score-board/score-board.component.ts",
         "sensitiveFields": [],
         "ownershipFields": [],
         "massAssignmentTargets": []
@@ -16537,201 +16416,6 @@
         "sensitiveFields": [],
         "ownershipFields": [],
         "massAssignmentTargets": []
-      },
-      {
-        "name": "SearchResultComponent",
-        "line": 35,
-        "fields": [
-          "deluxeGuard",
-          "productService",
-          "quantityService",
-          "router",
-          "route",
-          "sanitizer",
-          "ngZone",
-          "io",
-          "cdRef",
-          "elRef",
-          "pageSizeOptions",
-          "resultsLength",
-          "currentPageSize",
-          "static",
-          "emptyState",
-          "products",
-          "quantities",
-          "next",
-          "dataTable",
-          "tableData",
-          "name",
-          "price",
-          "deluxePrice",
-          "id",
-          "image",
-          "description",
-          "entry",
-          "quantity",
-          "dataSource",
-          "paginator",
-          "gridDataSource",
-          "routerSubscription",
-          "challenge",
-          "string",
-          "error",
-          "i",
-          "length",
-          "queryParam",
-          "filter",
-          "searchValue",
-          "gridDataSourceSubscription",
-          "result",
-          "grid",
-          "resizeObserver",
-          "columns",
-          "pageSize",
-          "pageIndex",
-          "challengeName",
-          "module"
-        ],
-        "schemaType": "class",
-        "file": "frontend/src/app/search-result/search-result.component.ts",
-        "sensitiveFields": [
-          {
-            "field": "price",
-            "tags": [
-              "business_value"
-            ]
-          },
-          {
-            "field": "deluxePrice",
-            "tags": [
-              "business_value"
-            ]
-          }
-        ],
-        "ownershipFields": [],
-        "massAssignmentTargets": [
-          "price",
-          "deluxePrice"
-        ]
-      },
-      {
-        "name": "MockSocket",
-        "line": 37,
-        "fields": [
-          "str",
-          "callback"
-        ],
-        "schemaType": "class",
-        "file": "frontend/src/app/search-result/search-result.component.spec.ts",
-        "sensitiveFields": [],
-        "ownershipFields": [],
-        "massAssignmentTargets": []
-      },
-      {
-        "name": "MockActivatedRoute",
-        "line": 47,
-        "fields": [
-          "snapshot",
-          "queryParams",
-          "q",
-          "arg"
-        ],
-        "schemaType": "class",
-        "file": "frontend/src/app/search-result/search-result.component.spec.ts",
-        "sensitiveFields": [],
-        "ownershipFields": [],
-        "massAssignmentTargets": []
-      },
-      {
-        "name": "RegisterComponent",
-        "line": 41,
-        "fields": [
-          "securityQuestionService",
-          "userService",
-          "securityAnswerService",
-          "router",
-          "formSubmitService",
-          "translateService",
-          "snackBar",
-          "snackBarHelperService",
-          "ngZone",
-          "emailControl",
-          "UntypedFormControl",
-          "passwordControl",
-          "repeatPasswordControl",
-          "securityQuestionControl",
-          "securityAnswerControl",
-          "error",
-          "null",
-          "next",
-          "securityQuestions",
-          "user",
-          "email",
-          "password",
-          "passwordRepeat",
-          "securityQuestion",
-          "id",
-          "securityAnswer",
-          "response",
-          "UserId",
-          "answer",
-          "SecurityQuestionId"
-        ],
-        "schemaType": "class",
-        "file": "frontend/src/app/register/register.component.ts",
-        "sensitiveFields": [
-          {
-            "field": "emailControl",
-            "tags": [
-              "pii"
-            ]
-          },
-          {
-            "field": "passwordControl",
-            "tags": [
-              "credential"
-            ]
-          },
-          {
-            "field": "repeatPasswordControl",
-            "tags": [
-              "credential"
-            ]
-          },
-          {
-            "field": "email",
-            "tags": [
-              "pii"
-            ]
-          },
-          {
-            "field": "password",
-            "tags": [
-              "credential"
-            ]
-          },
-          {
-            "field": "passwordRepeat",
-            "tags": [
-              "credential"
-            ]
-          },
-          {
-            "field": "UserId",
-            "tags": [
-              "ownership"
-            ]
-          }
-        ],
-        "ownershipFields": [
-          "UserId"
-        ],
-        "massAssignmentTargets": [
-          "passwordControl",
-          "repeatPasswordControl",
-          "password",
-          "passwordRepeat"
-        ]
       },
       {
         "name": "WalletService",
@@ -17598,56 +17282,183 @@
         "massAssignmentTargets": []
       },
       {
-        "name": "PurchaseBasketComponent",
-        "line": 30,
+        "name": "SidenavComponent",
+        "line": 32,
         "fields": [
-          "deluxeGuard",
-          "basketService",
+          "administrationService",
+          "challengeService",
+          "ngZone",
+          "io",
           "userService",
-          "productService",
-          "snackBarHelperService",
-          "allowEdit",
-          "displayTotal",
-          "totalPrice",
-          "emitTotal",
-          "emitProductCount",
-          "tableColumns",
-          "dataSource",
-          "bonus",
-          "itemTotal",
+          "cookieService",
+          "router",
+          "configurationService",
+          "loginGuard",
+          "applicationName",
+          "showGitHubLink",
           "userEmail",
+          "scoreBoardVisible",
+          "version",
+          "showPrivacySubmenu",
+          "showOrdersSubmenu",
+          "isShowing",
+          "offerScoreBoardTutorial",
+          "sidenavToggle",
           "next",
           "error",
-          "product",
-          "price",
-          "guestBasketItems",
-          "length",
-          "guestProductRequests",
-          "item",
-          "quantity",
-          "result",
-          "deluxePrice",
-          "BasketItem",
-          "id",
-          "existingGuestItem",
-          "ProductId",
-          "newQuantity"
+          "key",
+          "name",
+          "challenges",
+          "user",
+          "onToggleSidenav",
+          "config",
+          "payload",
+          "role",
+          "module"
         ],
         "schemaType": "class",
-        "file": "frontend/src/app/purchase-basket/purchase-basket.component.ts",
+        "file": "frontend/src/app/sidenav/sidenav.component.ts",
         "sensitiveFields": [
-          {
-            "field": "totalPrice",
-            "tags": [
-              "business_value"
-            ]
-          },
           {
             "field": "userEmail",
             "tags": [
               "pii"
             ]
           },
+          {
+            "field": "role",
+            "tags": [
+              "privilege"
+            ]
+          }
+        ],
+        "ownershipFields": [],
+        "massAssignmentTargets": [
+          "role"
+        ]
+      },
+      {
+        "name": "MockSocket",
+        "line": 27,
+        "fields": [
+          "str",
+          "callback"
+        ],
+        "schemaType": "class",
+        "file": "frontend/src/app/sidenav/sidenav.component.spec.ts",
+        "sensitiveFields": [],
+        "ownershipFields": [],
+        "massAssignmentTargets": []
+      },
+      {
+        "name": "ScoreBoardComponent",
+        "line": 45,
+        "fields": [
+          "challengeService",
+          "hintService",
+          "configurationService",
+          "sanitizer",
+          "ngZone",
+          "io",
+          "router",
+          "route",
+          "allChallenges",
+          "filteredChallenges",
+          "filterSetting",
+          "FilterSetting",
+          "applicationConfiguration",
+          "null",
+          "lastUnlockedChallengeKey",
+          "isInitialized",
+          "subscriptions",
+          "dataLoaderSubscription",
+          "sort",
+          "transformedChallenges",
+          "hintText",
+          "ChallengeId",
+          "nextHint",
+          "hintsUnlocked",
+          "hintsAvailable",
+          "tagList",
+          "originalDescription",
+          "description",
+          "routerSubscription",
+          "queryParams",
+          "key",
+          "solved",
+          "codingChallengeStatus",
+          "restrictToTutorialChallengesFirst",
+          "index",
+          "challenge",
+          "challengeKey",
+          "hintId",
+          "unlocked",
+          "next",
+          "error"
+        ],
+        "schemaType": "class",
+        "file": "frontend/src/app/score-board/score-board.component.ts",
+        "sensitiveFields": [],
+        "ownershipFields": [],
+        "massAssignmentTargets": []
+      },
+      {
+        "name": "SearchResultComponent",
+        "line": 35,
+        "fields": [
+          "deluxeGuard",
+          "productService",
+          "quantityService",
+          "router",
+          "route",
+          "sanitizer",
+          "ngZone",
+          "io",
+          "cdRef",
+          "elRef",
+          "pageSizeOptions",
+          "resultsLength",
+          "currentPageSize",
+          "static",
+          "emptyState",
+          "products",
+          "quantities",
+          "next",
+          "dataTable",
+          "tableData",
+          "name",
+          "price",
+          "deluxePrice",
+          "id",
+          "image",
+          "description",
+          "entry",
+          "quantity",
+          "dataSource",
+          "paginator",
+          "gridDataSource",
+          "routerSubscription",
+          "challenge",
+          "string",
+          "error",
+          "i",
+          "length",
+          "queryParam",
+          "filter",
+          "searchValue",
+          "gridDataSourceSubscription",
+          "result",
+          "grid",
+          "resizeObserver",
+          "columns",
+          "pageSize",
+          "pageIndex",
+          "challengeName",
+          "module"
+        ],
+        "schemaType": "class",
+        "file": "frontend/src/app/search-result/search-result.component.ts",
+        "sensitiveFields": [
           {
             "field": "price",
             "tags": [
@@ -17663,9 +17474,127 @@
         ],
         "ownershipFields": [],
         "massAssignmentTargets": [
-          "totalPrice",
           "price",
           "deluxePrice"
+        ]
+      },
+      {
+        "name": "MockSocket",
+        "line": 37,
+        "fields": [
+          "str",
+          "callback"
+        ],
+        "schemaType": "class",
+        "file": "frontend/src/app/search-result/search-result.component.spec.ts",
+        "sensitiveFields": [],
+        "ownershipFields": [],
+        "massAssignmentTargets": []
+      },
+      {
+        "name": "MockActivatedRoute",
+        "line": 47,
+        "fields": [
+          "snapshot",
+          "queryParams",
+          "q",
+          "arg"
+        ],
+        "schemaType": "class",
+        "file": "frontend/src/app/search-result/search-result.component.spec.ts",
+        "sensitiveFields": [],
+        "ownershipFields": [],
+        "massAssignmentTargets": []
+      },
+      {
+        "name": "RegisterComponent",
+        "line": 41,
+        "fields": [
+          "securityQuestionService",
+          "userService",
+          "securityAnswerService",
+          "router",
+          "formSubmitService",
+          "translateService",
+          "snackBar",
+          "snackBarHelperService",
+          "ngZone",
+          "emailControl",
+          "UntypedFormControl",
+          "passwordControl",
+          "repeatPasswordControl",
+          "securityQuestionControl",
+          "securityAnswerControl",
+          "error",
+          "null",
+          "next",
+          "securityQuestions",
+          "user",
+          "email",
+          "password",
+          "passwordRepeat",
+          "securityQuestion",
+          "id",
+          "securityAnswer",
+          "response",
+          "UserId",
+          "answer",
+          "SecurityQuestionId"
+        ],
+        "schemaType": "class",
+        "file": "frontend/src/app/register/register.component.ts",
+        "sensitiveFields": [
+          {
+            "field": "emailControl",
+            "tags": [
+              "pii"
+            ]
+          },
+          {
+            "field": "passwordControl",
+            "tags": [
+              "credential"
+            ]
+          },
+          {
+            "field": "repeatPasswordControl",
+            "tags": [
+              "credential"
+            ]
+          },
+          {
+            "field": "email",
+            "tags": [
+              "pii"
+            ]
+          },
+          {
+            "field": "password",
+            "tags": [
+              "credential"
+            ]
+          },
+          {
+            "field": "passwordRepeat",
+            "tags": [
+              "credential"
+            ]
+          },
+          {
+            "field": "UserId",
+            "tags": [
+              "ownership"
+            ]
+          }
+        ],
+        "ownershipFields": [
+          "UserId"
+        ],
+        "massAssignmentTargets": [
+          "passwordControl",
+          "repeatPasswordControl",
+          "password",
+          "passwordRepeat"
         ]
       },
       {
@@ -17746,6 +17675,137 @@
         "massAssignmentTargets": []
       },
       {
+        "name": "PurchaseBasketComponent",
+        "line": 30,
+        "fields": [
+          "deluxeGuard",
+          "basketService",
+          "userService",
+          "productService",
+          "snackBarHelperService",
+          "allowEdit",
+          "displayTotal",
+          "totalPrice",
+          "emitTotal",
+          "emitProductCount",
+          "tableColumns",
+          "dataSource",
+          "bonus",
+          "itemTotal",
+          "userEmail",
+          "next",
+          "error",
+          "product",
+          "price",
+          "guestBasketItems",
+          "length",
+          "guestProductRequests",
+          "item",
+          "quantity",
+          "result",
+          "deluxePrice",
+          "BasketItem",
+          "id",
+          "existingGuestItem",
+          "ProductId",
+          "newQuantity"
+        ],
+        "schemaType": "class",
+        "file": "frontend/src/app/purchase-basket/purchase-basket.component.ts",
+        "sensitiveFields": [
+          {
+            "field": "totalPrice",
+            "tags": [
+              "business_value"
+            ]
+          },
+          {
+            "field": "userEmail",
+            "tags": [
+              "pii"
+            ]
+          },
+          {
+            "field": "price",
+            "tags": [
+              "business_value"
+            ]
+          },
+          {
+            "field": "deluxePrice",
+            "tags": [
+              "business_value"
+            ]
+          }
+        ],
+        "ownershipFields": [],
+        "massAssignmentTargets": [
+          "totalPrice",
+          "price",
+          "deluxePrice"
+        ]
+      },
+      {
+        "name": "ProductComponent",
+        "line": 26,
+        "fields": [
+          "basketService",
+          "productService",
+          "translateService",
+          "snackBarHelperService",
+          "dialog",
+          "item",
+          "isLoggedIn",
+          "isDeluxe",
+          "id",
+          "next",
+          "product",
+          "error",
+          "productsInBasket",
+          "any",
+          "found",
+          "i",
+          "length",
+          "newQuantity",
+          "quantity",
+          "ProductId",
+          "BasketId",
+          "width",
+          "height",
+          "data",
+          "productData"
+        ],
+        "schemaType": "class",
+        "file": "frontend/src/app/product/product.component.ts",
+        "sensitiveFields": [],
+        "ownershipFields": [],
+        "massAssignmentTargets": []
+      },
+      {
+        "name": "ProductReviewEditComponent",
+        "line": 31,
+        "fields": [
+          "data",
+          "reviewData",
+          "Review",
+          "productReviewService",
+          "dialogRef",
+          "snackBarHelperService",
+          "editReviewControl",
+          "UntypedFormControl",
+          "error",
+          "null",
+          "id",
+          "message",
+          "next"
+        ],
+        "schemaType": "class",
+        "file": "frontend/src/app/product-review-edit/product-review-edit.component.ts",
+        "sensitiveFields": [],
+        "ownershipFields": [],
+        "massAssignmentTargets": []
+      },
+      {
         "name": "QrCodeComponent",
         "line": 23,
         "fields": [
@@ -17760,6 +17820,32 @@
         "sensitiveFields": [
           {
             "field": "address",
+            "tags": [
+              "pii"
+            ]
+          }
+        ],
+        "ownershipFields": [],
+        "massAssignmentTargets": []
+      },
+      {
+        "name": "PrivacyPolicyComponent",
+        "line": 19,
+        "fields": [
+          "_document",
+          "configurationService",
+          "applicationName",
+          "applicationUrl",
+          "next",
+          "config",
+          "privacyContactEmail",
+          "error"
+        ],
+        "schemaType": "class",
+        "file": "frontend/src/app/privacy-policy/privacy-policy.component.ts",
+        "sensitiveFields": [
+          {
+            "field": "privacyContactEmail",
             "tags": [
               "pii"
             ]
@@ -17810,92 +17896,6 @@
         "massAssignmentTargets": [
           "points"
         ]
-      },
-      {
-        "name": "ProductReviewEditComponent",
-        "line": 31,
-        "fields": [
-          "data",
-          "reviewData",
-          "Review",
-          "productReviewService",
-          "dialogRef",
-          "snackBarHelperService",
-          "editReviewControl",
-          "UntypedFormControl",
-          "error",
-          "null",
-          "id",
-          "message",
-          "next"
-        ],
-        "schemaType": "class",
-        "file": "frontend/src/app/product-review-edit/product-review-edit.component.ts",
-        "sensitiveFields": [],
-        "ownershipFields": [],
-        "massAssignmentTargets": []
-      },
-      {
-        "name": "PrivacyPolicyComponent",
-        "line": 19,
-        "fields": [
-          "_document",
-          "configurationService",
-          "applicationName",
-          "applicationUrl",
-          "next",
-          "config",
-          "privacyContactEmail",
-          "error"
-        ],
-        "schemaType": "class",
-        "file": "frontend/src/app/privacy-policy/privacy-policy.component.ts",
-        "sensitiveFields": [
-          {
-            "field": "privacyContactEmail",
-            "tags": [
-              "pii"
-            ]
-          }
-        ],
-        "ownershipFields": [],
-        "massAssignmentTargets": []
-      },
-      {
-        "name": "ProductComponent",
-        "line": 26,
-        "fields": [
-          "basketService",
-          "productService",
-          "translateService",
-          "snackBarHelperService",
-          "dialog",
-          "item",
-          "isLoggedIn",
-          "isDeluxe",
-          "id",
-          "next",
-          "product",
-          "error",
-          "productsInBasket",
-          "any",
-          "found",
-          "i",
-          "length",
-          "newQuantity",
-          "quantity",
-          "ProductId",
-          "BasketId",
-          "width",
-          "height",
-          "data",
-          "productData"
-        ],
-        "schemaType": "class",
-        "file": "frontend/src/app/product/product.component.ts",
-        "sensitiveFields": [],
-        "ownershipFields": [],
-        "massAssignmentTargets": []
       },
       {
         "name": "PaymentComponent",
@@ -18108,33 +18108,6 @@
         "massAssignmentTargets": []
       },
       {
-        "name": "PasswordStrengthInfoComponent",
-        "line": 17,
-        "fields": [
-          "passwordComponent",
-          "enableScoreInfo",
-          "lowerCaseCriteriaMsg",
-          "upperCaseCriteriaMsg",
-          "digitsCriteriaMsg",
-          "specialCharsCriteriaMsg",
-          "minCharsCriteriaMsg"
-        ],
-        "schemaType": "class",
-        "file": "frontend/src/app/password-strength-info/password-strength-info.component.ts",
-        "sensitiveFields": [
-          {
-            "field": "passwordComponent",
-            "tags": [
-              "credential"
-            ]
-          }
-        ],
-        "ownershipFields": [],
-        "massAssignmentTargets": [
-          "passwordComponent"
-        ]
-      },
-      {
         "name": "OrderSummaryComponent",
         "line": 26,
         "fields": [
@@ -18198,6 +18171,185 @@
           "deliveryPrice",
           "promotionalDiscount"
         ]
+      },
+      {
+        "name": "PasswordStrengthInfoComponent",
+        "line": 17,
+        "fields": [
+          "passwordComponent",
+          "enableScoreInfo",
+          "lowerCaseCriteriaMsg",
+          "upperCaseCriteriaMsg",
+          "digitsCriteriaMsg",
+          "specialCharsCriteriaMsg",
+          "minCharsCriteriaMsg"
+        ],
+        "schemaType": "class",
+        "file": "frontend/src/app/password-strength-info/password-strength-info.component.ts",
+        "sensitiveFields": [
+          {
+            "field": "passwordComponent",
+            "tags": [
+              "credential"
+            ]
+          }
+        ],
+        "ownershipFields": [],
+        "massAssignmentTargets": [
+          "passwordComponent"
+        ]
+      },
+      {
+        "name": "OAuthComponent",
+        "line": 19,
+        "fields": [
+          "cookieService",
+          "userService",
+          "router",
+          "route",
+          "ngZone",
+          "next",
+          "profile",
+          "password",
+          "email",
+          "passwordRepeat",
+          "error",
+          "oauth",
+          "expires",
+          "hash",
+          "splitted",
+          "params",
+          "any"
+        ],
+        "schemaType": "class",
+        "file": "frontend/src/app/oauth/oauth.component.ts",
+        "sensitiveFields": [
+          {
+            "field": "password",
+            "tags": [
+              "credential"
+            ]
+          },
+          {
+            "field": "email",
+            "tags": [
+              "pii"
+            ]
+          },
+          {
+            "field": "passwordRepeat",
+            "tags": [
+              "credential"
+            ]
+          },
+          {
+            "field": "hash",
+            "tags": [
+              "credential"
+            ]
+          }
+        ],
+        "ownershipFields": [],
+        "massAssignmentTargets": [
+          "password",
+          "passwordRepeat",
+          "hash"
+        ]
+      },
+      {
+        "name": "OrderCompletionComponent",
+        "line": 31,
+        "fields": [
+          "configurationService",
+          "addressService",
+          "trackOrderService",
+          "activatedRoute",
+          "basketService",
+          "tableColumns",
+          "orderId",
+          "orderDetails",
+          "any",
+          "totalPrice",
+          "deliveryPrice",
+          "promotionalDiscount",
+          "address",
+          "tweetText",
+          "next",
+          "paramMap",
+          "addressId",
+          "paymentId",
+          "itemTotal",
+          "eta",
+          "products",
+          "bonus",
+          "dataSource",
+          "https",
+          "error",
+          "redirectUrl",
+          "truncateTweet",
+          "tweet",
+          "maxLength",
+          "showDots"
+        ],
+        "schemaType": "class",
+        "file": "frontend/src/app/order-completion/order-completion.component.ts",
+        "sensitiveFields": [
+          {
+            "field": "addressService",
+            "tags": [
+              "pii"
+            ]
+          },
+          {
+            "field": "totalPrice",
+            "tags": [
+              "business_value"
+            ]
+          },
+          {
+            "field": "deliveryPrice",
+            "tags": [
+              "business_value"
+            ]
+          },
+          {
+            "field": "promotionalDiscount",
+            "tags": [
+              "business_value"
+            ]
+          },
+          {
+            "field": "address",
+            "tags": [
+              "pii"
+            ]
+          },
+          {
+            "field": "addressId",
+            "tags": [
+              "pii"
+            ]
+          }
+        ],
+        "ownershipFields": [],
+        "massAssignmentTargets": [
+          "totalPrice",
+          "deliveryPrice",
+          "promotionalDiscount"
+        ]
+      },
+      {
+        "name": "MockActivatedRoute",
+        "line": 28,
+        "fields": [
+          "paramMap",
+          "id"
+        ],
+        "schemaType": "class",
+        "file": "frontend/src/app/order-completion/order-completion.component.spec.ts",
+        "sensitiveFields": [],
+        "ownershipFields": [],
+        "massAssignmentTargets": []
       },
       {
         "name": "OrderHistoryComponent",
@@ -18366,6 +18518,95 @@
         "massAssignmentTargets": []
       },
       {
+        "name": "LoginComponent",
+        "line": 41,
+        "fields": [
+          "configurationService",
+          "userService",
+          "windowRefService",
+          "cookieService",
+          "router",
+          "route",
+          "formSubmitService",
+          "basketService",
+          "ngZone",
+          "emailControl",
+          "passwordControl",
+          "hide",
+          "user",
+          "rememberMe",
+          "UntypedFormControl",
+          "error",
+          "clientId",
+          "oauthUnavailable",
+          "redirectUri",
+          "testingUsername",
+          "testingPassword",
+          "email",
+          "next",
+          "authorizedRedirect",
+          "r",
+          "uri",
+          "proxy",
+          "password",
+          "authentication",
+          "redirectUrl",
+          "expires",
+          "status",
+          "client_id",
+          "response_type",
+          "scope",
+          "redirect_uri"
+        ],
+        "schemaType": "class",
+        "file": "frontend/src/app/login/login.component.ts",
+        "sensitiveFields": [
+          {
+            "field": "emailControl",
+            "tags": [
+              "pii"
+            ]
+          },
+          {
+            "field": "passwordControl",
+            "tags": [
+              "credential"
+            ]
+          },
+          {
+            "field": "testingPassword",
+            "tags": [
+              "credential"
+            ]
+          },
+          {
+            "field": "email",
+            "tags": [
+              "pii"
+            ]
+          },
+          {
+            "field": "password",
+            "tags": [
+              "credential"
+            ]
+          },
+          {
+            "field": "scope",
+            "tags": [
+              "privilege"
+            ]
+          }
+        ],
+        "ownershipFields": [],
+        "massAssignmentTargets": [
+          "passwordControl",
+          "testingPassword",
+          "password",
+          "scope"
+        ]
+      },
+      {
         "name": "NFTUnlockComponent",
         "line": 19,
         "fields": [
@@ -18390,155 +18631,28 @@
         "massAssignmentTargets": []
       },
       {
-        "name": "OrderCompletionComponent",
-        "line": 31,
-        "fields": [
-          "configurationService",
-          "addressService",
-          "trackOrderService",
-          "activatedRoute",
-          "basketService",
-          "tableColumns",
-          "orderId",
-          "orderDetails",
-          "any",
-          "totalPrice",
-          "deliveryPrice",
-          "promotionalDiscount",
-          "address",
-          "tweetText",
-          "next",
-          "paramMap",
-          "addressId",
-          "paymentId",
-          "itemTotal",
-          "eta",
-          "products",
-          "bonus",
-          "dataSource",
-          "https",
-          "error",
-          "redirectUrl",
-          "truncateTweet",
-          "tweet",
-          "maxLength",
-          "showDots"
-        ],
-        "schemaType": "class",
-        "file": "frontend/src/app/order-completion/order-completion.component.ts",
-        "sensitiveFields": [
-          {
-            "field": "addressService",
-            "tags": [
-              "pii"
-            ]
-          },
-          {
-            "field": "totalPrice",
-            "tags": [
-              "business_value"
-            ]
-          },
-          {
-            "field": "deliveryPrice",
-            "tags": [
-              "business_value"
-            ]
-          },
-          {
-            "field": "promotionalDiscount",
-            "tags": [
-              "business_value"
-            ]
-          },
-          {
-            "field": "address",
-            "tags": [
-              "pii"
-            ]
-          },
-          {
-            "field": "addressId",
-            "tags": [
-              "pii"
-            ]
-          }
-        ],
-        "ownershipFields": [],
-        "massAssignmentTargets": [
-          "totalPrice",
-          "deliveryPrice",
-          "promotionalDiscount"
-        ]
-      },
-      {
-        "name": "MockActivatedRoute",
-        "line": 28,
-        "fields": [
-          "paramMap",
-          "id"
-        ],
-        "schemaType": "class",
-        "file": "frontend/src/app/order-completion/order-completion.component.spec.ts",
-        "sensitiveFields": [],
-        "ownershipFields": [],
-        "massAssignmentTargets": []
-      },
-      {
-        "name": "OAuthComponent",
+        "name": "LastLoginIpComponent",
         "line": 19,
         "fields": [
-          "cookieService",
-          "userService",
-          "router",
-          "route",
-          "ngZone",
-          "next",
-          "profile",
-          "password",
-          "email",
-          "passwordRepeat",
-          "error",
-          "oauth",
-          "expires",
-          "hash",
-          "splitted",
-          "params",
-          "any"
+          "sanitizer",
+          "lastLoginIp",
+          "any",
+          "payload",
+          "token"
         ],
         "schemaType": "class",
-        "file": "frontend/src/app/oauth/oauth.component.ts",
+        "file": "frontend/src/app/last-login-ip/last-login-ip.component.ts",
         "sensitiveFields": [
           {
-            "field": "password",
+            "field": "token",
             "tags": [
-              "credential"
-            ]
-          },
-          {
-            "field": "email",
-            "tags": [
-              "pii"
-            ]
-          },
-          {
-            "field": "passwordRepeat",
-            "tags": [
-              "credential"
-            ]
-          },
-          {
-            "field": "hash",
-            "tags": [
-              "credential"
+              "token"
             ]
           }
         ],
         "ownershipFields": [],
         "massAssignmentTargets": [
-          "password",
-          "passwordRepeat",
-          "hash"
+          "token"
         ]
       },
       {
@@ -18640,45 +18754,6 @@
           "passwordControl",
           "repeatPasswordControl"
         ]
-      },
-      {
-        "name": "LastLoginIpComponent",
-        "line": 19,
-        "fields": [
-          "sanitizer",
-          "lastLoginIp",
-          "any",
-          "payload",
-          "token"
-        ],
-        "schemaType": "class",
-        "file": "frontend/src/app/last-login-ip/last-login-ip.component.ts",
-        "sensitiveFields": [
-          {
-            "field": "token",
-            "tags": [
-              "token"
-            ]
-          }
-        ],
-        "ownershipFields": [],
-        "massAssignmentTargets": [
-          "token"
-        ]
-      },
-      {
-        "name": "FeedbackDetailsComponent",
-        "line": 20,
-        "fields": [
-          "dialogData",
-          "feedback",
-          "id"
-        ],
-        "schemaType": "class",
-        "file": "frontend/src/app/feedback-details/feedback-details.component.ts",
-        "sensitiveFields": [],
-        "ownershipFields": [],
-        "massAssignmentTargets": []
       },
       {
         "name": "FaucetModule",
@@ -18849,6 +18924,35 @@
         ]
       },
       {
+        "name": "DeluxeUserComponent",
+        "line": 23,
+        "fields": [
+          "router",
+          "userService",
+          "configurationService",
+          "route",
+          "ngZone",
+          "io",
+          "membershipCost",
+          "string",
+          "applicationName",
+          "logoSrc",
+          "SHOWCASES",
+          "icon",
+          "name",
+          "description",
+          "next",
+          "decalParam",
+          "logo",
+          "error"
+        ],
+        "schemaType": "class",
+        "file": "frontend/src/app/deluxe-user/deluxe-user.component.ts",
+        "sensitiveFields": [],
+        "ownershipFields": [],
+        "massAssignmentTargets": []
+      },
+      {
         "name": "DeliveryMethodComponent",
         "line": 33,
         "fields": [
@@ -18887,141 +18991,6 @@
         "massAssignmentTargets": []
       },
       {
-        "name": "DeluxeUserComponent",
-        "line": 23,
-        "fields": [
-          "router",
-          "userService",
-          "configurationService",
-          "route",
-          "ngZone",
-          "io",
-          "membershipCost",
-          "string",
-          "applicationName",
-          "logoSrc",
-          "SHOWCASES",
-          "icon",
-          "name",
-          "description",
-          "next",
-          "decalParam",
-          "logo",
-          "error"
-        ],
-        "schemaType": "class",
-        "file": "frontend/src/app/deluxe-user/deluxe-user.component.ts",
-        "sensitiveFields": [],
-        "ownershipFields": [],
-        "massAssignmentTargets": []
-      },
-      {
-        "name": "LoginComponent",
-        "line": 41,
-        "fields": [
-          "configurationService",
-          "userService",
-          "windowRefService",
-          "cookieService",
-          "router",
-          "route",
-          "formSubmitService",
-          "basketService",
-          "ngZone",
-          "emailControl",
-          "passwordControl",
-          "hide",
-          "user",
-          "rememberMe",
-          "UntypedFormControl",
-          "error",
-          "clientId",
-          "oauthUnavailable",
-          "redirectUri",
-          "testingUsername",
-          "testingPassword",
-          "email",
-          "next",
-          "authorizedRedirect",
-          "r",
-          "uri",
-          "proxy",
-          "password",
-          "authentication",
-          "redirectUrl",
-          "expires",
-          "status",
-          "client_id",
-          "response_type",
-          "scope",
-          "redirect_uri"
-        ],
-        "schemaType": "class",
-        "file": "frontend/src/app/login/login.component.ts",
-        "sensitiveFields": [
-          {
-            "field": "emailControl",
-            "tags": [
-              "pii"
-            ]
-          },
-          {
-            "field": "passwordControl",
-            "tags": [
-              "credential"
-            ]
-          },
-          {
-            "field": "testingPassword",
-            "tags": [
-              "credential"
-            ]
-          },
-          {
-            "field": "email",
-            "tags": [
-              "pii"
-            ]
-          },
-          {
-            "field": "password",
-            "tags": [
-              "credential"
-            ]
-          },
-          {
-            "field": "scope",
-            "tags": [
-              "privilege"
-            ]
-          }
-        ],
-        "ownershipFields": [],
-        "massAssignmentTargets": [
-          "passwordControl",
-          "testingPassword",
-          "password",
-          "scope"
-        ]
-      },
-      {
-        "name": "ErrorPageComponent",
-        "line": 21,
-        "fields": [
-          "route",
-          "translate",
-          "error",
-          "null",
-          "errorKey",
-          "next"
-        ],
-        "schemaType": "class",
-        "file": "frontend/src/app/error-page/error-page.component.ts",
-        "sensitiveFields": [],
-        "ownershipFields": [],
-        "massAssignmentTargets": []
-      },
-      {
         "name": "DataExportComponent",
         "line": 27,
         "fields": [
@@ -19054,86 +19023,32 @@
         "massAssignmentTargets": []
       },
       {
-        "name": "CodingChallengePageComponent",
-        "line": 28,
+        "name": "ErrorPageComponent",
+        "line": 21,
         "fields": [
           "route",
-          "destroyRef",
-          "codeSnippetService",
-          "codeFixesService",
-          "challengeService",
-          "fixItSection",
-          "challengeKey",
-          "challengeName",
-          "snippet",
-          "CodeSnippet",
-          "fixes",
-          "findItSolved",
-          "fixItSolved",
-          "isLoaded",
-          "challenges",
-          "sort",
-          "challenge",
-          "c",
-          "key",
-          "behavior"
+          "translate",
+          "error",
+          "null",
+          "errorKey",
+          "next"
         ],
         "schemaType": "class",
-        "file": "frontend/src/app/coding-challenge-page/coding-challenge-page.component.ts",
-        "sensitiveFields": [
-          {
-            "field": "codeSnippetService",
-            "tags": [
-              "token"
-            ]
-          },
-          {
-            "field": "codeFixesService",
-            "tags": [
-              "token"
-            ]
-          },
-          {
-            "field": "CodeSnippet",
-            "tags": [
-              "token"
-            ]
-          }
-        ],
-        "ownershipFields": [],
-        "massAssignmentTargets": [
-          "codeSnippetService",
-          "codeFixesService",
-          "CodeSnippet"
-        ]
-      },
-      {
-        "name": "MockFindItComponent",
-        "line": 22,
-        "fields": [
-          "challengeKey",
-          "snippet",
-          "alreadySolved",
-          "solved"
-        ],
-        "schemaType": "class",
-        "file": "frontend/src/app/coding-challenge-page/coding-challenge-page.component.spec.ts",
+        "file": "frontend/src/app/error-page/error-page.component.ts",
         "sensitiveFields": [],
         "ownershipFields": [],
         "massAssignmentTargets": []
       },
       {
-        "name": "MockFixItComponent",
-        "line": 30,
+        "name": "FeedbackDetailsComponent",
+        "line": 20,
         "fields": [
-          "challengeKey",
-          "snippet",
-          "fixes",
-          "alreadySolved",
-          "solved"
+          "dialogData",
+          "feedback",
+          "id"
         ],
         "schemaType": "class",
-        "file": "frontend/src/app/coding-challenge-page/coding-challenge-page.component.spec.ts",
+        "file": "frontend/src/app/feedback-details/feedback-details.component.ts",
         "sensitiveFields": [],
         "ownershipFields": [],
         "massAssignmentTargets": []
@@ -19157,72 +19072,6 @@
         "sensitiveFields": [],
         "ownershipFields": [],
         "massAssignmentTargets": []
-      },
-      {
-        "name": "ComplaintComponent",
-        "line": 32,
-        "fields": [
-          "userService",
-          "complaintService",
-          "formSubmitService",
-          "translate",
-          "customerControl",
-          "UntypedFormControl",
-          "value",
-          "disabled",
-          "messageControl",
-          "static",
-          "fileUploadError",
-          "any",
-          "uploader",
-          "FileUploader",
-          "url",
-          "authToken",
-          "allowedMimeType",
-          "maxFileSize",
-          "userEmail",
-          "complaint",
-          "confirmation",
-          "onWhenAddingFileFailed",
-          "to",
-          "onAfterAddingFile",
-          "onSuccessItem",
-          "next",
-          "user",
-          "UserId",
-          "error",
-          "message",
-          "savedComplaint",
-          "ref"
-        ],
-        "schemaType": "class",
-        "file": "frontend/src/app/complaint/complaint.component.ts",
-        "sensitiveFields": [
-          {
-            "field": "authToken",
-            "tags": [
-              "token"
-            ]
-          },
-          {
-            "field": "userEmail",
-            "tags": [
-              "pii"
-            ]
-          },
-          {
-            "field": "UserId",
-            "tags": [
-              "ownership"
-            ]
-          }
-        ],
-        "ownershipFields": [
-          "UserId"
-        ],
-        "massAssignmentTargets": [
-          "authToken"
-        ]
       },
       {
         "name": "ContactComponent",
@@ -19316,6 +19165,91 @@
         ]
       },
       {
+        "name": "ChallengeStatusBadgeComponent",
+        "line": 27,
+        "fields": [
+          "challengeService",
+          "windowRefService",
+          "challenge",
+          "Challenge",
+          "allowRepeatNotifications",
+          "showChallengeHints",
+          "next",
+          "error"
+        ],
+        "schemaType": "class",
+        "file": "frontend/src/app/challenge-status-badge/challenge-status-badge.component.ts",
+        "sensitiveFields": [],
+        "ownershipFields": [],
+        "massAssignmentTargets": []
+      },
+      {
+        "name": "ComplaintComponent",
+        "line": 32,
+        "fields": [
+          "userService",
+          "complaintService",
+          "formSubmitService",
+          "translate",
+          "customerControl",
+          "UntypedFormControl",
+          "value",
+          "disabled",
+          "messageControl",
+          "static",
+          "fileUploadError",
+          "any",
+          "uploader",
+          "FileUploader",
+          "url",
+          "authToken",
+          "allowedMimeType",
+          "maxFileSize",
+          "userEmail",
+          "complaint",
+          "confirmation",
+          "onWhenAddingFileFailed",
+          "to",
+          "onAfterAddingFile",
+          "onSuccessItem",
+          "next",
+          "user",
+          "UserId",
+          "error",
+          "message",
+          "savedComplaint",
+          "ref"
+        ],
+        "schemaType": "class",
+        "file": "frontend/src/app/complaint/complaint.component.ts",
+        "sensitiveFields": [
+          {
+            "field": "authToken",
+            "tags": [
+              "token"
+            ]
+          },
+          {
+            "field": "userEmail",
+            "tags": [
+              "pii"
+            ]
+          },
+          {
+            "field": "UserId",
+            "tags": [
+              "ownership"
+            ]
+          }
+        ],
+        "ownershipFields": [
+          "UserId"
+        ],
+        "massAssignmentTargets": [
+          "authToken"
+        ]
+      },
+      {
         "name": "ChallengeSolvedNotificationComponent",
         "line": 45,
         "fields": [
@@ -19379,96 +19313,6 @@
         "massAssignmentTargets": []
       },
       {
-        "name": "ChallengeStatusBadgeComponent",
-        "line": 27,
-        "fields": [
-          "challengeService",
-          "windowRefService",
-          "challenge",
-          "Challenge",
-          "allowRepeatNotifications",
-          "showChallengeHints",
-          "next",
-          "error"
-        ],
-        "schemaType": "class",
-        "file": "frontend/src/app/challenge-status-badge/challenge-status-badge.component.ts",
-        "sensitiveFields": [],
-        "ownershipFields": [],
-        "massAssignmentTargets": []
-      },
-      {
-        "name": "AdministrationComponent",
-        "line": 34,
-        "fields": [
-          "dialog",
-          "userService",
-          "feedbackService",
-          "sanitizer",
-          "cookieService",
-          "showToolCalls",
-          "userDataSource",
-          "userDataSourceHidden",
-          "userColumns",
-          "feedbackDataSource",
-          "feedbackColumns",
-          "error",
-          "resultsLengthUser",
-          "resultsLengthFeedback",
-          "paginatorUsers",
-          "paginatorFeedb",
-          "event",
-          "expires",
-          "next",
-          "email",
-          "class",
-          "paginator",
-          "comment",
-          "id",
-          "data",
-          "feedback",
-          "numberOfTimes",
-          "user",
-          "lastLoginTime",
-          "SIX_HOURS_IN_SECONDS"
-        ],
-        "schemaType": "class",
-        "file": "frontend/src/app/administration/administration.component.ts",
-        "sensitiveFields": [
-          {
-            "field": "email",
-            "tags": [
-              "pii"
-            ]
-          }
-        ],
-        "ownershipFields": [],
-        "massAssignmentTargets": []
-      },
-      {
-        "name": "AddressSelectComponent",
-        "line": 16,
-        "fields": [
-          "router",
-          "ngZone",
-          "addressId",
-          "any",
-          "showNextButton"
-        ],
-        "schemaType": "class",
-        "file": "frontend/src/app/address-select/address-select.component.ts",
-        "sensitiveFields": [
-          {
-            "field": "addressId",
-            "tags": [
-              "pii"
-            ]
-          }
-        ],
-        "ownershipFields": [],
-        "massAssignmentTargets": []
-      },
-      {
         "name": "BasketComponent",
         "line": 23,
         "fields": [
@@ -19487,111 +19331,20 @@
         "massAssignmentTargets": []
       },
       {
-        "name": "AccountingComponent",
-        "line": 40,
+        "name": "AddressSelectComponent",
+        "line": 16,
         "fields": [
-          "productService",
-          "quantityService",
-          "orderHistoryService",
-          "snackBarHelperService",
-          "orderHistoryColumns",
-          "static",
-          "paginatorOrderHistory",
-          "orderData",
-          "displayedColumns",
-          "tableData",
-          "paginator",
-          "productSubscription",
-          "quantitySubscription",
-          "quantityMap",
-          "next",
-          "id",
-          "quantity",
-          "error",
-          "dataSource",
-          "orderId",
-          "totalPrice",
-          "delivered",
-          "orderSource",
-          "product",
-          "price"
-        ],
-        "schemaType": "class",
-        "file": "frontend/src/app/accounting/accounting.component.ts",
-        "sensitiveFields": [
-          {
-            "field": "totalPrice",
-            "tags": [
-              "business_value"
-            ]
-          },
-          {
-            "field": "price",
-            "tags": [
-              "business_value"
-            ]
-          }
-        ],
-        "ownershipFields": [],
-        "massAssignmentTargets": [
-          "totalPrice",
-          "price"
-        ]
-      },
-      {
-        "name": "AddressComponent",
-        "line": 29,
-        "fields": [
-          "addressService",
-          "translate",
           "router",
           "ngZone",
-          "snackBarHelperService",
-          "emitSelection",
-          "allowEdit",
-          "addNewAddressDiv",
-          "showNextButton",
           "addressId",
           "any",
-          "displayedColumns",
-          "selection",
-          "storedAddresses",
-          "confirmation",
-          "error",
-          "addressExist",
-          "next",
-          "dataSource",
-          "id"
+          "showNextButton"
         ],
         "schemaType": "class",
-        "file": "frontend/src/app/address/address.component.ts",
+        "file": "frontend/src/app/address-select/address-select.component.ts",
         "sensitiveFields": [
           {
-            "field": "addressService",
-            "tags": [
-              "pii"
-            ]
-          },
-          {
-            "field": "addNewAddressDiv",
-            "tags": [
-              "pii"
-            ]
-          },
-          {
             "field": "addressId",
-            "tags": [
-              "pii"
-            ]
-          },
-          {
-            "field": "storedAddresses",
-            "tags": [
-              "pii"
-            ]
-          },
-          {
-            "field": "addressExist",
             "tags": [
               "pii"
             ]
@@ -19688,6 +19441,168 @@
         ]
       },
       {
+        "name": "AddressComponent",
+        "line": 29,
+        "fields": [
+          "addressService",
+          "translate",
+          "router",
+          "ngZone",
+          "snackBarHelperService",
+          "emitSelection",
+          "allowEdit",
+          "addNewAddressDiv",
+          "showNextButton",
+          "addressId",
+          "any",
+          "displayedColumns",
+          "selection",
+          "storedAddresses",
+          "confirmation",
+          "error",
+          "addressExist",
+          "next",
+          "dataSource",
+          "id"
+        ],
+        "schemaType": "class",
+        "file": "frontend/src/app/address/address.component.ts",
+        "sensitiveFields": [
+          {
+            "field": "addressService",
+            "tags": [
+              "pii"
+            ]
+          },
+          {
+            "field": "addNewAddressDiv",
+            "tags": [
+              "pii"
+            ]
+          },
+          {
+            "field": "addressId",
+            "tags": [
+              "pii"
+            ]
+          },
+          {
+            "field": "storedAddresses",
+            "tags": [
+              "pii"
+            ]
+          },
+          {
+            "field": "addressExist",
+            "tags": [
+              "pii"
+            ]
+          }
+        ],
+        "ownershipFields": [],
+        "massAssignmentTargets": []
+      },
+      {
+        "name": "AdministrationComponent",
+        "line": 34,
+        "fields": [
+          "dialog",
+          "userService",
+          "feedbackService",
+          "sanitizer",
+          "cookieService",
+          "showToolCalls",
+          "userDataSource",
+          "userDataSourceHidden",
+          "userColumns",
+          "feedbackDataSource",
+          "feedbackColumns",
+          "error",
+          "resultsLengthUser",
+          "resultsLengthFeedback",
+          "paginatorUsers",
+          "paginatorFeedb",
+          "event",
+          "expires",
+          "next",
+          "email",
+          "class",
+          "paginator",
+          "comment",
+          "id",
+          "data",
+          "feedback",
+          "numberOfTimes",
+          "user",
+          "lastLoginTime",
+          "SIX_HOURS_IN_SECONDS"
+        ],
+        "schemaType": "class",
+        "file": "frontend/src/app/administration/administration.component.ts",
+        "sensitiveFields": [
+          {
+            "field": "email",
+            "tags": [
+              "pii"
+            ]
+          }
+        ],
+        "ownershipFields": [],
+        "massAssignmentTargets": []
+      },
+      {
+        "name": "AccountingComponent",
+        "line": 40,
+        "fields": [
+          "productService",
+          "quantityService",
+          "orderHistoryService",
+          "snackBarHelperService",
+          "orderHistoryColumns",
+          "static",
+          "paginatorOrderHistory",
+          "orderData",
+          "displayedColumns",
+          "tableData",
+          "paginator",
+          "productSubscription",
+          "quantitySubscription",
+          "quantityMap",
+          "next",
+          "id",
+          "quantity",
+          "error",
+          "dataSource",
+          "orderId",
+          "totalPrice",
+          "delivered",
+          "orderSource",
+          "product",
+          "price"
+        ],
+        "schemaType": "class",
+        "file": "frontend/src/app/accounting/accounting.component.ts",
+        "sensitiveFields": [
+          {
+            "field": "totalPrice",
+            "tags": [
+              "business_value"
+            ]
+          },
+          {
+            "field": "price",
+            "tags": [
+              "business_value"
+            ]
+          }
+        ],
+        "ownershipFields": [],
+        "massAssignmentTargets": [
+          "totalPrice",
+          "price"
+        ]
+      },
+      {
         "name": "AboutComponent",
         "line": 30,
         "fields": [
@@ -19720,19 +19635,140 @@
         "massAssignmentTargets": []
       },
       {
-        "name": "ChatInputBoxComponent",
-        "line": 27,
+        "name": "CodingChallengePageComponent",
+        "line": 28,
         "fields": [
-          "message",
-          "disabled",
-          "messageSent",
-          "textarea",
-          "event",
-          "keyEvent",
-          "content"
+          "route",
+          "destroyRef",
+          "codeSnippetService",
+          "codeFixesService",
+          "challengeService",
+          "fixItSection",
+          "challengeKey",
+          "challengeName",
+          "snippet",
+          "CodeSnippet",
+          "fixes",
+          "findItSolved",
+          "fixItSolved",
+          "isLoaded",
+          "challenges",
+          "sort",
+          "challenge",
+          "c",
+          "key",
+          "behavior"
         ],
         "schemaType": "class",
-        "file": "frontend/src/app/chatbot/chat-input-box/chat-input-box.component.ts",
+        "file": "frontend/src/app/coding-challenge-page/coding-challenge-page.component.ts",
+        "sensitiveFields": [
+          {
+            "field": "codeSnippetService",
+            "tags": [
+              "token"
+            ]
+          },
+          {
+            "field": "codeFixesService",
+            "tags": [
+              "token"
+            ]
+          },
+          {
+            "field": "CodeSnippet",
+            "tags": [
+              "token"
+            ]
+          }
+        ],
+        "ownershipFields": [],
+        "massAssignmentTargets": [
+          "codeSnippetService",
+          "codeFixesService",
+          "CodeSnippet"
+        ]
+      },
+      {
+        "name": "MockFindItComponent",
+        "line": 22,
+        "fields": [
+          "challengeKey",
+          "snippet",
+          "alreadySolved",
+          "solved"
+        ],
+        "schemaType": "class",
+        "file": "frontend/src/app/coding-challenge-page/coding-challenge-page.component.spec.ts",
+        "sensitiveFields": [],
+        "ownershipFields": [],
+        "massAssignmentTargets": []
+      },
+      {
+        "name": "MockFixItComponent",
+        "line": 30,
+        "fields": [
+          "challengeKey",
+          "snippet",
+          "fixes",
+          "alreadySolved",
+          "solved"
+        ],
+        "schemaType": "class",
+        "file": "frontend/src/app/coding-challenge-page/coding-challenge-page.component.spec.ts",
+        "sensitiveFields": [],
+        "ownershipFields": [],
+        "massAssignmentTargets": []
+      },
+      {
+        "name": "ChatWelcomeScreenComponent",
+        "line": 28,
+        "fields": [
+          "conversationStorage",
+          "translate",
+          "configurationService",
+          "message",
+          "messageSent",
+          "conversationSelected",
+          "inputBox",
+          "conversations",
+          "chatBotName",
+          "chatBotAvatar",
+          "sampleQuestions",
+          "next",
+          "error",
+          "questions",
+          "length",
+          "translations",
+          "allSuggestions",
+          "q",
+          "currentMessage",
+          "availableSuggestions",
+          "s",
+          "chosen",
+          "key",
+          "text",
+          "event",
+          "id"
+        ],
+        "schemaType": "class",
+        "file": "frontend/src/app/chatbot/chat-welcome-screen/chat-welcome-screen.component.ts",
+        "sensitiveFields": [],
+        "ownershipFields": [],
+        "massAssignmentTargets": []
+      },
+      {
+        "name": "ChatWelcomePageComponent",
+        "line": 19,
+        "fields": [
+          "router",
+          "conversationStorage",
+          "message",
+          "id",
+          "queryParams",
+          "initialMessage"
+        ],
+        "schemaType": "class",
+        "file": "frontend/src/app/chatbot/chat-welcome-page/chat-welcome-page.component.ts",
         "sensitiveFields": [],
         "ownershipFields": [],
         "massAssignmentTargets": []
@@ -19803,55 +19839,19 @@
         ]
       },
       {
-        "name": "ChatWelcomePageComponent",
-        "line": 19,
+        "name": "ChatInputBoxComponent",
+        "line": 27,
         "fields": [
-          "router",
-          "conversationStorage",
           "message",
-          "id",
-          "queryParams",
-          "initialMessage"
-        ],
-        "schemaType": "class",
-        "file": "frontend/src/app/chatbot/chat-welcome-page/chat-welcome-page.component.ts",
-        "sensitiveFields": [],
-        "ownershipFields": [],
-        "massAssignmentTargets": []
-      },
-      {
-        "name": "ChatWelcomeScreenComponent",
-        "line": 28,
-        "fields": [
-          "conversationStorage",
-          "translate",
-          "configurationService",
-          "message",
+          "disabled",
           "messageSent",
-          "conversationSelected",
-          "inputBox",
-          "conversations",
-          "chatBotName",
-          "chatBotAvatar",
-          "sampleQuestions",
-          "next",
-          "error",
-          "questions",
-          "length",
-          "translations",
-          "allSuggestions",
-          "q",
-          "currentMessage",
-          "availableSuggestions",
-          "s",
-          "chosen",
-          "key",
-          "text",
+          "textarea",
           "event",
-          "id"
+          "keyEvent",
+          "content"
         ],
         "schemaType": "class",
-        "file": "frontend/src/app/chatbot/chat-welcome-screen/chat-welcome-screen.component.ts",
+        "file": "frontend/src/app/chatbot/chat-input-box/chat-input-box.component.ts",
         "sensitiveFields": [],
         "ownershipFields": [],
         "massAssignmentTargets": []
@@ -19869,6 +19869,22 @@
         ],
         "schemaType": "class",
         "file": "frontend/src/app/score-board/components/tutorial-mode-warning/tutorial-mode-warning.component.ts",
+        "sensitiveFields": [],
+        "ownershipFields": [],
+        "massAssignmentTargets": []
+      },
+      {
+        "name": "ScoreCardComponent",
+        "line": 10,
+        "fields": [
+          "description",
+          "total",
+          "score",
+          "showAsPercentage",
+          "showProgressBar"
+        ],
+        "schemaType": "class",
+        "file": "frontend/src/app/score-board/components/score-card/score-card.component.ts",
         "sensitiveFields": [],
         "ownershipFields": [],
         "massAssignmentTargets": []
@@ -19909,18 +19925,6 @@
         ]
       },
       {
-        "name": "DifficultyStarsComponent",
-        "line": 9,
-        "fields": [
-          "difficulty"
-        ],
-        "schemaType": "class",
-        "file": "frontend/src/app/score-board/components/difficulty-stars/difficulty-stars.component.ts",
-        "sensitiveFields": [],
-        "ownershipFields": [],
-        "massAssignmentTargets": []
-      },
-      {
         "name": "HackingChallengeProgressScoreCardComponent",
         "line": 12,
         "fields": [
@@ -19929,6 +19933,30 @@
         ],
         "schemaType": "class",
         "file": "frontend/src/app/score-board/components/hacking-challenge-progress-score-card/hacking-challenge-progress-score-card.component.ts",
+        "sensitiveFields": [],
+        "ownershipFields": [],
+        "massAssignmentTargets": []
+      },
+      {
+        "name": "DifficultyOverviewScoreCardComponent",
+        "line": 33,
+        "fields": [
+          "allChallenges",
+          "totalChallenges",
+          "solvedChallenges",
+          "difficultySummaries",
+          "difficulty",
+          "availableChallenges",
+          "solvedHackingChallenges",
+          "availableCodingChallenges",
+          "codingScore",
+          "challenges",
+          "summariesLookup",
+          "DifficultySummaries",
+          "codingChallengeStatus"
+        ],
+        "schemaType": "class",
+        "file": "frontend/src/app/score-board/components/difficulty-overview-score-card/difficulty-overview-score-card.component.ts",
         "sensitiveFields": [],
         "ownershipFields": [],
         "massAssignmentTargets": []
@@ -19943,22 +19971,6 @@
         ],
         "schemaType": "class",
         "file": "frontend/src/app/score-board/components/coding-challenge-progress-score-card/coding-challenge-progress-score-card.component.ts",
-        "sensitiveFields": [],
-        "ownershipFields": [],
-        "massAssignmentTargets": []
-      },
-      {
-        "name": "ScoreCardComponent",
-        "line": 10,
-        "fields": [
-          "description",
-          "total",
-          "score",
-          "showAsPercentage",
-          "showProgressBar"
-        ],
-        "schemaType": "class",
-        "file": "frontend/src/app/score-board/components/score-card/score-card.component.ts",
         "sensitiveFields": [],
         "ownershipFields": [],
         "massAssignmentTargets": []
@@ -20010,25 +20022,36 @@
         ]
       },
       {
-        "name": "DifficultyOverviewScoreCardComponent",
-        "line": 33,
+        "name": "ChallengesUnavailableWarningComponent",
+        "line": 16,
         "fields": [
-          "allChallenges",
-          "totalChallenges",
-          "solvedChallenges",
-          "difficultySummaries",
-          "difficulty",
-          "availableChallenges",
-          "solvedHackingChallenges",
-          "availableCodingChallenges",
-          "codingScore",
           "challenges",
-          "summariesLookup",
-          "DifficultySummaries",
-          "codingChallengeStatus"
+          "filterSetting",
+          "filterSettingChange",
+          "numberOfDisabledChallenges",
+          "disabledBecauseOfEnv",
+          "null",
+          "disabledOnWindows",
+          "numberOfDisabledChallengesOnWindows",
+          "disabledChallenges",
+          "challenge",
+          "disabledEnv",
+          "showDisabledChallenges"
         ],
         "schemaType": "class",
-        "file": "frontend/src/app/score-board/components/difficulty-overview-score-card/difficulty-overview-score-card.component.ts",
+        "file": "frontend/src/app/score-board/components/challenges-unavailable-warning/challenges-unavailable-warning.component.ts",
+        "sensitiveFields": [],
+        "ownershipFields": [],
+        "massAssignmentTargets": []
+      },
+      {
+        "name": "DifficultyStarsComponent",
+        "line": 9,
+        "fields": [
+          "difficulty"
+        ],
+        "schemaType": "class",
+        "file": "frontend/src/app/score-board/components/difficulty-stars/difficulty-stars.component.ts",
         "sensitiveFields": [],
         "ownershipFields": [],
         "massAssignmentTargets": []
@@ -20052,90 +20075,6 @@
         ],
         "schemaType": "class",
         "file": "frontend/src/app/coding-challenge-page/components/coding-challenge-section/coding-challenge-section.component.ts",
-        "sensitiveFields": [],
-        "ownershipFields": [],
-        "massAssignmentTargets": []
-      },
-      {
-        "name": "CodingChallengeFixItComponent",
-        "line": 33,
-        "fields": [
-          "diffHost",
-          "diffView",
-          "null",
-          "codeFixesService",
-          "challengeService",
-          "cookieService",
-          "destroyRef",
-          "challengeKey",
-          "snippet",
-          "fixes",
-          "alreadySolved",
-          "solved",
-          "selectedFix",
-          "randomFixes",
-          "explanation",
-          "string",
-          "result",
-          "ResultState",
-          "shaking",
-          "onlyChangedLines",
-          "fix",
-          "lang",
-          "parent",
-          "state",
-          "doc",
-          "extensions",
-          "original",
-          "highlightChanges",
-          "gutter",
-          "mergeControls",
-          "collapseUnchanged",
-          "margin",
-          "minSize",
-          "sort",
-          "Right",
-          "Wrong",
-          "default",
-          "verdict",
-          "variant",
-          "setResult",
-          "setShaking"
-        ],
-        "schemaType": "class",
-        "file": "frontend/src/app/coding-challenge-page/components/coding-challenge-fix-it/coding-challenge-fix-it.component.ts",
-        "sensitiveFields": [
-          {
-            "field": "codeFixesService",
-            "tags": [
-              "token"
-            ]
-          }
-        ],
-        "ownershipFields": [],
-        "massAssignmentTargets": [
-          "codeFixesService"
-        ]
-      },
-      {
-        "name": "ChallengesUnavailableWarningComponent",
-        "line": 16,
-        "fields": [
-          "challenges",
-          "filterSetting",
-          "filterSettingChange",
-          "numberOfDisabledChallenges",
-          "disabledBecauseOfEnv",
-          "null",
-          "disabledOnWindows",
-          "numberOfDisabledChallengesOnWindows",
-          "disabledChallenges",
-          "challenge",
-          "disabledEnv",
-          "showDisabledChallenges"
-        ],
-        "schemaType": "class",
-        "file": "frontend/src/app/score-board/components/challenges-unavailable-warning/challenges-unavailable-warning.component.ts",
         "sensitiveFields": [],
         "ownershipFields": [],
         "massAssignmentTargets": []
@@ -20210,6 +20149,67 @@
         "massAssignmentTargets": []
       },
       {
+        "name": "CodingChallengeFixItComponent",
+        "line": 33,
+        "fields": [
+          "diffHost",
+          "diffView",
+          "null",
+          "codeFixesService",
+          "challengeService",
+          "cookieService",
+          "destroyRef",
+          "challengeKey",
+          "snippet",
+          "fixes",
+          "alreadySolved",
+          "solved",
+          "selectedFix",
+          "randomFixes",
+          "explanation",
+          "string",
+          "result",
+          "ResultState",
+          "shaking",
+          "onlyChangedLines",
+          "fix",
+          "lang",
+          "parent",
+          "state",
+          "doc",
+          "extensions",
+          "original",
+          "highlightChanges",
+          "gutter",
+          "mergeControls",
+          "collapseUnchanged",
+          "margin",
+          "minSize",
+          "sort",
+          "Right",
+          "Wrong",
+          "default",
+          "verdict",
+          "variant",
+          "setResult",
+          "setShaking"
+        ],
+        "schemaType": "class",
+        "file": "frontend/src/app/coding-challenge-page/components/coding-challenge-fix-it/coding-challenge-fix-it.component.ts",
+        "sensitiveFields": [
+          {
+            "field": "codeFixesService",
+            "tags": [
+              "token"
+            ]
+          }
+        ],
+        "ownershipFields": [],
+        "massAssignmentTargets": [
+          "codeFixesService"
+        ]
+      },
+      {
         "name": "DifficultySelectionSummaryPipe",
         "line": 15,
         "fields": [
@@ -20220,18 +20220,6 @@
         ],
         "schemaType": "class",
         "file": "frontend/src/app/score-board/components/filter-settings/pipes/difficulty-selection-summary.pipe.ts",
-        "sensitiveFields": [],
-        "ownershipFields": [],
-        "massAssignmentTargets": []
-      },
-      {
-        "name": "ScoreBoardAdditionalSettingsDialogComponent",
-        "line": 14,
-        "fields": [
-          "localBackupService"
-        ],
-        "schemaType": "class",
-        "file": "frontend/src/app/score-board/components/filter-settings/components/score-board-additional-settings-dialog/score-board-additional-settings-dialog.component.ts",
         "sensitiveFields": [],
         "ownershipFields": [],
         "massAssignmentTargets": []
@@ -20249,6 +20237,18 @@
         ],
         "schemaType": "class",
         "file": "frontend/src/app/score-board/components/filter-settings/components/category-filter/category-filter.component.ts",
+        "sensitiveFields": [],
+        "ownershipFields": [],
+        "massAssignmentTargets": []
+      },
+      {
+        "name": "ScoreBoardAdditionalSettingsDialogComponent",
+        "line": 14,
+        "fields": [
+          "localBackupService"
+        ],
+        "schemaType": "class",
+        "file": "frontend/src/app/score-board/components/filter-settings/components/score-board-additional-settings-dialog/score-board-additional-settings-dialog.component.ts",
         "sensitiveFields": [],
         "ownershipFields": [],
         "massAssignmentTargets": []
@@ -20914,6 +20914,49 @@
         ]
       },
       {
+        "name": "TwoFactorAuthEnterComponent",
+        "line": 35,
+        "fields": [
+          "twoFactorAuthService",
+          "cookieService",
+          "userService",
+          "router",
+          "ngZone",
+          "twoFactorForm",
+          "UntypedFormGroup",
+          "token",
+          "errored",
+          "fields",
+          "TokenEnterFormFields",
+          "next",
+          "expires",
+          "isLoggedIn",
+          "true",
+          "error"
+        ],
+        "schemaType": "class",
+        "file": "frontend/src/app/two-factor-auth-enter/two-factor-auth-enter.component.ts",
+        "sensitiveFields": [
+          {
+            "field": "token",
+            "tags": [
+              "token"
+            ]
+          },
+          {
+            "field": "TokenEnterFormFields",
+            "tags": [
+              "token"
+            ]
+          }
+        ],
+        "ownershipFields": [],
+        "massAssignmentTargets": [
+          "token",
+          "TokenEnterFormFields"
+        ]
+      },
+      {
         "name": "WalletWeb3Component",
         "line": 35,
         "fields": [
@@ -21073,6 +21116,49 @@
         ]
       },
       {
+        "name": "TrackResultComponent",
+        "line": 32,
+        "fields": [
+          "route",
+          "trackOrderService",
+          "sanitizer",
+          "displayedColumns",
+          "dataSource",
+          "results",
+          "any",
+          "status",
+          "Status",
+          "orderId",
+          "orderNo",
+          "email",
+          "totalPrice",
+          "products",
+          "eta",
+          "bonus",
+          "data"
+        ],
+        "schemaType": "class",
+        "file": "frontend/src/app/track-result/track-result.component.ts",
+        "sensitiveFields": [
+          {
+            "field": "email",
+            "tags": [
+              "pii"
+            ]
+          },
+          {
+            "field": "totalPrice",
+            "tags": [
+              "business_value"
+            ]
+          }
+        ],
+        "ownershipFields": [],
+        "massAssignmentTargets": [
+          "totalPrice"
+        ]
+      },
+      {
         "name": "TwoFactorAuthComponent",
         "line": 36,
         "fields": [
@@ -21168,148 +21254,6 @@
         ]
       },
       {
-        "name": "SidenavComponent",
-        "line": 32,
-        "fields": [
-          "administrationService",
-          "challengeService",
-          "ngZone",
-          "io",
-          "userService",
-          "cookieService",
-          "router",
-          "configurationService",
-          "loginGuard",
-          "applicationName",
-          "showGitHubLink",
-          "userEmail",
-          "scoreBoardVisible",
-          "version",
-          "showPrivacySubmenu",
-          "showOrdersSubmenu",
-          "isShowing",
-          "offerScoreBoardTutorial",
-          "sidenavToggle",
-          "next",
-          "error",
-          "key",
-          "name",
-          "challenges",
-          "user",
-          "onToggleSidenav",
-          "config",
-          "payload",
-          "role",
-          "module"
-        ],
-        "schemaType": "class",
-        "file": "frontend/src/app/sidenav/sidenav.component.ts",
-        "sensitiveFields": [
-          {
-            "field": "userEmail",
-            "tags": [
-              "pii"
-            ]
-          },
-          {
-            "field": "role",
-            "tags": [
-              "privilege"
-            ]
-          }
-        ],
-        "ownershipFields": [],
-        "massAssignmentTargets": [
-          "role"
-        ]
-      },
-      {
-        "name": "TwoFactorAuthEnterComponent",
-        "line": 35,
-        "fields": [
-          "twoFactorAuthService",
-          "cookieService",
-          "userService",
-          "router",
-          "ngZone",
-          "twoFactorForm",
-          "UntypedFormGroup",
-          "token",
-          "errored",
-          "fields",
-          "TokenEnterFormFields",
-          "next",
-          "expires",
-          "isLoggedIn",
-          "true",
-          "error"
-        ],
-        "schemaType": "class",
-        "file": "frontend/src/app/two-factor-auth-enter/two-factor-auth-enter.component.ts",
-        "sensitiveFields": [
-          {
-            "field": "token",
-            "tags": [
-              "token"
-            ]
-          },
-          {
-            "field": "TokenEnterFormFields",
-            "tags": [
-              "token"
-            ]
-          }
-        ],
-        "ownershipFields": [],
-        "massAssignmentTargets": [
-          "token",
-          "TokenEnterFormFields"
-        ]
-      },
-      {
-        "name": "TrackResultComponent",
-        "line": 32,
-        "fields": [
-          "route",
-          "trackOrderService",
-          "sanitizer",
-          "displayedColumns",
-          "dataSource",
-          "results",
-          "any",
-          "status",
-          "Status",
-          "orderId",
-          "orderNo",
-          "email",
-          "totalPrice",
-          "products",
-          "eta",
-          "bonus",
-          "data"
-        ],
-        "schemaType": "class",
-        "file": "frontend/src/app/track-result/track-result.component.ts",
-        "sensitiveFields": [
-          {
-            "field": "email",
-            "tags": [
-              "pii"
-            ]
-          },
-          {
-            "field": "totalPrice",
-            "tags": [
-              "business_value"
-            ]
-          }
-        ],
-        "ownershipFields": [],
-        "massAssignmentTargets": [
-          "totalPrice"
-        ]
-      },
-      {
         "name": "ServerStartedNotificationComponent",
         "line": 26,
         "fields": [
@@ -21356,173 +21300,6 @@
           "continueCode",
           "continueCodeFindIt",
           "continueCodeFixIt"
-        ]
-      },
-      {
-        "name": "SearchResultComponent",
-        "line": 35,
-        "fields": [
-          "deluxeGuard",
-          "productService",
-          "quantityService",
-          "router",
-          "route",
-          "sanitizer",
-          "ngZone",
-          "io",
-          "cdRef",
-          "elRef",
-          "pageSizeOptions",
-          "resultsLength",
-          "currentPageSize",
-          "static",
-          "emptyState",
-          "products",
-          "quantities",
-          "next",
-          "dataTable",
-          "tableData",
-          "name",
-          "price",
-          "deluxePrice",
-          "id",
-          "image",
-          "description",
-          "entry",
-          "quantity",
-          "dataSource",
-          "paginator",
-          "gridDataSource",
-          "routerSubscription",
-          "challenge",
-          "string",
-          "error",
-          "i",
-          "length",
-          "queryParam",
-          "filter",
-          "searchValue",
-          "gridDataSourceSubscription",
-          "result",
-          "grid",
-          "resizeObserver",
-          "columns",
-          "pageSize",
-          "pageIndex",
-          "challengeName",
-          "module"
-        ],
-        "schemaType": "class",
-        "file": "frontend/src/app/search-result/search-result.component.ts",
-        "sensitiveFields": [
-          {
-            "field": "price",
-            "tags": [
-              "business_value"
-            ]
-          },
-          {
-            "field": "deluxePrice",
-            "tags": [
-              "business_value"
-            ]
-          }
-        ],
-        "ownershipFields": [],
-        "massAssignmentTargets": [
-          "price",
-          "deluxePrice"
-        ]
-      },
-      {
-        "name": "RegisterComponent",
-        "line": 41,
-        "fields": [
-          "securityQuestionService",
-          "userService",
-          "securityAnswerService",
-          "router",
-          "formSubmitService",
-          "translateService",
-          "snackBar",
-          "snackBarHelperService",
-          "ngZone",
-          "emailControl",
-          "UntypedFormControl",
-          "passwordControl",
-          "repeatPasswordControl",
-          "securityQuestionControl",
-          "securityAnswerControl",
-          "error",
-          "null",
-          "next",
-          "securityQuestions",
-          "user",
-          "email",
-          "password",
-          "passwordRepeat",
-          "securityQuestion",
-          "id",
-          "securityAnswer",
-          "response",
-          "UserId",
-          "answer",
-          "SecurityQuestionId"
-        ],
-        "schemaType": "class",
-        "file": "frontend/src/app/register/register.component.ts",
-        "sensitiveFields": [
-          {
-            "field": "emailControl",
-            "tags": [
-              "pii"
-            ]
-          },
-          {
-            "field": "passwordControl",
-            "tags": [
-              "credential"
-            ]
-          },
-          {
-            "field": "repeatPasswordControl",
-            "tags": [
-              "credential"
-            ]
-          },
-          {
-            "field": "email",
-            "tags": [
-              "pii"
-            ]
-          },
-          {
-            "field": "password",
-            "tags": [
-              "credential"
-            ]
-          },
-          {
-            "field": "passwordRepeat",
-            "tags": [
-              "credential"
-            ]
-          },
-          {
-            "field": "UserId",
-            "tags": [
-              "ownership"
-            ]
-          }
-        ],
-        "ownershipFields": [
-          "UserId"
-        ],
-        "massAssignmentTargets": [
-          "passwordControl",
-          "repeatPasswordControl",
-          "password",
-          "passwordRepeat"
         ]
       },
       {
@@ -21859,56 +21636,118 @@
         ]
       },
       {
-        "name": "PurchaseBasketComponent",
-        "line": 30,
+        "name": "SidenavComponent",
+        "line": 32,
         "fields": [
-          "deluxeGuard",
-          "basketService",
+          "administrationService",
+          "challengeService",
+          "ngZone",
+          "io",
           "userService",
-          "productService",
-          "snackBarHelperService",
-          "allowEdit",
-          "displayTotal",
-          "totalPrice",
-          "emitTotal",
-          "emitProductCount",
-          "tableColumns",
-          "dataSource",
-          "bonus",
-          "itemTotal",
+          "cookieService",
+          "router",
+          "configurationService",
+          "loginGuard",
+          "applicationName",
+          "showGitHubLink",
           "userEmail",
+          "scoreBoardVisible",
+          "version",
+          "showPrivacySubmenu",
+          "showOrdersSubmenu",
+          "isShowing",
+          "offerScoreBoardTutorial",
+          "sidenavToggle",
           "next",
           "error",
-          "product",
-          "price",
-          "guestBasketItems",
-          "length",
-          "guestProductRequests",
-          "item",
-          "quantity",
-          "result",
-          "deluxePrice",
-          "BasketItem",
-          "id",
-          "existingGuestItem",
-          "ProductId",
-          "newQuantity"
+          "key",
+          "name",
+          "challenges",
+          "user",
+          "onToggleSidenav",
+          "config",
+          "payload",
+          "role",
+          "module"
         ],
         "schemaType": "class",
-        "file": "frontend/src/app/purchase-basket/purchase-basket.component.ts",
+        "file": "frontend/src/app/sidenav/sidenav.component.ts",
         "sensitiveFields": [
-          {
-            "field": "totalPrice",
-            "tags": [
-              "business_value"
-            ]
-          },
           {
             "field": "userEmail",
             "tags": [
               "pii"
             ]
           },
+          {
+            "field": "role",
+            "tags": [
+              "privilege"
+            ]
+          }
+        ],
+        "ownershipFields": [],
+        "massAssignmentTargets": [
+          "role"
+        ]
+      },
+      {
+        "name": "SearchResultComponent",
+        "line": 35,
+        "fields": [
+          "deluxeGuard",
+          "productService",
+          "quantityService",
+          "router",
+          "route",
+          "sanitizer",
+          "ngZone",
+          "io",
+          "cdRef",
+          "elRef",
+          "pageSizeOptions",
+          "resultsLength",
+          "currentPageSize",
+          "static",
+          "emptyState",
+          "products",
+          "quantities",
+          "next",
+          "dataTable",
+          "tableData",
+          "name",
+          "price",
+          "deluxePrice",
+          "id",
+          "image",
+          "description",
+          "entry",
+          "quantity",
+          "dataSource",
+          "paginator",
+          "gridDataSource",
+          "routerSubscription",
+          "challenge",
+          "string",
+          "error",
+          "i",
+          "length",
+          "queryParam",
+          "filter",
+          "searchValue",
+          "gridDataSourceSubscription",
+          "result",
+          "grid",
+          "resizeObserver",
+          "columns",
+          "pageSize",
+          "pageIndex",
+          "challengeName",
+          "module"
+        ],
+        "schemaType": "class",
+        "file": "frontend/src/app/search-result/search-result.component.ts",
+        "sensitiveFields": [
           {
             "field": "price",
             "tags": [
@@ -21924,9 +21763,99 @@
         ],
         "ownershipFields": [],
         "massAssignmentTargets": [
-          "totalPrice",
           "price",
           "deluxePrice"
+        ]
+      },
+      {
+        "name": "RegisterComponent",
+        "line": 41,
+        "fields": [
+          "securityQuestionService",
+          "userService",
+          "securityAnswerService",
+          "router",
+          "formSubmitService",
+          "translateService",
+          "snackBar",
+          "snackBarHelperService",
+          "ngZone",
+          "emailControl",
+          "UntypedFormControl",
+          "passwordControl",
+          "repeatPasswordControl",
+          "securityQuestionControl",
+          "securityAnswerControl",
+          "error",
+          "null",
+          "next",
+          "securityQuestions",
+          "user",
+          "email",
+          "password",
+          "passwordRepeat",
+          "securityQuestion",
+          "id",
+          "securityAnswer",
+          "response",
+          "UserId",
+          "answer",
+          "SecurityQuestionId"
+        ],
+        "schemaType": "class",
+        "file": "frontend/src/app/register/register.component.ts",
+        "sensitiveFields": [
+          {
+            "field": "emailControl",
+            "tags": [
+              "pii"
+            ]
+          },
+          {
+            "field": "passwordControl",
+            "tags": [
+              "credential"
+            ]
+          },
+          {
+            "field": "repeatPasswordControl",
+            "tags": [
+              "credential"
+            ]
+          },
+          {
+            "field": "email",
+            "tags": [
+              "pii"
+            ]
+          },
+          {
+            "field": "password",
+            "tags": [
+              "credential"
+            ]
+          },
+          {
+            "field": "passwordRepeat",
+            "tags": [
+              "credential"
+            ]
+          },
+          {
+            "field": "UserId",
+            "tags": [
+              "ownership"
+            ]
+          }
+        ],
+        "ownershipFields": [
+          "UserId"
+        ],
+        "massAssignmentTargets": [
+          "passwordControl",
+          "repeatPasswordControl",
+          "password",
+          "passwordRepeat"
         ]
       },
       {
@@ -22007,6 +21936,77 @@
         "massAssignmentTargets": []
       },
       {
+        "name": "PurchaseBasketComponent",
+        "line": 30,
+        "fields": [
+          "deluxeGuard",
+          "basketService",
+          "userService",
+          "productService",
+          "snackBarHelperService",
+          "allowEdit",
+          "displayTotal",
+          "totalPrice",
+          "emitTotal",
+          "emitProductCount",
+          "tableColumns",
+          "dataSource",
+          "bonus",
+          "itemTotal",
+          "userEmail",
+          "next",
+          "error",
+          "product",
+          "price",
+          "guestBasketItems",
+          "length",
+          "guestProductRequests",
+          "item",
+          "quantity",
+          "result",
+          "deluxePrice",
+          "BasketItem",
+          "id",
+          "existingGuestItem",
+          "ProductId",
+          "newQuantity"
+        ],
+        "schemaType": "class",
+        "file": "frontend/src/app/purchase-basket/purchase-basket.component.ts",
+        "sensitiveFields": [
+          {
+            "field": "totalPrice",
+            "tags": [
+              "business_value"
+            ]
+          },
+          {
+            "field": "userEmail",
+            "tags": [
+              "pii"
+            ]
+          },
+          {
+            "field": "price",
+            "tags": [
+              "business_value"
+            ]
+          },
+          {
+            "field": "deluxePrice",
+            "tags": [
+              "business_value"
+            ]
+          }
+        ],
+        "ownershipFields": [],
+        "massAssignmentTargets": [
+          "totalPrice",
+          "price",
+          "deluxePrice"
+        ]
+      },
+      {
         "name": "QrCodeComponent",
         "line": 23,
         "fields": [
@@ -22021,6 +22021,32 @@
         "sensitiveFields": [
           {
             "field": "address",
+            "tags": [
+              "pii"
+            ]
+          }
+        ],
+        "ownershipFields": [],
+        "massAssignmentTargets": []
+      },
+      {
+        "name": "PrivacyPolicyComponent",
+        "line": 19,
+        "fields": [
+          "_document",
+          "configurationService",
+          "applicationName",
+          "applicationUrl",
+          "next",
+          "config",
+          "privacyContactEmail",
+          "error"
+        ],
+        "schemaType": "class",
+        "file": "frontend/src/app/privacy-policy/privacy-policy.component.ts",
+        "sensitiveFields": [
+          {
+            "field": "privacyContactEmail",
             "tags": [
               "pii"
             ]
@@ -22071,32 +22097,6 @@
         "massAssignmentTargets": [
           "points"
         ]
-      },
-      {
-        "name": "PrivacyPolicyComponent",
-        "line": 19,
-        "fields": [
-          "_document",
-          "configurationService",
-          "applicationName",
-          "applicationUrl",
-          "next",
-          "config",
-          "privacyContactEmail",
-          "error"
-        ],
-        "schemaType": "class",
-        "file": "frontend/src/app/privacy-policy/privacy-policy.component.ts",
-        "sensitiveFields": [
-          {
-            "field": "privacyContactEmail",
-            "tags": [
-              "pii"
-            ]
-          }
-        ],
-        "ownershipFields": [],
-        "massAssignmentTargets": []
       },
       {
         "name": "PaymentComponent",
@@ -22235,33 +22235,6 @@
         ]
       },
       {
-        "name": "PasswordStrengthInfoComponent",
-        "line": 17,
-        "fields": [
-          "passwordComponent",
-          "enableScoreInfo",
-          "lowerCaseCriteriaMsg",
-          "upperCaseCriteriaMsg",
-          "digitsCriteriaMsg",
-          "specialCharsCriteriaMsg",
-          "minCharsCriteriaMsg"
-        ],
-        "schemaType": "class",
-        "file": "frontend/src/app/password-strength-info/password-strength-info.component.ts",
-        "sensitiveFields": [
-          {
-            "field": "passwordComponent",
-            "tags": [
-              "credential"
-            ]
-          }
-        ],
-        "ownershipFields": [],
-        "massAssignmentTargets": [
-          "passwordComponent"
-        ]
-      },
-      {
         "name": "OrderSummaryComponent",
         "line": 26,
         "fields": [
@@ -22322,6 +22295,172 @@
         ],
         "ownershipFields": [],
         "massAssignmentTargets": [
+          "deliveryPrice",
+          "promotionalDiscount"
+        ]
+      },
+      {
+        "name": "PasswordStrengthInfoComponent",
+        "line": 17,
+        "fields": [
+          "passwordComponent",
+          "enableScoreInfo",
+          "lowerCaseCriteriaMsg",
+          "upperCaseCriteriaMsg",
+          "digitsCriteriaMsg",
+          "specialCharsCriteriaMsg",
+          "minCharsCriteriaMsg"
+        ],
+        "schemaType": "class",
+        "file": "frontend/src/app/password-strength-info/password-strength-info.component.ts",
+        "sensitiveFields": [
+          {
+            "field": "passwordComponent",
+            "tags": [
+              "credential"
+            ]
+          }
+        ],
+        "ownershipFields": [],
+        "massAssignmentTargets": [
+          "passwordComponent"
+        ]
+      },
+      {
+        "name": "OAuthComponent",
+        "line": 19,
+        "fields": [
+          "cookieService",
+          "userService",
+          "router",
+          "route",
+          "ngZone",
+          "next",
+          "profile",
+          "password",
+          "email",
+          "passwordRepeat",
+          "error",
+          "oauth",
+          "expires",
+          "hash",
+          "splitted",
+          "params",
+          "any"
+        ],
+        "schemaType": "class",
+        "file": "frontend/src/app/oauth/oauth.component.ts",
+        "sensitiveFields": [
+          {
+            "field": "password",
+            "tags": [
+              "credential"
+            ]
+          },
+          {
+            "field": "email",
+            "tags": [
+              "pii"
+            ]
+          },
+          {
+            "field": "passwordRepeat",
+            "tags": [
+              "credential"
+            ]
+          },
+          {
+            "field": "hash",
+            "tags": [
+              "credential"
+            ]
+          }
+        ],
+        "ownershipFields": [],
+        "massAssignmentTargets": [
+          "password",
+          "passwordRepeat",
+          "hash"
+        ]
+      },
+      {
+        "name": "OrderCompletionComponent",
+        "line": 31,
+        "fields": [
+          "configurationService",
+          "addressService",
+          "trackOrderService",
+          "activatedRoute",
+          "basketService",
+          "tableColumns",
+          "orderId",
+          "orderDetails",
+          "any",
+          "totalPrice",
+          "deliveryPrice",
+          "promotionalDiscount",
+          "address",
+          "tweetText",
+          "next",
+          "paramMap",
+          "addressId",
+          "paymentId",
+          "itemTotal",
+          "eta",
+          "products",
+          "bonus",
+          "dataSource",
+          "https",
+          "error",
+          "redirectUrl",
+          "truncateTweet",
+          "tweet",
+          "maxLength",
+          "showDots"
+        ],
+        "schemaType": "class",
+        "file": "frontend/src/app/order-completion/order-completion.component.ts",
+        "sensitiveFields": [
+          {
+            "field": "addressService",
+            "tags": [
+              "pii"
+            ]
+          },
+          {
+            "field": "totalPrice",
+            "tags": [
+              "business_value"
+            ]
+          },
+          {
+            "field": "deliveryPrice",
+            "tags": [
+              "business_value"
+            ]
+          },
+          {
+            "field": "promotionalDiscount",
+            "tags": [
+              "business_value"
+            ]
+          },
+          {
+            "field": "address",
+            "tags": [
+              "pii"
+            ]
+          },
+          {
+            "field": "addressId",
+            "tags": [
+              "pii"
+            ]
+          }
+        ],
+        "ownershipFields": [],
+        "massAssignmentTargets": [
+          "totalPrice",
           "deliveryPrice",
           "promotionalDiscount"
         ]
@@ -22480,114 +22619,63 @@
         ]
       },
       {
-        "name": "OrderCompletionComponent",
-        "line": 31,
+        "name": "LoginComponent",
+        "line": 41,
         "fields": [
           "configurationService",
-          "addressService",
-          "trackOrderService",
-          "activatedRoute",
-          "basketService",
-          "tableColumns",
-          "orderId",
-          "orderDetails",
-          "any",
-          "totalPrice",
-          "deliveryPrice",
-          "promotionalDiscount",
-          "address",
-          "tweetText",
-          "next",
-          "paramMap",
-          "addressId",
-          "paymentId",
-          "itemTotal",
-          "eta",
-          "products",
-          "bonus",
-          "dataSource",
-          "https",
-          "error",
-          "redirectUrl",
-          "truncateTweet",
-          "tweet",
-          "maxLength",
-          "showDots"
-        ],
-        "schemaType": "class",
-        "file": "frontend/src/app/order-completion/order-completion.component.ts",
-        "sensitiveFields": [
-          {
-            "field": "addressService",
-            "tags": [
-              "pii"
-            ]
-          },
-          {
-            "field": "totalPrice",
-            "tags": [
-              "business_value"
-            ]
-          },
-          {
-            "field": "deliveryPrice",
-            "tags": [
-              "business_value"
-            ]
-          },
-          {
-            "field": "promotionalDiscount",
-            "tags": [
-              "business_value"
-            ]
-          },
-          {
-            "field": "address",
-            "tags": [
-              "pii"
-            ]
-          },
-          {
-            "field": "addressId",
-            "tags": [
-              "pii"
-            ]
-          }
-        ],
-        "ownershipFields": [],
-        "massAssignmentTargets": [
-          "totalPrice",
-          "deliveryPrice",
-          "promotionalDiscount"
-        ]
-      },
-      {
-        "name": "OAuthComponent",
-        "line": 19,
-        "fields": [
-          "cookieService",
           "userService",
+          "windowRefService",
+          "cookieService",
           "router",
           "route",
+          "formSubmitService",
+          "basketService",
           "ngZone",
-          "next",
-          "profile",
-          "password",
-          "email",
-          "passwordRepeat",
+          "emailControl",
+          "passwordControl",
+          "hide",
+          "user",
+          "rememberMe",
+          "UntypedFormControl",
           "error",
-          "oauth",
+          "clientId",
+          "oauthUnavailable",
+          "redirectUri",
+          "testingUsername",
+          "testingPassword",
+          "email",
+          "next",
+          "authorizedRedirect",
+          "r",
+          "uri",
+          "proxy",
+          "password",
+          "authentication",
+          "redirectUrl",
           "expires",
-          "hash",
-          "splitted",
-          "params",
-          "any"
+          "status",
+          "client_id",
+          "response_type",
+          "scope",
+          "redirect_uri"
         ],
         "schemaType": "class",
-        "file": "frontend/src/app/oauth/oauth.component.ts",
+        "file": "frontend/src/app/login/login.component.ts",
         "sensitiveFields": [
           {
-            "field": "password",
+            "field": "emailControl",
+            "tags": [
+              "pii"
+            ]
+          },
+          {
+            "field": "passwordControl",
+            "tags": [
+              "credential"
+            ]
+          },
+          {
+            "field": "testingPassword",
             "tags": [
               "credential"
             ]
@@ -22599,23 +22687,49 @@
             ]
           },
           {
-            "field": "passwordRepeat",
+            "field": "password",
             "tags": [
               "credential"
             ]
           },
           {
-            "field": "hash",
+            "field": "scope",
             "tags": [
-              "credential"
+              "privilege"
             ]
           }
         ],
         "ownershipFields": [],
         "massAssignmentTargets": [
+          "passwordControl",
+          "testingPassword",
           "password",
-          "passwordRepeat",
-          "hash"
+          "scope"
+        ]
+      },
+      {
+        "name": "LastLoginIpComponent",
+        "line": 19,
+        "fields": [
+          "sanitizer",
+          "lastLoginIp",
+          "any",
+          "payload",
+          "token"
+        ],
+        "schemaType": "class",
+        "file": "frontend/src/app/last-login-ip/last-login-ip.component.ts",
+        "sensitiveFields": [
+          {
+            "field": "token",
+            "tags": [
+              "token"
+            ]
+          }
+        ],
+        "ownershipFields": [],
+        "massAssignmentTargets": [
+          "token"
         ]
       },
       {
@@ -22675,31 +22789,6 @@
         "massAssignmentTargets": [
           "passwordControl",
           "repeatPasswordControl"
-        ]
-      },
-      {
-        "name": "LastLoginIpComponent",
-        "line": 19,
-        "fields": [
-          "sanitizer",
-          "lastLoginIp",
-          "any",
-          "payload",
-          "token"
-        ],
-        "schemaType": "class",
-        "file": "frontend/src/app/last-login-ip/last-login-ip.component.ts",
-        "sensitiveFields": [
-          {
-            "field": "token",
-            "tags": [
-              "token"
-            ]
-          }
-        ],
-        "ownershipFields": [],
-        "massAssignmentTargets": [
-          "token"
         ]
       },
       {
@@ -22896,215 +22985,6 @@
         "massAssignmentTargets": []
       },
       {
-        "name": "LoginComponent",
-        "line": 41,
-        "fields": [
-          "configurationService",
-          "userService",
-          "windowRefService",
-          "cookieService",
-          "router",
-          "route",
-          "formSubmitService",
-          "basketService",
-          "ngZone",
-          "emailControl",
-          "passwordControl",
-          "hide",
-          "user",
-          "rememberMe",
-          "UntypedFormControl",
-          "error",
-          "clientId",
-          "oauthUnavailable",
-          "redirectUri",
-          "testingUsername",
-          "testingPassword",
-          "email",
-          "next",
-          "authorizedRedirect",
-          "r",
-          "uri",
-          "proxy",
-          "password",
-          "authentication",
-          "redirectUrl",
-          "expires",
-          "status",
-          "client_id",
-          "response_type",
-          "scope",
-          "redirect_uri"
-        ],
-        "schemaType": "class",
-        "file": "frontend/src/app/login/login.component.ts",
-        "sensitiveFields": [
-          {
-            "field": "emailControl",
-            "tags": [
-              "pii"
-            ]
-          },
-          {
-            "field": "passwordControl",
-            "tags": [
-              "credential"
-            ]
-          },
-          {
-            "field": "testingPassword",
-            "tags": [
-              "credential"
-            ]
-          },
-          {
-            "field": "email",
-            "tags": [
-              "pii"
-            ]
-          },
-          {
-            "field": "password",
-            "tags": [
-              "credential"
-            ]
-          },
-          {
-            "field": "scope",
-            "tags": [
-              "privilege"
-            ]
-          }
-        ],
-        "ownershipFields": [],
-        "massAssignmentTargets": [
-          "passwordControl",
-          "testingPassword",
-          "password",
-          "scope"
-        ]
-      },
-      {
-        "name": "CodingChallengePageComponent",
-        "line": 28,
-        "fields": [
-          "route",
-          "destroyRef",
-          "codeSnippetService",
-          "codeFixesService",
-          "challengeService",
-          "fixItSection",
-          "challengeKey",
-          "challengeName",
-          "snippet",
-          "CodeSnippet",
-          "fixes",
-          "findItSolved",
-          "fixItSolved",
-          "isLoaded",
-          "challenges",
-          "sort",
-          "challenge",
-          "c",
-          "key",
-          "behavior"
-        ],
-        "schemaType": "class",
-        "file": "frontend/src/app/coding-challenge-page/coding-challenge-page.component.ts",
-        "sensitiveFields": [
-          {
-            "field": "codeSnippetService",
-            "tags": [
-              "token"
-            ]
-          },
-          {
-            "field": "codeFixesService",
-            "tags": [
-              "token"
-            ]
-          },
-          {
-            "field": "CodeSnippet",
-            "tags": [
-              "token"
-            ]
-          }
-        ],
-        "ownershipFields": [],
-        "massAssignmentTargets": [
-          "codeSnippetService",
-          "codeFixesService",
-          "CodeSnippet"
-        ]
-      },
-      {
-        "name": "ComplaintComponent",
-        "line": 32,
-        "fields": [
-          "userService",
-          "complaintService",
-          "formSubmitService",
-          "translate",
-          "customerControl",
-          "UntypedFormControl",
-          "value",
-          "disabled",
-          "messageControl",
-          "static",
-          "fileUploadError",
-          "any",
-          "uploader",
-          "FileUploader",
-          "url",
-          "authToken",
-          "allowedMimeType",
-          "maxFileSize",
-          "userEmail",
-          "complaint",
-          "confirmation",
-          "onWhenAddingFileFailed",
-          "to",
-          "onAfterAddingFile",
-          "onSuccessItem",
-          "next",
-          "user",
-          "UserId",
-          "error",
-          "message",
-          "savedComplaint",
-          "ref"
-        ],
-        "schemaType": "class",
-        "file": "frontend/src/app/complaint/complaint.component.ts",
-        "sensitiveFields": [
-          {
-            "field": "authToken",
-            "tags": [
-              "token"
-            ]
-          },
-          {
-            "field": "userEmail",
-            "tags": [
-              "pii"
-            ]
-          },
-          {
-            "field": "UserId",
-            "tags": [
-              "ownership"
-            ]
-          }
-        ],
-        "ownershipFields": [
-          "UserId"
-        ],
-        "massAssignmentTargets": [
-          "authToken"
-        ]
-      },
-      {
         "name": "ContactComponent",
         "line": 33,
         "fields": [
@@ -23196,6 +23076,72 @@
         ]
       },
       {
+        "name": "ComplaintComponent",
+        "line": 32,
+        "fields": [
+          "userService",
+          "complaintService",
+          "formSubmitService",
+          "translate",
+          "customerControl",
+          "UntypedFormControl",
+          "value",
+          "disabled",
+          "messageControl",
+          "static",
+          "fileUploadError",
+          "any",
+          "uploader",
+          "FileUploader",
+          "url",
+          "authToken",
+          "allowedMimeType",
+          "maxFileSize",
+          "userEmail",
+          "complaint",
+          "confirmation",
+          "onWhenAddingFileFailed",
+          "to",
+          "onAfterAddingFile",
+          "onSuccessItem",
+          "next",
+          "user",
+          "UserId",
+          "error",
+          "message",
+          "savedComplaint",
+          "ref"
+        ],
+        "schemaType": "class",
+        "file": "frontend/src/app/complaint/complaint.component.ts",
+        "sensitiveFields": [
+          {
+            "field": "authToken",
+            "tags": [
+              "token"
+            ]
+          },
+          {
+            "field": "userEmail",
+            "tags": [
+              "pii"
+            ]
+          },
+          {
+            "field": "UserId",
+            "tags": [
+              "ownership"
+            ]
+          }
+        ],
+        "ownershipFields": [
+          "UserId"
+        ],
+        "massAssignmentTargets": [
+          "authToken"
+        ]
+      },
+      {
         "name": "ChallengeSolvedNotificationComponent",
         "line": 45,
         "fields": [
@@ -23246,54 +23192,6 @@
         ]
       },
       {
-        "name": "AdministrationComponent",
-        "line": 34,
-        "fields": [
-          "dialog",
-          "userService",
-          "feedbackService",
-          "sanitizer",
-          "cookieService",
-          "showToolCalls",
-          "userDataSource",
-          "userDataSourceHidden",
-          "userColumns",
-          "feedbackDataSource",
-          "feedbackColumns",
-          "error",
-          "resultsLengthUser",
-          "resultsLengthFeedback",
-          "paginatorUsers",
-          "paginatorFeedb",
-          "event",
-          "expires",
-          "next",
-          "email",
-          "class",
-          "paginator",
-          "comment",
-          "id",
-          "data",
-          "feedback",
-          "numberOfTimes",
-          "user",
-          "lastLoginTime",
-          "SIX_HOURS_IN_SECONDS"
-        ],
-        "schemaType": "class",
-        "file": "frontend/src/app/administration/administration.component.ts",
-        "sensitiveFields": [
-          {
-            "field": "email",
-            "tags": [
-              "pii"
-            ]
-          }
-        ],
-        "ownershipFields": [],
-        "massAssignmentTargets": []
-      },
-      {
         "name": "AddressSelectComponent",
         "line": 16,
         "fields": [
@@ -23308,120 +23206,6 @@
         "sensitiveFields": [
           {
             "field": "addressId",
-            "tags": [
-              "pii"
-            ]
-          }
-        ],
-        "ownershipFields": [],
-        "massAssignmentTargets": []
-      },
-      {
-        "name": "AccountingComponent",
-        "line": 40,
-        "fields": [
-          "productService",
-          "quantityService",
-          "orderHistoryService",
-          "snackBarHelperService",
-          "orderHistoryColumns",
-          "static",
-          "paginatorOrderHistory",
-          "orderData",
-          "displayedColumns",
-          "tableData",
-          "paginator",
-          "productSubscription",
-          "quantitySubscription",
-          "quantityMap",
-          "next",
-          "id",
-          "quantity",
-          "error",
-          "dataSource",
-          "orderId",
-          "totalPrice",
-          "delivered",
-          "orderSource",
-          "product",
-          "price"
-        ],
-        "schemaType": "class",
-        "file": "frontend/src/app/accounting/accounting.component.ts",
-        "sensitiveFields": [
-          {
-            "field": "totalPrice",
-            "tags": [
-              "business_value"
-            ]
-          },
-          {
-            "field": "price",
-            "tags": [
-              "business_value"
-            ]
-          }
-        ],
-        "ownershipFields": [],
-        "massAssignmentTargets": [
-          "totalPrice",
-          "price"
-        ]
-      },
-      {
-        "name": "AddressComponent",
-        "line": 29,
-        "fields": [
-          "addressService",
-          "translate",
-          "router",
-          "ngZone",
-          "snackBarHelperService",
-          "emitSelection",
-          "allowEdit",
-          "addNewAddressDiv",
-          "showNextButton",
-          "addressId",
-          "any",
-          "displayedColumns",
-          "selection",
-          "storedAddresses",
-          "confirmation",
-          "error",
-          "addressExist",
-          "next",
-          "dataSource",
-          "id"
-        ],
-        "schemaType": "class",
-        "file": "frontend/src/app/address/address.component.ts",
-        "sensitiveFields": [
-          {
-            "field": "addressService",
-            "tags": [
-              "pii"
-            ]
-          },
-          {
-            "field": "addNewAddressDiv",
-            "tags": [
-              "pii"
-            ]
-          },
-          {
-            "field": "addressId",
-            "tags": [
-              "pii"
-            ]
-          },
-          {
-            "field": "storedAddresses",
-            "tags": [
-              "pii"
-            ]
-          },
-          {
-            "field": "addressExist",
             "tags": [
               "pii"
             ]
@@ -23515,6 +23299,222 @@
         "massAssignmentTargets": [
           "pinControl",
           "zipCode"
+        ]
+      },
+      {
+        "name": "AddressComponent",
+        "line": 29,
+        "fields": [
+          "addressService",
+          "translate",
+          "router",
+          "ngZone",
+          "snackBarHelperService",
+          "emitSelection",
+          "allowEdit",
+          "addNewAddressDiv",
+          "showNextButton",
+          "addressId",
+          "any",
+          "displayedColumns",
+          "selection",
+          "storedAddresses",
+          "confirmation",
+          "error",
+          "addressExist",
+          "next",
+          "dataSource",
+          "id"
+        ],
+        "schemaType": "class",
+        "file": "frontend/src/app/address/address.component.ts",
+        "sensitiveFields": [
+          {
+            "field": "addressService",
+            "tags": [
+              "pii"
+            ]
+          },
+          {
+            "field": "addNewAddressDiv",
+            "tags": [
+              "pii"
+            ]
+          },
+          {
+            "field": "addressId",
+            "tags": [
+              "pii"
+            ]
+          },
+          {
+            "field": "storedAddresses",
+            "tags": [
+              "pii"
+            ]
+          },
+          {
+            "field": "addressExist",
+            "tags": [
+              "pii"
+            ]
+          }
+        ],
+        "ownershipFields": [],
+        "massAssignmentTargets": []
+      },
+      {
+        "name": "AdministrationComponent",
+        "line": 34,
+        "fields": [
+          "dialog",
+          "userService",
+          "feedbackService",
+          "sanitizer",
+          "cookieService",
+          "showToolCalls",
+          "userDataSource",
+          "userDataSourceHidden",
+          "userColumns",
+          "feedbackDataSource",
+          "feedbackColumns",
+          "error",
+          "resultsLengthUser",
+          "resultsLengthFeedback",
+          "paginatorUsers",
+          "paginatorFeedb",
+          "event",
+          "expires",
+          "next",
+          "email",
+          "class",
+          "paginator",
+          "comment",
+          "id",
+          "data",
+          "feedback",
+          "numberOfTimes",
+          "user",
+          "lastLoginTime",
+          "SIX_HOURS_IN_SECONDS"
+        ],
+        "schemaType": "class",
+        "file": "frontend/src/app/administration/administration.component.ts",
+        "sensitiveFields": [
+          {
+            "field": "email",
+            "tags": [
+              "pii"
+            ]
+          }
+        ],
+        "ownershipFields": [],
+        "massAssignmentTargets": []
+      },
+      {
+        "name": "AccountingComponent",
+        "line": 40,
+        "fields": [
+          "productService",
+          "quantityService",
+          "orderHistoryService",
+          "snackBarHelperService",
+          "orderHistoryColumns",
+          "static",
+          "paginatorOrderHistory",
+          "orderData",
+          "displayedColumns",
+          "tableData",
+          "paginator",
+          "productSubscription",
+          "quantitySubscription",
+          "quantityMap",
+          "next",
+          "id",
+          "quantity",
+          "error",
+          "dataSource",
+          "orderId",
+          "totalPrice",
+          "delivered",
+          "orderSource",
+          "product",
+          "price"
+        ],
+        "schemaType": "class",
+        "file": "frontend/src/app/accounting/accounting.component.ts",
+        "sensitiveFields": [
+          {
+            "field": "totalPrice",
+            "tags": [
+              "business_value"
+            ]
+          },
+          {
+            "field": "price",
+            "tags": [
+              "business_value"
+            ]
+          }
+        ],
+        "ownershipFields": [],
+        "massAssignmentTargets": [
+          "totalPrice",
+          "price"
+        ]
+      },
+      {
+        "name": "CodingChallengePageComponent",
+        "line": 28,
+        "fields": [
+          "route",
+          "destroyRef",
+          "codeSnippetService",
+          "codeFixesService",
+          "challengeService",
+          "fixItSection",
+          "challengeKey",
+          "challengeName",
+          "snippet",
+          "CodeSnippet",
+          "fixes",
+          "findItSolved",
+          "fixItSolved",
+          "isLoaded",
+          "challenges",
+          "sort",
+          "challenge",
+          "c",
+          "key",
+          "behavior"
+        ],
+        "schemaType": "class",
+        "file": "frontend/src/app/coding-challenge-page/coding-challenge-page.component.ts",
+        "sensitiveFields": [
+          {
+            "field": "codeSnippetService",
+            "tags": [
+              "token"
+            ]
+          },
+          {
+            "field": "codeFixesService",
+            "tags": [
+              "token"
+            ]
+          },
+          {
+            "field": "CodeSnippet",
+            "tags": [
+              "token"
+            ]
+          }
+        ],
+        "ownershipFields": [],
+        "massAssignmentTargets": [
+          "codeSnippetService",
+          "codeFixesService",
+          "CodeSnippet"
         ]
       },
       {
@@ -23821,15 +23821,15 @@
             ]
           },
           {
-            "model": "ComplaintComponent",
-            "file": "frontend/src/app/complaint/complaint.component.ts",
+            "model": "ContactComponent",
+            "file": "frontend/src/app/contact/contact.component.ts",
             "tags": [
               "ownership"
             ]
           },
           {
-            "model": "ContactComponent",
-            "file": "frontend/src/app/contact/contact.component.ts",
+            "model": "ComplaintComponent",
+            "file": "frontend/src/app/complaint/complaint.component.ts",
             "tags": [
               "ownership"
             ]
@@ -23881,15 +23881,15 @@
             ]
           },
           {
-            "model": "RegisterComponent",
-            "file": "frontend/src/app/register/register.component.ts",
+            "model": "SecurityQuestionService",
+            "file": "frontend/src/app/Services/security-question.service.ts",
             "tags": [
               "pii"
             ]
           },
           {
-            "model": "SecurityQuestionService",
-            "file": "frontend/src/app/Services/security-question.service.ts",
+            "model": "RegisterComponent",
+            "file": "frontend/src/app/register/register.component.ts",
             "tags": [
               "pii"
             ]
@@ -23902,15 +23902,15 @@
             ]
           },
           {
-            "model": "ForgotPasswordComponent",
-            "file": "frontend/src/app/forgot-password/forgot-password.component.ts",
+            "model": "LoginComponent",
+            "file": "frontend/src/app/login/login.component.ts",
             "tags": [
               "pii"
             ]
           },
           {
-            "model": "LoginComponent",
-            "file": "frontend/src/app/login/login.component.ts",
+            "model": "ForgotPasswordComponent",
+            "file": "frontend/src/app/forgot-password/forgot-password.component.ts",
             "tags": [
               "pii"
             ]
@@ -23932,15 +23932,15 @@
             ]
           },
           {
-            "model": "RegisterComponent",
-            "file": "frontend/src/app/register/register.component.ts",
+            "model": "TwoFactorAuthService",
+            "file": "frontend/src/app/Services/two-factor-auth-service.ts",
             "tags": [
               "credential"
             ]
           },
           {
-            "model": "TwoFactorAuthService",
-            "file": "frontend/src/app/Services/two-factor-auth-service.ts",
+            "model": "RegisterComponent",
+            "file": "frontend/src/app/register/register.component.ts",
             "tags": [
               "credential"
             ]
@@ -23990,15 +23990,15 @@
             ]
           },
           {
-            "model": "SidenavComponent",
-            "file": "frontend/src/app/sidenav/sidenav.component.ts",
+            "model": "ChatService",
+            "file": "frontend/src/app/Services/chat.service.ts",
             "tags": [
               "privilege"
             ]
           },
           {
-            "model": "ChatService",
-            "file": "frontend/src/app/Services/chat.service.ts",
+            "model": "SidenavComponent",
+            "file": "frontend/src/app/sidenav/sidenav.component.ts",
             "tags": [
               "privilege"
             ]
@@ -24328,6 +24328,15 @@
             ]
           }
         ],
+        "TokenEnterFormFields": [
+          {
+            "model": "TwoFactorAuthEnterComponent",
+            "file": "frontend/src/app/two-factor-auth-enter/two-factor-auth-enter.component.ts",
+            "tags": [
+              "token"
+            ]
+          }
+        ],
         "walletBalance": [
           {
             "model": "WalletWeb3Component",
@@ -24430,6 +24439,50 @@
             ]
           }
         ],
+        "totalPrice": [
+          {
+            "model": "TrackResultComponent",
+            "file": "frontend/src/app/track-result/track-result.component.ts",
+            "tags": [
+              "business_value"
+            ]
+          },
+          {
+            "model": "PurchaseBasketComponent",
+            "file": "frontend/src/app/purchase-basket/purchase-basket.component.ts",
+            "tags": [
+              "business_value"
+            ]
+          },
+          {
+            "model": "PaymentComponent",
+            "file": "frontend/src/app/payment/payment.component.ts",
+            "tags": [
+              "business_value"
+            ]
+          },
+          {
+            "model": "OrderCompletionComponent",
+            "file": "frontend/src/app/order-completion/order-completion.component.ts",
+            "tags": [
+              "business_value"
+            ]
+          },
+          {
+            "model": "OrderHistoryComponent",
+            "file": "frontend/src/app/order-history/order-history.component.ts",
+            "tags": [
+              "business_value"
+            ]
+          },
+          {
+            "model": "AccountingComponent",
+            "file": "frontend/src/app/accounting/accounting.component.ts",
+            "tags": [
+              "business_value"
+            ]
+          }
+        ],
         "passwordControl": [
           {
             "model": "TwoFactorAuthComponent",
@@ -24446,15 +24499,15 @@
             ]
           },
           {
-            "model": "ForgotPasswordComponent",
-            "file": "frontend/src/app/forgot-password/forgot-password.component.ts",
+            "model": "LoginComponent",
+            "file": "frontend/src/app/login/login.component.ts",
             "tags": [
               "credential"
             ]
           },
           {
-            "model": "LoginComponent",
-            "file": "frontend/src/app/login/login.component.ts",
+            "model": "ForgotPasswordComponent",
+            "file": "frontend/src/app/forgot-password/forgot-password.component.ts",
             "tags": [
               "credential"
             ]
@@ -24521,96 +24574,6 @@
             ]
           }
         ],
-        "userEmail": [
-          {
-            "model": "SidenavComponent",
-            "file": "frontend/src/app/sidenav/sidenav.component.ts",
-            "tags": [
-              "pii"
-            ]
-          },
-          {
-            "model": "PurchaseBasketComponent",
-            "file": "frontend/src/app/purchase-basket/purchase-basket.component.ts",
-            "tags": [
-              "pii"
-            ]
-          },
-          {
-            "model": "RecycleComponent",
-            "file": "frontend/src/app/recycle/recycle.component.ts",
-            "tags": [
-              "pii"
-            ]
-          },
-          {
-            "model": "NavbarComponent",
-            "file": "frontend/src/app/navbar/navbar.component.ts",
-            "tags": [
-              "pii"
-            ]
-          },
-          {
-            "model": "ComplaintComponent",
-            "file": "frontend/src/app/complaint/complaint.component.ts",
-            "tags": [
-              "pii"
-            ]
-          }
-        ],
-        "TokenEnterFormFields": [
-          {
-            "model": "TwoFactorAuthEnterComponent",
-            "file": "frontend/src/app/two-factor-auth-enter/two-factor-auth-enter.component.ts",
-            "tags": [
-              "token"
-            ]
-          }
-        ],
-        "totalPrice": [
-          {
-            "model": "TrackResultComponent",
-            "file": "frontend/src/app/track-result/track-result.component.ts",
-            "tags": [
-              "business_value"
-            ]
-          },
-          {
-            "model": "PurchaseBasketComponent",
-            "file": "frontend/src/app/purchase-basket/purchase-basket.component.ts",
-            "tags": [
-              "business_value"
-            ]
-          },
-          {
-            "model": "PaymentComponent",
-            "file": "frontend/src/app/payment/payment.component.ts",
-            "tags": [
-              "business_value"
-            ]
-          },
-          {
-            "model": "OrderHistoryComponent",
-            "file": "frontend/src/app/order-history/order-history.component.ts",
-            "tags": [
-              "business_value"
-            ]
-          },
-          {
-            "model": "OrderCompletionComponent",
-            "file": "frontend/src/app/order-completion/order-completion.component.ts",
-            "tags": [
-              "business_value"
-            ]
-          },
-          {
-            "model": "AccountingComponent",
-            "file": "frontend/src/app/accounting/accounting.component.ts",
-            "tags": [
-              "business_value"
-            ]
-          }
-        ],
         "continueCode": [
           {
             "model": "ServerStartedNotificationComponent",
@@ -24663,61 +24626,6 @@
             "file": "frontend/src/app/Services/local-backup.service.ts",
             "tags": [
               "token"
-            ]
-          }
-        ],
-        "emailControl": [
-          {
-            "model": "RegisterComponent",
-            "file": "frontend/src/app/register/register.component.ts",
-            "tags": [
-              "pii"
-            ]
-          },
-          {
-            "model": "ForgotPasswordComponent",
-            "file": "frontend/src/app/forgot-password/forgot-password.component.ts",
-            "tags": [
-              "pii"
-            ]
-          },
-          {
-            "model": "LoginComponent",
-            "file": "frontend/src/app/login/login.component.ts",
-            "tags": [
-              "pii"
-            ]
-          }
-        ],
-        "repeatPasswordControl": [
-          {
-            "model": "RegisterComponent",
-            "file": "frontend/src/app/register/register.component.ts",
-            "tags": [
-              "credential"
-            ]
-          },
-          {
-            "model": "ForgotPasswordComponent",
-            "file": "frontend/src/app/forgot-password/forgot-password.component.ts",
-            "tags": [
-              "credential"
-            ]
-          }
-        ],
-        "passwordRepeat": [
-          {
-            "model": "RegisterComponent",
-            "file": "frontend/src/app/register/register.component.ts",
-            "tags": [
-              "credential"
-            ]
-          },
-          {
-            "model": "OAuthComponent",
-            "file": "frontend/src/app/oauth/oauth.component.ts",
-            "tags": [
-              "credential"
             ]
           }
         ],
@@ -24794,6 +24702,98 @@
             ]
           }
         ],
+        "userEmail": [
+          {
+            "model": "SidenavComponent",
+            "file": "frontend/src/app/sidenav/sidenav.component.ts",
+            "tags": [
+              "pii"
+            ]
+          },
+          {
+            "model": "RecycleComponent",
+            "file": "frontend/src/app/recycle/recycle.component.ts",
+            "tags": [
+              "pii"
+            ]
+          },
+          {
+            "model": "PurchaseBasketComponent",
+            "file": "frontend/src/app/purchase-basket/purchase-basket.component.ts",
+            "tags": [
+              "pii"
+            ]
+          },
+          {
+            "model": "NavbarComponent",
+            "file": "frontend/src/app/navbar/navbar.component.ts",
+            "tags": [
+              "pii"
+            ]
+          },
+          {
+            "model": "ComplaintComponent",
+            "file": "frontend/src/app/complaint/complaint.component.ts",
+            "tags": [
+              "pii"
+            ]
+          }
+        ],
+        "emailControl": [
+          {
+            "model": "RegisterComponent",
+            "file": "frontend/src/app/register/register.component.ts",
+            "tags": [
+              "pii"
+            ]
+          },
+          {
+            "model": "LoginComponent",
+            "file": "frontend/src/app/login/login.component.ts",
+            "tags": [
+              "pii"
+            ]
+          },
+          {
+            "model": "ForgotPasswordComponent",
+            "file": "frontend/src/app/forgot-password/forgot-password.component.ts",
+            "tags": [
+              "pii"
+            ]
+          }
+        ],
+        "repeatPasswordControl": [
+          {
+            "model": "RegisterComponent",
+            "file": "frontend/src/app/register/register.component.ts",
+            "tags": [
+              "credential"
+            ]
+          },
+          {
+            "model": "ForgotPasswordComponent",
+            "file": "frontend/src/app/forgot-password/forgot-password.component.ts",
+            "tags": [
+              "credential"
+            ]
+          }
+        ],
+        "passwordRepeat": [
+          {
+            "model": "RegisterComponent",
+            "file": "frontend/src/app/register/register.component.ts",
+            "tags": [
+              "credential"
+            ]
+          },
+          {
+            "model": "OAuthComponent",
+            "file": "frontend/src/app/oauth/oauth.component.ts",
+            "tags": [
+              "credential"
+            ]
+          }
+        ],
         "addressComponent": [
           {
             "model": "RecycleComponent",
@@ -24833,15 +24833,24 @@
             ]
           },
           {
-            "model": "AddressComponent",
-            "file": "frontend/src/app/address/address.component.ts",
+            "model": "AddressCreateComponent",
+            "file": "frontend/src/app/address-create/address-create.component.ts",
             "tags": [
               "pii"
             ]
           },
           {
-            "model": "AddressCreateComponent",
-            "file": "frontend/src/app/address-create/address-create.component.ts",
+            "model": "AddressComponent",
+            "file": "frontend/src/app/address/address.component.ts",
+            "tags": [
+              "pii"
+            ]
+          }
+        ],
+        "privacyContactEmail": [
+          {
+            "model": "PrivacyPolicyComponent",
+            "file": "frontend/src/app/privacy-policy/privacy-policy.component.ts",
             "tags": [
               "pii"
             ]
@@ -24860,15 +24869,6 @@
             "file": "frontend/src/app/order-history/order-history.component.ts",
             "tags": [
               "business_value"
-            ]
-          }
-        ],
-        "privacyContactEmail": [
-          {
-            "model": "PrivacyPolicyComponent",
-            "file": "frontend/src/app/privacy-policy/privacy-policy.component.ts",
-            "tags": [
-              "pii"
             ]
           }
         ],
@@ -24936,15 +24936,6 @@
             ]
           }
         ],
-        "passwordComponent": [
-          {
-            "model": "PasswordStrengthInfoComponent",
-            "file": "frontend/src/app/password-strength-info/password-strength-info.component.ts",
-            "tags": [
-              "credential"
-            ]
-          }
-        ],
         "addressService": [
           {
             "model": "OrderSummaryComponent",
@@ -24968,17 +24959,26 @@
             ]
           },
           {
-            "model": "AddressComponent",
-            "file": "frontend/src/app/address/address.component.ts",
+            "model": "AddressCreateComponent",
+            "file": "frontend/src/app/address-create/address-create.component.ts",
             "tags": [
               "pii"
             ]
           },
           {
-            "model": "AddressCreateComponent",
-            "file": "frontend/src/app/address-create/address-create.component.ts",
+            "model": "AddressComponent",
+            "file": "frontend/src/app/address/address.component.ts",
             "tags": [
               "pii"
+            ]
+          }
+        ],
+        "passwordComponent": [
+          {
+            "model": "PasswordStrengthInfoComponent",
+            "file": "frontend/src/app/password-strength-info/password-strength-info.component.ts",
+            "tags": [
+              "credential"
             ]
           }
         ],
@@ -24988,6 +24988,24 @@
             "file": "frontend/src/app/oauth/oauth.component.ts",
             "tags": [
               "credential"
+            ]
+          }
+        ],
+        "testingPassword": [
+          {
+            "model": "LoginComponent",
+            "file": "frontend/src/app/login/login.component.ts",
+            "tags": [
+              "credential"
+            ]
+          }
+        ],
+        "scope": [
+          {
+            "model": "LoginComponent",
+            "file": "frontend/src/app/login/login.component.ts",
+            "tags": [
+              "privilege"
             ]
           }
         ],
@@ -25063,21 +25081,84 @@
             ]
           }
         ],
-        "testingPassword": [
+        "newPasswordControl": [
           {
-            "model": "LoginComponent",
-            "file": "frontend/src/app/login/login.component.ts",
+            "model": "ChangePasswordComponent",
+            "file": "frontend/src/app/change-password/change-password.component.ts",
             "tags": [
               "credential"
             ]
           }
         ],
-        "scope": [
+        "repeatNewPasswordControl": [
           {
-            "model": "LoginComponent",
-            "file": "frontend/src/app/login/login.component.ts",
+            "model": "ChangePasswordComponent",
+            "file": "frontend/src/app/change-password/change-password.component.ts",
             "tags": [
-              "privilege"
+              "credential"
+            ]
+          }
+        ],
+        "authToken": [
+          {
+            "model": "ComplaintComponent",
+            "file": "frontend/src/app/complaint/complaint.component.ts",
+            "tags": [
+              "token"
+            ]
+          }
+        ],
+        "countryMappingService": [
+          {
+            "model": "ChallengeSolvedNotificationComponent",
+            "file": "frontend/src/app/challenge-solved-notification/challenge-solved-notification.component.ts",
+            "tags": [
+              "token"
+            ]
+          }
+        ],
+        "pinControl": [
+          {
+            "model": "AddressCreateComponent",
+            "file": "frontend/src/app/address-create/address-create.component.ts",
+            "tags": [
+              "token"
+            ]
+          }
+        ],
+        "addressControl": [
+          {
+            "model": "AddressCreateComponent",
+            "file": "frontend/src/app/address-create/address-create.component.ts",
+            "tags": [
+              "pii"
+            ]
+          }
+        ],
+        "addNewAddressDiv": [
+          {
+            "model": "AddressComponent",
+            "file": "frontend/src/app/address/address.component.ts",
+            "tags": [
+              "pii"
+            ]
+          }
+        ],
+        "storedAddresses": [
+          {
+            "model": "AddressComponent",
+            "file": "frontend/src/app/address/address.component.ts",
+            "tags": [
+              "pii"
+            ]
+          }
+        ],
+        "addressExist": [
+          {
+            "model": "AddressComponent",
+            "file": "frontend/src/app/address/address.component.ts",
+            "tags": [
+              "pii"
             ]
           }
         ],
@@ -25112,87 +25193,6 @@
             "file": "frontend/src/app/coding-challenge-page/coding-challenge-page.component.ts",
             "tags": [
               "token"
-            ]
-          }
-        ],
-        "authToken": [
-          {
-            "model": "ComplaintComponent",
-            "file": "frontend/src/app/complaint/complaint.component.ts",
-            "tags": [
-              "token"
-            ]
-          }
-        ],
-        "newPasswordControl": [
-          {
-            "model": "ChangePasswordComponent",
-            "file": "frontend/src/app/change-password/change-password.component.ts",
-            "tags": [
-              "credential"
-            ]
-          }
-        ],
-        "repeatNewPasswordControl": [
-          {
-            "model": "ChangePasswordComponent",
-            "file": "frontend/src/app/change-password/change-password.component.ts",
-            "tags": [
-              "credential"
-            ]
-          }
-        ],
-        "countryMappingService": [
-          {
-            "model": "ChallengeSolvedNotificationComponent",
-            "file": "frontend/src/app/challenge-solved-notification/challenge-solved-notification.component.ts",
-            "tags": [
-              "token"
-            ]
-          }
-        ],
-        "addNewAddressDiv": [
-          {
-            "model": "AddressComponent",
-            "file": "frontend/src/app/address/address.component.ts",
-            "tags": [
-              "pii"
-            ]
-          }
-        ],
-        "storedAddresses": [
-          {
-            "model": "AddressComponent",
-            "file": "frontend/src/app/address/address.component.ts",
-            "tags": [
-              "pii"
-            ]
-          }
-        ],
-        "addressExist": [
-          {
-            "model": "AddressComponent",
-            "file": "frontend/src/app/address/address.component.ts",
-            "tags": [
-              "pii"
-            ]
-          }
-        ],
-        "pinControl": [
-          {
-            "model": "AddressCreateComponent",
-            "file": "frontend/src/app/address-create/address-create.component.ts",
-            "tags": [
-              "token"
-            ]
-          }
-        ],
-        "addressControl": [
-          {
-            "model": "AddressCreateComponent",
-            "file": "frontend/src/app/address-create/address-create.component.ts",
-            "tags": [
-              "pii"
             ]
           }
         ],

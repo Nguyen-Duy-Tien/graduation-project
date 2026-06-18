@@ -1,0 +1,11 @@
+[submodule "benchmarks/juice-shop"]
+    path = benchmarks/juice-shop
+    url = https://github.com/juice-shop/juice-shop.git
+
+[submodule "benchmarks/crapi"]
+    path = benchmarks/crapi
+    url = https://github.com/OWASP/crAPI.git
+
+[submodule "benchmarks/owasp-benchmark"]
+    path = benchmarks/owasp-benchmark
+    url = https://github.com/OWASP-Benchmark/BenchmarkJava.git
