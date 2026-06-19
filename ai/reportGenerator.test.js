@@ -149,7 +149,7 @@ test('buildHtml: shows exact finding location and evidence', () => {
   assert.match(html, /gap: 2\.25rem/);
 });
 
-test('buildHtml: shows tool run counts and AI filtered findings', () => {
+test('buildHtml: shows tool run counts and keeps all findings visible', () => {
   const html = buildHtml(
     {
       executive_summary: { key_findings: [], immediate_actions: [] },
@@ -159,8 +159,8 @@ test('buildHtml: shows tool run counts and AI filtered findings', () => {
       ],
       triaged_findings: [{
         id: 'F-010',
-        triage_status: 'false_positive',
-        triage_reason: 'Dependency not reachable in runtime path.',
+        triage_status: 'needs_manual_review',
+        triage_reason: 'Requires validation in runtime path.',
         risk_score: 5,
         remediation: { summary: 'No action required.' },
         original_finding: {
@@ -181,7 +181,7 @@ test('buildHtml: shows tool run counts and AI filtered findings', () => {
   assert.match(html, /Semgrep/);
   assert.match(html, /4 findings/);
   assert.match(html, /missing zap-report\.json/);
-  assert.match(html, /AI Filtered Findings/);
+  assert.doesNotMatch(html, /AI Filtered Findings/);
   assert.match(html, /Scanner-only finding/);
 });
 

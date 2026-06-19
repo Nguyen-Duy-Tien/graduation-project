@@ -253,7 +253,7 @@ Copy `Jenkinsfile` vào root của repo dự án, đảm bảo module nằm tạ
 
 - Đọc output của Semgrep, Bandit, Trivy, ZAP, Nikto → **deduplication** theo `category:ruleId:location`
 - Gửi tối đa 40 findings (ưu tiên critical/high) lên Gemini
-- Gemini phân loại mỗi finding: `confirmed_vulnerability` | `likely_vulnerability` | `needs_manual_review` | `false_positive`
+- Gemini phân loại mỗi finding: `confirmed_vulnerability` | `likely_vulnerability` | `needs_manual_review`
 - Tính `risk_score` 0–100, sinh `remediation` cụ thể cho framework đang dùng
 - Render `security-report.html` dark-themed với executive summary, severity stats, per-finding details
 
@@ -332,11 +332,11 @@ Bảng đánh giá gồm:
 | Endpoints detected by collector | Số endpoint route scanner phát hiện |
 | Endpoint coverage | Tỷ lệ endpoint ground truth được scanner phát hiện |
 | Category coverage | Tỷ lệ nhóm lỗ hổng ground truth có evidence từ route/pattern collector |
-| Raw findings before AI | Số finding trước AI triage, lấy từ `security-report.json` nếu có |
-| Findings marked false positive by AI | Số finding AI phân loại `false_positive` |
-| Actionable findings after AI | Số finding còn lại sau khi lọc false positive |
+| Scanner findings triaged by AI | Số scanner findings đã được AI triage, lấy từ `security-report.json` nếu có |
+| Confirmed vulnerabilities | Số finding được AI xếp `confirmed_vulnerability` |
+| Needs manual review | Số finding cần kiểm chứng thủ công |
 
-Lưu ý: false positive rate trước AI cần nhãn thủ công trên raw scanner findings. Script tự động chỉ tính được phân loại sau AI dựa trên `security-report.json`.
+Lưu ý: AI triage không gắn hoặc lọc `false_positive`. Việc tính false positive cần kiểm chứng thủ công hoặc đối chiếu với ground truth benchmark.
 
 ---
 
@@ -396,6 +396,6 @@ Call #3 (reportGenerator.js)
   temperature: 0.10  |  max_tokens: 8192
   Input:  tối đa 40 findings đã dedup (~5–10KB)
   Output: triaged findings với risk score + remediation + executive summary
-  Mục đích: loại bỏ false positive, ưu tiên findings, đưa ra hướng fix cụ thể
+  Mục đích: ưu tiên findings, chấm risk score, đưa ra hướng fix cụ thể
 ```
 

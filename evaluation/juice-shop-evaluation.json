@@ -1,0 +1,3775 @@
+{
+  "inputs": {
+    "challengesPath": "C:\\Users\\Admin\\Documents\\do an\\output\\final-report Juice Shop\\challenges.yml",
+    "reportPath": "C:\\Users\\Admin\\Documents\\do an\\output\\final-report Juice Shop\\security-report.json",
+    "htmlPath": "C:\\Users\\Admin\\Documents\\do an\\output\\final-report Juice Shop\\security-report.html"
+  },
+  "groundTruth": {
+    "challengeCount": 112,
+    "categories": [
+      {
+        "category": "Sensitive Data Exposure",
+        "count": 16
+      },
+      {
+        "category": "Injection",
+        "count": 13
+      },
+      {
+        "category": "Broken Access Control",
+        "count": 12
+      },
+      {
+        "category": "Improper Input Validation",
+        "count": 12
+      },
+      {
+        "category": "Broken Authentication",
+        "count": 9
+      },
+      {
+        "category": "XSS",
+        "count": 9
+      },
+      {
+        "category": "Vulnerable Components",
+        "count": 8
+      },
+      {
+        "category": "Miscellaneous",
+        "count": 6
+      },
+      {
+        "category": "Cryptographic Issues",
+        "count": 5
+      },
+      {
+        "category": "Broken Anti Automation",
+        "count": 4
+      },
+      {
+        "category": "Observability Failures",
+        "count": 4
+      },
+      {
+        "category": "Security Misconfiguration",
+        "count": 4
+      },
+      {
+        "category": "Insecure Deserialization",
+        "count": 3
+      },
+      {
+        "category": "Security through Obscurity",
+        "count": 3
+      },
+      {
+        "category": "Unvalidated Redirects",
+        "count": 2
+      },
+      {
+        "category": "XXE",
+        "count": 2
+      }
+    ]
+  },
+  "scanner": {
+    "rows": [
+      {
+        "id": "F-001",
+        "source": "semgrep",
+        "category": "sqli",
+        "severity": "critical",
+        "message": "Detected a sequelize statement that is tainted by user-input. This could lead to SQL injection if the variable is user-controlled and is not properly sanitized. In order to prevent SQL injection, it is recommended to use parameterized queries or prepared statements.",
+        "location": "/src/data/static/codefixes/dbSchemaChallenge_1.ts:5",
+        "triageStatus": "confirmed_vulnerability",
+        "outcome": "TP",
+        "confidence": "exact",
+        "challengeKey": "dbSchemaChallenge",
+        "challengeName": "Database Schema",
+        "reason": "The finding is in the DB schema challenge codefix file."
+      },
+      {
+        "id": "F-002",
+        "source": "semgrep",
+        "category": "sqli",
+        "severity": "critical",
+        "message": "Detected a sequelize statement that is tainted by user-input. This could lead to SQL injection if the variable is user-controlled and is not properly sanitized. In order to prevent SQL injection, it is recommended to use parameterized queries or prepared statements.",
+        "location": "/src/data/static/codefixes/dbSchemaChallenge_3.ts:11",
+        "triageStatus": "confirmed_vulnerability",
+        "outcome": "TP",
+        "confidence": "exact",
+        "challengeKey": "dbSchemaChallenge",
+        "challengeName": "Database Schema",
+        "reason": "The finding is in the DB schema challenge codefix file."
+      },
+      {
+        "id": "F-003",
+        "source": "semgrep",
+        "category": "sqli",
+        "severity": "critical",
+        "message": "Detected a sequelize statement that is tainted by user-input. This could lead to SQL injection if the variable is user-controlled and is not properly sanitized. In order to prevent SQL injection, it is recommended to use parameterized queries or prepared statements.",
+        "location": "/src/data/static/codefixes/unionSqlInjectionChallenge_1.ts:6",
+        "triageStatus": "confirmed_vulnerability",
+        "outcome": "TP",
+        "confidence": "exact",
+        "challengeKey": "unionSqlInjectionChallenge",
+        "challengeName": "User Credentials",
+        "reason": "The finding is in the Union SQL Injection challenge codefix file."
+      },
+      {
+        "id": "F-004",
+        "source": "semgrep",
+        "category": "sqli",
+        "severity": "critical",
+        "message": "Detected a sequelize statement that is tainted by user-input. This could lead to SQL injection if the variable is user-controlled and is not properly sanitized. In order to prevent SQL injection, it is recommended to use parameterized queries or prepared statements.",
+        "location": "/src/data/static/codefixes/unionSqlInjectionChallenge_3.ts:10",
+        "triageStatus": "confirmed_vulnerability",
+        "outcome": "TP",
+        "confidence": "exact",
+        "challengeKey": "unionSqlInjectionChallenge",
+        "challengeName": "User Credentials",
+        "reason": "The finding is in the Union SQL Injection challenge codefix file."
+      },
+      {
+        "id": "F-005",
+        "source": "semgrep",
+        "category": "sqli",
+        "severity": "critical",
+        "message": "Detected a sequelize statement that is tainted by user-input. This could lead to SQL injection if the variable is user-controlled and is not properly sanitized. In order to prevent SQL injection, it is recommended to use parameterized queries or prepared statements.",
+        "location": "/src/routes/login.ts:34",
+        "triageStatus": "confirmed_vulnerability",
+        "outcome": "TP",
+        "confidence": "exact",
+        "challengeKey": "loginAdminChallenge",
+        "challengeName": "Login Admin",
+        "reason": "SQL injection in login is the ground-truth Login Admin/Login Bender/Login Jim family."
+      },
+      {
+        "id": "F-006",
+        "source": "semgrep",
+        "category": "sqli",
+        "severity": "critical",
+        "message": "Detected a sequelize statement that is tainted by user-input. This could lead to SQL injection if the variable is user-controlled and is not properly sanitized. In order to prevent SQL injection, it is recommended to use parameterized queries or prepared statements.",
+        "location": "/src/routes/search.ts:23",
+        "triageStatus": "confirmed_vulnerability",
+        "outcome": "TP",
+        "confidence": "exact",
+        "challengeKey": "unionSqlInjectionChallenge",
+        "challengeName": "User Credentials",
+        "reason": "SQL injection in search is the User Credentials ground-truth challenge."
+      },
+      {
+        "id": "F-007",
+        "source": "semgrep",
+        "category": "general",
+        "severity": "critical",
+        "message": "Found data from an Express or Next web request flowing to `eval`. If this data is user-controllable this can lead to execution of arbitrary system commands in the context of your application process. Avoid `eval` whenever possible.",
+        "location": "/src/routes/userProfile.ts:61",
+        "triageStatus": "confirmed_vulnerability",
+        "outcome": "PARTIAL",
+        "confidence": "partial",
+        "challengeKey": "sstiChallenge",
+        "challengeName": "SSTi",
+        "reason": "Eval-like route evidence maps to server-side code execution class; Juice Shop ground truth is SSTi/RCE."
+      },
+      {
+        "id": "F-008",
+        "source": "semgrep",
+        "category": "general",
+        "severity": "high",
+        "message": "Detected a unquoted template variable as an attribute. If unquoted, a malicious actor could inject custom JavaScript handlers. To fix this, add quotes around the template expression, like this: \"{{ expr }}\".",
+        "location": "/src/frontend/src/app/navbar/navbar.component.html:17",
+        "triageStatus": "likely_vulnerability",
+        "outcome": "FP",
+        "confidence": "none",
+        "challengeKey": null,
+        "challengeName": null,
+        "reason": "No precise Juice Shop challenge mapping for this scanner finding."
+      },
+      {
+        "id": "F-009",
+        "source": "semgrep",
+        "category": "general",
+        "severity": "high",
+        "message": "Detected a unquoted template variable as an attribute. If unquoted, a malicious actor could inject custom JavaScript handlers. To fix this, add quotes around the template expression, like this: \"{{ expr }}\".",
+        "location": "/src/frontend/src/app/purchase-basket/purchase-basket.component.html:15",
+        "triageStatus": "likely_vulnerability",
+        "outcome": "FP",
+        "confidence": "none",
+        "challengeKey": null,
+        "challengeName": null,
+        "reason": "No precise Juice Shop challenge mapping for this scanner finding."
+      },
+      {
+        "id": "F-010",
+        "source": "semgrep",
+        "category": "jwt",
+        "severity": "high",
+        "message": "A hard-coded credential was detected. It is not recommended to store credentials in source-code, as this risks secrets being leaked and used by either an internal or external malicious adversary. It is recommended to use environment variables to securely provide credentials or retrieve credentials from a secure vault or HSM (Hardware Security Module).",
+        "location": "/src/lib/insecurity.ts:56",
+        "triageStatus": "confirmed_vulnerability",
+        "outcome": "PARTIAL",
+        "confidence": "partial",
+        "challengeKey": "jwtUnsignedChallenge",
+        "challengeName": "Unsigned JWT",
+        "reason": "JWT hardcoded/weak secret evidence supports JWT challenge surfaces."
+      },
+      {
+        "id": "F-011",
+        "source": "semgrep",
+        "category": "general",
+        "severity": "high",
+        "message": "The application processes user-input, this is passed to res.sendFile which can allow an attacker to arbitrarily read files on the system through path traversal. It is recommended to perform input validation in addition to canonicalizing the path. This allows you to validate the path against the intended directory it should be accessing.",
+        "location": "/src/routes/fileServer.ts:33",
+        "triageStatus": "confirmed_vulnerability",
+        "outcome": "TP",
+        "confidence": "exact",
+        "challengeKey": "directoryListingChallenge",
+        "challengeName": "Confidential Document",
+        "reason": "Public file server is the Confidential Document/file disclosure surface."
+      },
+      {
+        "id": "F-012",
+        "source": "semgrep",
+        "category": "general",
+        "severity": "high",
+        "message": "The application processes user-input, this is passed to res.sendFile which can allow an attacker to arbitrarily read files on the system through path traversal. It is recommended to perform input validation in addition to canonicalizing the path. This allows you to validate the path against the intended directory it should be accessing.",
+        "location": "/src/routes/keyServer.ts:14",
+        "triageStatus": "confirmed_vulnerability",
+        "outcome": "PARTIAL",
+        "confidence": "partial",
+        "challengeKey": "nftUnlockChallenge",
+        "challengeName": "NFT Takeover",
+        "reason": "Key file exposure supports sensitive-data/key-disclosure challenges."
+      },
+      {
+        "id": "F-013",
+        "source": "semgrep",
+        "category": "general",
+        "severity": "high",
+        "message": "The application processes user-input, this is passed to res.sendFile which can allow an attacker to arbitrarily read files on the system through path traversal. It is recommended to perform input validation in addition to canonicalizing the path. This allows you to validate the path against the intended directory it should be accessing.",
+        "location": "/src/routes/logfileServer.ts:14",
+        "triageStatus": "confirmed_vulnerability",
+        "outcome": "TP",
+        "confidence": "exact",
+        "challengeKey": "accessLogDisclosureChallenge",
+        "challengeName": "Access Log",
+        "reason": "Log file server is the Access Log ground-truth challenge surface."
+      },
+      {
+        "id": "F-014",
+        "source": "semgrep",
+        "category": "general",
+        "severity": "high",
+        "message": "The application processes user-input, this is passed to res.sendFile which can allow an attacker to arbitrarily read files on the system through path traversal. It is recommended to perform input validation in addition to canonicalizing the path. This allows you to validate the path against the intended directory it should be accessing.",
+        "location": "/src/routes/quarantineServer.ts:14",
+        "triageStatus": "confirmed_vulnerability",
+        "outcome": "PARTIAL",
+        "confidence": "partial",
+        "challengeKey": "lfrChallenge",
+        "challengeName": "Local File Read",
+        "reason": "Quarantine file serving is file-read/file-disclosure related ground truth."
+      },
+      {
+        "id": "F-015",
+        "source": "semgrep",
+        "category": "general",
+        "severity": "high",
+        "message": "It looks like 'toUrl' is read from user input and it is used to as a redirect. Ensure 'toUrl' is not externally controlled, otherwise this is an open redirect.",
+        "location": "/src/routes/redirect.ts:19",
+        "triageStatus": "likely_vulnerability",
+        "outcome": "TP",
+        "confidence": "exact",
+        "challengeKey": "redirectChallenge",
+        "challengeName": "Allowlist Bypass",
+        "reason": "Open redirect in redirect.ts maps to Allowlist Bypass/Outdated Allowlist."
+      },
+      {
+        "id": "F-016",
+        "source": "semgrep",
+        "category": "general",
+        "severity": "high",
+        "message": "The application redirects to a URL specified by user-supplied input `query` that is not validated. This could redirect users to malicious locations. Consider using an allow-list approach to validate URLs, or warn users they are being redirected to a third-party website.",
+        "location": "/src/routes/redirect.ts:19",
+        "triageStatus": "likely_vulnerability",
+        "outcome": "TP",
+        "confidence": "exact",
+        "challengeKey": "redirectChallenge",
+        "challengeName": "Allowlist Bypass",
+        "reason": "Open redirect in redirect.ts maps to Allowlist Bypass/Outdated Allowlist."
+      },
+      {
+        "id": "F-017",
+        "source": "semgrep",
+        "category": "general",
+        "severity": "high",
+        "message": "Cannot determine what 'subs' is and it is used with a '<script>' tag. This could be susceptible to cross-site scripting (XSS). Ensure 'subs' is not externally controlled, or sanitize this data.",
+        "location": "/src/routes/videoHandler.ts:57",
+        "triageStatus": "needs_manual_review",
+        "outcome": "FP",
+        "confidence": "none",
+        "challengeKey": null,
+        "challengeName": null,
+        "reason": "No precise Juice Shop challenge mapping for this scanner finding."
+      },
+      {
+        "id": "F-018",
+        "source": "semgrep",
+        "category": "general",
+        "severity": "high",
+        "message": "Cannot determine what 'subs' is and it is used with a '<script>' tag. This could be susceptible to cross-site scripting (XSS). Ensure 'subs' is not externally controlled, or sanitize this data.",
+        "location": "/src/routes/videoHandler.ts:71",
+        "triageStatus": "needs_manual_review",
+        "outcome": "FP",
+        "confidence": "none",
+        "challengeKey": null,
+        "challengeName": null,
+        "reason": "No precise Juice Shop challenge mapping for this scanner finding."
+      },
+      {
+        "id": "F-019",
+        "source": "semgrep",
+        "category": "general",
+        "severity": "high",
+        "message": "Directory listing/indexing is enabled, which may lead to disclosure of sensitive directories and files. It is recommended to disable directory listing unless it is a public resource. If you need directory listing, ensure that sensitive files are inaccessible when querying the resource.",
+        "location": "/src/server.ts:269",
+        "triageStatus": "confirmed_vulnerability",
+        "outcome": "PARTIAL",
+        "confidence": "partial",
+        "challengeKey": "directoryListingChallenge",
+        "challengeName": "Confidential Document",
+        "reason": "Directory listing in server.ts maps to Confidential Document and related file exposure challenges."
+      },
+      {
+        "id": "F-020",
+        "source": "semgrep",
+        "category": "general",
+        "severity": "high",
+        "message": "Directory listing/indexing is enabled, which may lead to disclosure of sensitive directories and files. It is recommended to disable directory listing unless it is a public resource. If you need directory listing, ensure that sensitive files are inaccessible when querying the resource.",
+        "location": "/src/server.ts:273",
+        "triageStatus": "confirmed_vulnerability",
+        "outcome": "PARTIAL",
+        "confidence": "partial",
+        "challengeKey": "directoryListingChallenge",
+        "challengeName": "Confidential Document",
+        "reason": "Directory listing in server.ts maps to Confidential Document and related file exposure challenges."
+      },
+      {
+        "id": "F-021",
+        "source": "semgrep",
+        "category": "general",
+        "severity": "high",
+        "message": "Directory listing/indexing is enabled, which may lead to disclosure of sensitive directories and files. It is recommended to disable directory listing unless it is a public resource. If you need directory listing, ensure that sensitive files are inaccessible when querying the resource.",
+        "location": "/src/server.ts:277",
+        "triageStatus": "confirmed_vulnerability",
+        "outcome": "PARTIAL",
+        "confidence": "partial",
+        "challengeKey": "directoryListingChallenge",
+        "challengeName": "Confidential Document",
+        "reason": "Directory listing in server.ts maps to Confidential Document and related file exposure challenges."
+      },
+      {
+        "id": "F-022",
+        "source": "semgrep",
+        "category": "general",
+        "severity": "high",
+        "message": "Directory listing/indexing is enabled, which may lead to disclosure of sensitive directories and files. It is recommended to disable directory listing unless it is a public resource. If you need directory listing, ensure that sensitive files are inaccessible when querying the resource.",
+        "location": "/src/server.ts:281",
+        "triageStatus": "confirmed_vulnerability",
+        "outcome": "PARTIAL",
+        "confidence": "partial",
+        "challengeKey": "directoryListingChallenge",
+        "challengeName": "Confidential Document",
+        "reason": "Directory listing in server.ts maps to Confidential Document and related file exposure challenges."
+      },
+      {
+        "id": "F-023",
+        "source": "semgrep",
+        "category": "general",
+        "severity": "high",
+        "message": "Detected a unquoted template variable as an attribute. If unquoted, a malicious actor could inject custom JavaScript handlers. To fix this, add quotes around the template expression, like this: \"{{ expr }}\".",
+        "location": "/src/views/dataErasureForm.hbs:38",
+        "triageStatus": "likely_vulnerability",
+        "outcome": "FP",
+        "confidence": "none",
+        "challengeKey": null,
+        "challengeName": null,
+        "reason": "No precise Juice Shop challenge mapping for this scanner finding."
+      },
+      {
+        "id": "F-024",
+        "source": "zap",
+        "category": "general",
+        "severity": "medium",
+        "message": "Backup File Disclosure",
+        "location": "GET http://web:3000/ftp/quarantine%20-%20Copy",
+        "triageStatus": "confirmed_vulnerability",
+        "outcome": "PARTIAL",
+        "confidence": "partial",
+        "challengeKey": "forgottenBackupChallenge",
+        "challengeName": "Forgotten Sales Backup",
+        "reason": "Backup file disclosure maps to forgotten backup/developer backup class, but many ZAP instances are duplicate probes."
+      },
+      {
+        "id": "F-025",
+        "source": "zap",
+        "category": "general",
+        "severity": "medium",
+        "message": "Backup File Disclosure",
+        "location": "GET http://web:3000/ftp/quarantine%20-%20Copy%20(2)",
+        "triageStatus": "confirmed_vulnerability",
+        "outcome": "PARTIAL",
+        "confidence": "partial",
+        "challengeKey": "forgottenBackupChallenge",
+        "challengeName": "Forgotten Sales Backup",
+        "reason": "Backup file disclosure maps to forgotten backup/developer backup class, but many ZAP instances are duplicate probes."
+      },
+      {
+        "id": "F-026",
+        "source": "zap",
+        "category": "general",
+        "severity": "medium",
+        "message": "Backup File Disclosure",
+        "location": "GET http://web:3000/ftp/quarantine%20-%20Copy%20(2)/juicy_malware_linux_amd_64.url",
+        "triageStatus": "confirmed_vulnerability",
+        "outcome": "PARTIAL",
+        "confidence": "partial",
+        "challengeKey": "forgottenBackupChallenge",
+        "challengeName": "Forgotten Sales Backup",
+        "reason": "Backup file disclosure maps to forgotten backup/developer backup class, but many ZAP instances are duplicate probes."
+      },
+      {
+        "id": "F-027",
+        "source": "zap",
+        "category": "general",
+        "severity": "medium",
+        "message": "Backup File Disclosure",
+        "location": "GET http://web:3000/ftp/quarantine%20-%20Copy%20(2)/juicy_malware_linux_arm_64.url",
+        "triageStatus": "confirmed_vulnerability",
+        "outcome": "PARTIAL",
+        "confidence": "partial",
+        "challengeKey": "forgottenBackupChallenge",
+        "challengeName": "Forgotten Sales Backup",
+        "reason": "Backup file disclosure maps to forgotten backup/developer backup class, but many ZAP instances are duplicate probes."
+      },
+      {
+        "id": "F-028",
+        "source": "zap",
+        "category": "general",
+        "severity": "medium",
+        "message": "Backup File Disclosure",
+        "location": "GET http://web:3000/ftp/quarantine%20-%20Copy%20(2)/juicy_malware_macos_64.url",
+        "triageStatus": "confirmed_vulnerability",
+        "outcome": "PARTIAL",
+        "confidence": "partial",
+        "challengeKey": "forgottenBackupChallenge",
+        "challengeName": "Forgotten Sales Backup",
+        "reason": "Backup file disclosure maps to forgotten backup/developer backup class, but many ZAP instances are duplicate probes."
+      },
+      {
+        "id": "F-029",
+        "source": "zap",
+        "category": "general",
+        "severity": "medium",
+        "message": "Backup File Disclosure",
+        "location": "GET http://web:3000/ftp/quarantine%20-%20Copy%20(2)/juicy_malware_windows_64.exe.url",
+        "triageStatus": "confirmed_vulnerability",
+        "outcome": "PARTIAL",
+        "confidence": "partial",
+        "challengeKey": "forgottenBackupChallenge",
+        "challengeName": "Forgotten Sales Backup",
+        "reason": "Backup file disclosure maps to forgotten backup/developer backup class, but many ZAP instances are duplicate probes."
+      },
+      {
+        "id": "F-030",
+        "source": "zap",
+        "category": "general",
+        "severity": "medium",
+        "message": "Backup File Disclosure",
+        "location": "GET http://web:3000/ftp/quarantine%20-%20Copy%20(3)",
+        "triageStatus": "confirmed_vulnerability",
+        "outcome": "PARTIAL",
+        "confidence": "partial",
+        "challengeKey": "forgottenBackupChallenge",
+        "challengeName": "Forgotten Sales Backup",
+        "reason": "Backup file disclosure maps to forgotten backup/developer backup class, but many ZAP instances are duplicate probes."
+      },
+      {
+        "id": "F-031",
+        "source": "zap",
+        "category": "general",
+        "severity": "medium",
+        "message": "Backup File Disclosure",
+        "location": "GET http://web:3000/ftp/quarantine%20-%20Copy%20(3)/juicy_malware_linux_amd_64.url",
+        "triageStatus": "likely_vulnerability",
+        "outcome": "PARTIAL",
+        "confidence": "partial",
+        "challengeKey": "forgottenBackupChallenge",
+        "challengeName": "Forgotten Sales Backup",
+        "reason": "Backup file disclosure maps to forgotten backup/developer backup class, but many ZAP instances are duplicate probes."
+      },
+      {
+        "id": "F-032",
+        "source": "zap",
+        "category": "general",
+        "severity": "medium",
+        "message": "Backup File Disclosure",
+        "location": "GET http://web:3000/ftp/quarantine%20-%20Copy%20(3)/juicy_malware_linux_arm_64.url",
+        "triageStatus": "likely_vulnerability",
+        "outcome": "PARTIAL",
+        "confidence": "partial",
+        "challengeKey": "forgottenBackupChallenge",
+        "challengeName": "Forgotten Sales Backup",
+        "reason": "Backup file disclosure maps to forgotten backup/developer backup class, but many ZAP instances are duplicate probes."
+      },
+      {
+        "id": "F-033",
+        "source": "zap",
+        "category": "general",
+        "severity": "medium",
+        "message": "Backup File Disclosure",
+        "location": "GET http://web:3000/ftp/quarantine%20-%20Copy%20(3)/juicy_malware_macos_64.url",
+        "triageStatus": "likely_vulnerability",
+        "outcome": "PARTIAL",
+        "confidence": "partial",
+        "challengeKey": "forgottenBackupChallenge",
+        "challengeName": "Forgotten Sales Backup",
+        "reason": "Backup file disclosure maps to forgotten backup/developer backup class, but many ZAP instances are duplicate probes."
+      },
+      {
+        "id": "F-034",
+        "source": "zap",
+        "category": "general",
+        "severity": "medium",
+        "message": "Backup File Disclosure",
+        "location": "GET http://web:3000/ftp/quarantine%20-%20Copy%20(3)/juicy_malware_windows_64.exe.url",
+        "triageStatus": "likely_vulnerability",
+        "outcome": "PARTIAL",
+        "confidence": "partial",
+        "challengeKey": "forgottenBackupChallenge",
+        "challengeName": "Forgotten Sales Backup",
+        "reason": "Backup file disclosure maps to forgotten backup/developer backup class, but many ZAP instances are duplicate probes."
+      },
+      {
+        "id": "F-035",
+        "source": "zap",
+        "category": "general",
+        "severity": "medium",
+        "message": "Backup File Disclosure",
+        "location": "GET http://web:3000/ftp/quarantine%20-%20Copy/juicy_malware_linux_amd_64.url",
+        "triageStatus": "likely_vulnerability",
+        "outcome": "PARTIAL",
+        "confidence": "partial",
+        "challengeKey": "forgottenBackupChallenge",
+        "challengeName": "Forgotten Sales Backup",
+        "reason": "Backup file disclosure maps to forgotten backup/developer backup class, but many ZAP instances are duplicate probes."
+      },
+      {
+        "id": "F-036",
+        "source": "zap",
+        "category": "general",
+        "severity": "medium",
+        "message": "Backup File Disclosure",
+        "location": "GET http://web:3000/ftp/quarantine%20-%20Copy/juicy_malware_linux_arm_64.url",
+        "triageStatus": "likely_vulnerability",
+        "outcome": "PARTIAL",
+        "confidence": "partial",
+        "challengeKey": "forgottenBackupChallenge",
+        "challengeName": "Forgotten Sales Backup",
+        "reason": "Backup file disclosure maps to forgotten backup/developer backup class, but many ZAP instances are duplicate probes."
+      },
+      {
+        "id": "F-037",
+        "source": "zap",
+        "category": "general",
+        "severity": "medium",
+        "message": "Backup File Disclosure",
+        "location": "GET http://web:3000/ftp/quarantine%20-%20Copy/juicy_malware_macos_64.url",
+        "triageStatus": "likely_vulnerability",
+        "outcome": "PARTIAL",
+        "confidence": "partial",
+        "challengeKey": "forgottenBackupChallenge",
+        "challengeName": "Forgotten Sales Backup",
+        "reason": "Backup file disclosure maps to forgotten backup/developer backup class, but many ZAP instances are duplicate probes."
+      },
+      {
+        "id": "F-038",
+        "source": "zap",
+        "category": "general",
+        "severity": "medium",
+        "message": "Backup File Disclosure",
+        "location": "GET http://web:3000/ftp/quarantine%20-%20Copy/juicy_malware_windows_64.exe.url",
+        "triageStatus": "likely_vulnerability",
+        "outcome": "PARTIAL",
+        "confidence": "partial",
+        "challengeKey": "forgottenBackupChallenge",
+        "challengeName": "Forgotten Sales Backup",
+        "reason": "Backup file disclosure maps to forgotten backup/developer backup class, but many ZAP instances are duplicate probes."
+      },
+      {
+        "id": "F-039",
+        "source": "zap",
+        "category": "general",
+        "severity": "medium",
+        "message": "Backup File Disclosure",
+        "location": "GET http://web:3000/ftp/quarantine.bac",
+        "triageStatus": "likely_vulnerability",
+        "outcome": "PARTIAL",
+        "confidence": "partial",
+        "challengeKey": "forgottenBackupChallenge",
+        "challengeName": "Forgotten Sales Backup",
+        "reason": "Backup file disclosure maps to forgotten backup/developer backup class, but many ZAP instances are duplicate probes."
+      },
+      {
+        "id": "F-040",
+        "source": "zap",
+        "category": "general",
+        "severity": "medium",
+        "message": "Backup File Disclosure",
+        "location": "GET http://web:3000/ftp/quarantine.backup",
+        "triageStatus": "likely_vulnerability",
+        "outcome": "PARTIAL",
+        "confidence": "partial",
+        "challengeKey": "forgottenBackupChallenge",
+        "challengeName": "Forgotten Sales Backup",
+        "reason": "Backup file disclosure maps to forgotten backup/developer backup class, but many ZAP instances are duplicate probes."
+      },
+      {
+        "id": "F-041",
+        "source": "zap",
+        "category": "general",
+        "severity": "medium",
+        "message": "Backup File Disclosure",
+        "location": "GET http://web:3000/ftp/quarantine.bak",
+        "triageStatus": "likely_vulnerability",
+        "outcome": "PARTIAL",
+        "confidence": "partial",
+        "challengeKey": "forgottenBackupChallenge",
+        "challengeName": "Forgotten Sales Backup",
+        "reason": "Backup file disclosure maps to forgotten backup/developer backup class, but many ZAP instances are duplicate probes."
+      },
+      {
+        "id": "F-042",
+        "source": "zap",
+        "category": "general",
+        "severity": "medium",
+        "message": "Backup File Disclosure",
+        "location": "GET http://web:3000/ftp/quarantine.jar",
+        "triageStatus": "likely_vulnerability",
+        "outcome": "PARTIAL",
+        "confidence": "partial",
+        "challengeKey": "forgottenBackupChallenge",
+        "challengeName": "Forgotten Sales Backup",
+        "reason": "Backup file disclosure maps to forgotten backup/developer backup class, but many ZAP instances are duplicate probes."
+      },
+      {
+        "id": "F-043",
+        "source": "zap",
+        "category": "general",
+        "severity": "medium",
+        "message": "Backup File Disclosure",
+        "location": "GET http://web:3000/ftp/quarantine.log",
+        "triageStatus": "likely_vulnerability",
+        "outcome": "PARTIAL",
+        "confidence": "partial",
+        "challengeKey": "forgottenBackupChallenge",
+        "challengeName": "Forgotten Sales Backup",
+        "reason": "Backup file disclosure maps to forgotten backup/developer backup class, but many ZAP instances are duplicate probes."
+      },
+      {
+        "id": "F-044",
+        "source": "zap",
+        "category": "general",
+        "severity": "medium",
+        "message": "Backup File Disclosure",
+        "location": "GET http://web:3000/ftp/quarantine.old",
+        "triageStatus": "likely_vulnerability",
+        "outcome": "PARTIAL",
+        "confidence": "partial",
+        "challengeKey": "forgottenBackupChallenge",
+        "challengeName": "Forgotten Sales Backup",
+        "reason": "Backup file disclosure maps to forgotten backup/developer backup class, but many ZAP instances are duplicate probes."
+      },
+      {
+        "id": "F-045",
+        "source": "zap",
+        "category": "general",
+        "severity": "medium",
+        "message": "Backup File Disclosure",
+        "location": "GET http://web:3000/ftp/quarantine.swp",
+        "triageStatus": "likely_vulnerability",
+        "outcome": "PARTIAL",
+        "confidence": "partial",
+        "challengeKey": "forgottenBackupChallenge",
+        "challengeName": "Forgotten Sales Backup",
+        "reason": "Backup file disclosure maps to forgotten backup/developer backup class, but many ZAP instances are duplicate probes."
+      },
+      {
+        "id": "F-046",
+        "source": "zap",
+        "category": "general",
+        "severity": "medium",
+        "message": "Backup File Disclosure",
+        "location": "GET http://web:3000/ftp/quarantine.tar",
+        "triageStatus": "likely_vulnerability",
+        "outcome": "PARTIAL",
+        "confidence": "partial",
+        "challengeKey": "forgottenBackupChallenge",
+        "challengeName": "Forgotten Sales Backup",
+        "reason": "Backup file disclosure maps to forgotten backup/developer backup class, but many ZAP instances are duplicate probes."
+      },
+      {
+        "id": "F-047",
+        "source": "zap",
+        "category": "general",
+        "severity": "medium",
+        "message": "Backup File Disclosure",
+        "location": "GET http://web:3000/ftp/quarantine.zip",
+        "triageStatus": "likely_vulnerability",
+        "outcome": "PARTIAL",
+        "confidence": "partial",
+        "challengeKey": "forgottenBackupChallenge",
+        "challengeName": "Forgotten Sales Backup",
+        "reason": "Backup file disclosure maps to forgotten backup/developer backup class, but many ZAP instances are duplicate probes."
+      },
+      {
+        "id": "F-048",
+        "source": "zap",
+        "category": "general",
+        "severity": "medium",
+        "message": "Backup File Disclosure",
+        "location": "GET http://web:3000/ftp/quarantine.~bk",
+        "triageStatus": "likely_vulnerability",
+        "outcome": "PARTIAL",
+        "confidence": "partial",
+        "challengeKey": "forgottenBackupChallenge",
+        "challengeName": "Forgotten Sales Backup",
+        "reason": "Backup file disclosure maps to forgotten backup/developer backup class, but many ZAP instances are duplicate probes."
+      },
+      {
+        "id": "F-049",
+        "source": "zap",
+        "category": "general",
+        "severity": "medium",
+        "message": "Backup File Disclosure",
+        "location": "GET http://web:3000/ftp/quarantinebackup",
+        "triageStatus": "likely_vulnerability",
+        "outcome": "PARTIAL",
+        "confidence": "partial",
+        "challengeKey": "forgottenBackupChallenge",
+        "challengeName": "Forgotten Sales Backup",
+        "reason": "Backup file disclosure maps to forgotten backup/developer backup class, but many ZAP instances are duplicate probes."
+      },
+      {
+        "id": "F-050",
+        "source": "zap",
+        "category": "general",
+        "severity": "medium",
+        "message": "Backup File Disclosure",
+        "location": "GET http://web:3000/ftp/quarantinebackup/juicy_malware_linux_amd_64.url",
+        "triageStatus": "likely_vulnerability",
+        "outcome": "PARTIAL",
+        "confidence": "partial",
+        "challengeKey": "forgottenBackupChallenge",
+        "challengeName": "Forgotten Sales Backup",
+        "reason": "Backup file disclosure maps to forgotten backup/developer backup class, but many ZAP instances are duplicate probes."
+      },
+      {
+        "id": "F-051",
+        "source": "zap",
+        "category": "general",
+        "severity": "medium",
+        "message": "Backup File Disclosure",
+        "location": "GET http://web:3000/ftp/quarantinebackup/juicy_malware_linux_arm_64.url",
+        "triageStatus": "likely_vulnerability",
+        "outcome": "PARTIAL",
+        "confidence": "partial",
+        "challengeKey": "forgottenBackupChallenge",
+        "challengeName": "Forgotten Sales Backup",
+        "reason": "Backup file disclosure maps to forgotten backup/developer backup class, but many ZAP instances are duplicate probes."
+      },
+      {
+        "id": "F-052",
+        "source": "zap",
+        "category": "general",
+        "severity": "medium",
+        "message": "Backup File Disclosure",
+        "location": "GET http://web:3000/ftp/quarantinebackup/juicy_malware_macos_64.url",
+        "triageStatus": "likely_vulnerability",
+        "outcome": "PARTIAL",
+        "confidence": "partial",
+        "challengeKey": "forgottenBackupChallenge",
+        "challengeName": "Forgotten Sales Backup",
+        "reason": "Backup file disclosure maps to forgotten backup/developer backup class, but many ZAP instances are duplicate probes."
+      },
+      {
+        "id": "F-053",
+        "source": "zap",
+        "category": "general",
+        "severity": "medium",
+        "message": "Backup File Disclosure",
+        "location": "GET http://web:3000/ftp/quarantinebackup/juicy_malware_windows_64.exe.url",
+        "triageStatus": "likely_vulnerability",
+        "outcome": "PARTIAL",
+        "confidence": "partial",
+        "challengeKey": "forgottenBackupChallenge",
+        "challengeName": "Forgotten Sales Backup",
+        "reason": "Backup file disclosure maps to forgotten backup/developer backup class, but many ZAP instances are duplicate probes."
+      },
+      {
+        "id": "F-054",
+        "source": "zap",
+        "category": "general",
+        "severity": "medium",
+        "message": "Backup File Disclosure",
+        "location": "GET http://web:3000/ftp/quarantine~",
+        "triageStatus": "likely_vulnerability",
+        "outcome": "PARTIAL",
+        "confidence": "partial",
+        "challengeKey": "forgottenBackupChallenge",
+        "challengeName": "Forgotten Sales Backup",
+        "reason": "Backup file disclosure maps to forgotten backup/developer backup class, but many ZAP instances are duplicate probes."
+      },
+      {
+        "id": "F-055",
+        "source": "zap",
+        "category": "general",
+        "severity": "medium",
+        "message": "Bypassing 403",
+        "location": "GET http://web:3000/%2e/ftp/coupons_2013.md.bak",
+        "triageStatus": "likely_vulnerability",
+        "outcome": "PARTIAL",
+        "confidence": "partial",
+        "challengeKey": "directoryListingChallenge",
+        "challengeName": "Confidential Document",
+        "reason": "403 bypass on /ftp files maps to file access challenges."
+      },
+      {
+        "id": "F-056",
+        "source": "zap",
+        "category": "general",
+        "severity": "medium",
+        "message": "Bypassing 403",
+        "location": "GET http://web:3000/%2e/ftp/eastere.gg",
+        "triageStatus": "likely_vulnerability",
+        "outcome": "PARTIAL",
+        "confidence": "partial",
+        "challengeKey": "directoryListingChallenge",
+        "challengeName": "Confidential Document",
+        "reason": "403 bypass on /ftp files maps to file access challenges."
+      },
+      {
+        "id": "F-057",
+        "source": "zap",
+        "category": "general",
+        "severity": "medium",
+        "message": "Bypassing 403",
+        "location": "GET http://web:3000/%2e/ftp/package-lock.json.bak",
+        "triageStatus": "likely_vulnerability",
+        "outcome": "PARTIAL",
+        "confidence": "partial",
+        "challengeKey": "directoryListingChallenge",
+        "challengeName": "Confidential Document",
+        "reason": "403 bypass on /ftp files maps to file access challenges."
+      },
+      {
+        "id": "F-058",
+        "source": "zap",
+        "category": "general",
+        "severity": "medium",
+        "message": "Bypassing 403",
+        "location": "GET http://web:3000/%2e/ftp/suspicious_errors.yml",
+        "triageStatus": "likely_vulnerability",
+        "outcome": "PARTIAL",
+        "confidence": "partial",
+        "challengeKey": "directoryListingChallenge",
+        "challengeName": "Confidential Document",
+        "reason": "403 bypass on /ftp files maps to file access challenges."
+      },
+      {
+        "id": "F-059",
+        "source": "zap",
+        "category": "misconfig",
+        "severity": "medium",
+        "message": "Content Security Policy (CSP) Header Not Set",
+        "location": "GET http://web:3000/",
+        "triageStatus": "needs_manual_review",
+        "outcome": "PARTIAL",
+        "confidence": "partial",
+        "challengeKey": "usernameXssChallenge",
+        "challengeName": "CSP Bypass",
+        "reason": "Missing CSP is relevant to CSP bypass/XSS challenges but not a direct challenge solution."
+      },
+      {
+        "id": "F-060",
+        "source": "zap",
+        "category": "misconfig",
+        "severity": "medium",
+        "message": "Content Security Policy (CSP) Header Not Set",
+        "location": "GET http://web:3000/file-upload",
+        "triageStatus": "needs_manual_review",
+        "outcome": "PARTIAL",
+        "confidence": "partial",
+        "challengeKey": "usernameXssChallenge",
+        "challengeName": "CSP Bypass",
+        "reason": "Missing CSP is relevant to CSP bypass/XSS challenges but not a direct challenge solution."
+      },
+      {
+        "id": "F-061",
+        "source": "zap",
+        "category": "misconfig",
+        "severity": "medium",
+        "message": "Content Security Policy (CSP) Header Not Set",
+        "location": "GET http://web:3000/ftp/coupons_2013.md.bak",
+        "triageStatus": "confirmed_vulnerability",
+        "outcome": "PARTIAL",
+        "confidence": "partial",
+        "challengeKey": "usernameXssChallenge",
+        "challengeName": "CSP Bypass",
+        "reason": "Missing CSP is relevant to CSP bypass/XSS challenges but not a direct challenge solution."
+      },
+      {
+        "id": "F-062",
+        "source": "zap",
+        "category": "misconfig",
+        "severity": "medium",
+        "message": "Content Security Policy (CSP) Header Not Set",
+        "location": "GET http://web:3000/ftp/eastere.gg",
+        "triageStatus": "confirmed_vulnerability",
+        "outcome": "PARTIAL",
+        "confidence": "partial",
+        "challengeKey": "usernameXssChallenge",
+        "challengeName": "CSP Bypass",
+        "reason": "Missing CSP is relevant to CSP bypass/XSS challenges but not a direct challenge solution."
+      },
+      {
+        "id": "F-063",
+        "source": "zap",
+        "category": "misconfig",
+        "severity": "medium",
+        "message": "Content Security Policy (CSP) Header Not Set",
+        "location": "GET http://web:3000/sitemap.xml",
+        "triageStatus": "confirmed_vulnerability",
+        "outcome": "PARTIAL",
+        "confidence": "partial",
+        "challengeKey": "usernameXssChallenge",
+        "challengeName": "CSP Bypass",
+        "reason": "Missing CSP is relevant to CSP bypass/XSS challenges but not a direct challenge solution."
+      },
+      {
+        "id": "F-064",
+        "source": "zap",
+        "category": "general",
+        "severity": "medium",
+        "message": "Cross-Domain Misconfiguration",
+        "location": "GET http://web:3000/",
+        "triageStatus": "confirmed_vulnerability",
+        "outcome": "FP",
+        "confidence": "none",
+        "challengeKey": null,
+        "challengeName": null,
+        "reason": "No precise Juice Shop challenge mapping for this scanner finding."
+      },
+      {
+        "id": "F-065",
+        "source": "zap",
+        "category": "general",
+        "severity": "medium",
+        "message": "Cross-Domain Misconfiguration",
+        "location": "GET http://web:3000/chunk-KD3CNUZG.js",
+        "triageStatus": "confirmed_vulnerability",
+        "outcome": "FP",
+        "confidence": "none",
+        "challengeKey": null,
+        "challengeName": null,
+        "reason": "No precise Juice Shop challenge mapping for this scanner finding."
+      },
+      {
+        "id": "F-066",
+        "source": "zap",
+        "category": "general",
+        "severity": "medium",
+        "message": "Cross-Domain Misconfiguration",
+        "location": "GET http://web:3000/file-upload",
+        "triageStatus": "confirmed_vulnerability",
+        "outcome": "FP",
+        "confidence": "none",
+        "challengeKey": null,
+        "challengeName": null,
+        "reason": "No precise Juice Shop challenge mapping for this scanner finding."
+      },
+      {
+        "id": "F-067",
+        "source": "zap",
+        "category": "general",
+        "severity": "medium",
+        "message": "Cross-Domain Misconfiguration",
+        "location": "GET http://web:3000/robots.txt",
+        "triageStatus": "confirmed_vulnerability",
+        "outcome": "FP",
+        "confidence": "none",
+        "challengeKey": null,
+        "challengeName": null,
+        "reason": "No precise Juice Shop challenge mapping for this scanner finding."
+      },
+      {
+        "id": "F-068",
+        "source": "zap",
+        "category": "general",
+        "severity": "medium",
+        "message": "Cross-Domain Misconfiguration",
+        "location": "GET http://web:3000/sitemap.xml",
+        "triageStatus": "confirmed_vulnerability",
+        "outcome": "FP",
+        "confidence": "none",
+        "challengeKey": null,
+        "challengeName": null,
+        "reason": "No precise Juice Shop challenge mapping for this scanner finding."
+      },
+      {
+        "id": "F-069",
+        "source": "zap",
+        "category": "misconfig",
+        "severity": "low",
+        "message": "Cross-Origin-Embedder-Policy Header Missing or Invalid",
+        "location": "GET http://web:3000/ param=Cross-Origin-Embedder-Policy",
+        "triageStatus": "confirmed_vulnerability",
+        "outcome": "FP",
+        "confidence": "none",
+        "challengeKey": null,
+        "challengeName": null,
+        "reason": "No precise Juice Shop challenge mapping for this scanner finding."
+      },
+      {
+        "id": "F-070",
+        "source": "zap",
+        "category": "misconfig",
+        "severity": "low",
+        "message": "Cross-Origin-Embedder-Policy Header Missing or Invalid",
+        "location": "GET http://web:3000/file-upload param=Cross-Origin-Embedder-Policy",
+        "triageStatus": "confirmed_vulnerability",
+        "outcome": "FP",
+        "confidence": "none",
+        "challengeKey": null,
+        "challengeName": null,
+        "reason": "No precise Juice Shop challenge mapping for this scanner finding."
+      },
+      {
+        "id": "F-071",
+        "source": "zap",
+        "category": "misconfig",
+        "severity": "low",
+        "message": "Cross-Origin-Embedder-Policy Header Missing or Invalid",
+        "location": "GET http://web:3000/ftp param=Cross-Origin-Embedder-Policy",
+        "triageStatus": "confirmed_vulnerability",
+        "outcome": "FP",
+        "confidence": "none",
+        "challengeKey": null,
+        "challengeName": null,
+        "reason": "No precise Juice Shop challenge mapping for this scanner finding."
+      },
+      {
+        "id": "F-072",
+        "source": "zap",
+        "category": "misconfig",
+        "severity": "low",
+        "message": "Cross-Origin-Embedder-Policy Header Missing or Invalid",
+        "location": "GET http://web:3000/juice-shop/build/routes/fileServer.js:59:18 param=Cross-Origin-Embedder-Policy",
+        "triageStatus": "confirmed_vulnerability",
+        "outcome": "FP",
+        "confidence": "none",
+        "challengeKey": null,
+        "challengeName": null,
+        "reason": "No precise Juice Shop challenge mapping for this scanner finding."
+      },
+      {
+        "id": "F-073",
+        "source": "zap",
+        "category": "misconfig",
+        "severity": "low",
+        "message": "Cross-Origin-Embedder-Policy Header Missing or Invalid",
+        "location": "GET http://web:3000/sitemap.xml param=Cross-Origin-Embedder-Policy",
+        "triageStatus": "confirmed_vulnerability",
+        "outcome": "FP",
+        "confidence": "none",
+        "challengeKey": null,
+        "challengeName": null,
+        "reason": "No precise Juice Shop challenge mapping for this scanner finding."
+      },
+      {
+        "id": "F-074",
+        "source": "zap",
+        "category": "misconfig",
+        "severity": "low",
+        "message": "Cross-Origin-Opener-Policy Header Missing or Invalid",
+        "location": "GET http://web:3000/ param=Cross-Origin-Opener-Policy",
+        "triageStatus": "confirmed_vulnerability",
+        "outcome": "FP",
+        "confidence": "none",
+        "challengeKey": null,
+        "challengeName": null,
+        "reason": "No precise Juice Shop challenge mapping for this scanner finding."
+      },
+      {
+        "id": "F-075",
+        "source": "zap",
+        "category": "misconfig",
+        "severity": "low",
+        "message": "Cross-Origin-Opener-Policy Header Missing or Invalid",
+        "location": "GET http://web:3000/file-upload param=Cross-Origin-Opener-Policy",
+        "triageStatus": "confirmed_vulnerability",
+        "outcome": "FP",
+        "confidence": "none",
+        "challengeKey": null,
+        "challengeName": null,
+        "reason": "No precise Juice Shop challenge mapping for this scanner finding."
+      },
+      {
+        "id": "F-076",
+        "source": "zap",
+        "category": "misconfig",
+        "severity": "low",
+        "message": "Cross-Origin-Opener-Policy Header Missing or Invalid",
+        "location": "GET http://web:3000/ftp param=Cross-Origin-Opener-Policy",
+        "triageStatus": "confirmed_vulnerability",
+        "outcome": "FP",
+        "confidence": "none",
+        "challengeKey": null,
+        "challengeName": null,
+        "reason": "No precise Juice Shop challenge mapping for this scanner finding."
+      },
+      {
+        "id": "F-077",
+        "source": "zap",
+        "category": "misconfig",
+        "severity": "low",
+        "message": "Cross-Origin-Opener-Policy Header Missing or Invalid",
+        "location": "GET http://web:3000/juice-shop/build/routes/fileServer.js:59:18 param=Cross-Origin-Opener-Policy",
+        "triageStatus": "confirmed_vulnerability",
+        "outcome": "FP",
+        "confidence": "none",
+        "challengeKey": null,
+        "challengeName": null,
+        "reason": "No precise Juice Shop challenge mapping for this scanner finding."
+      },
+      {
+        "id": "F-078",
+        "source": "zap",
+        "category": "misconfig",
+        "severity": "low",
+        "message": "Cross-Origin-Opener-Policy Header Missing or Invalid",
+        "location": "GET http://web:3000/sitemap.xml param=Cross-Origin-Opener-Policy",
+        "triageStatus": "confirmed_vulnerability",
+        "outcome": "FP",
+        "confidence": "none",
+        "challengeKey": null,
+        "challengeName": null,
+        "reason": "No precise Juice Shop challenge mapping for this scanner finding."
+      },
+      {
+        "id": "F-079",
+        "source": "zap",
+        "category": "general",
+        "severity": "low",
+        "message": "Dangerous JS Functions",
+        "location": "GET http://web:3000/main.js",
+        "triageStatus": "needs_manual_review",
+        "outcome": "PARTIAL",
+        "confidence": "partial",
+        "challengeKey": "localXssChallenge",
+        "challengeName": "DOM XSS",
+        "reason": "Dangerous JavaScript functions are XSS-relevant, but this is not a precise challenge match."
+      },
+      {
+        "id": "F-080",
+        "source": "zap",
+        "category": "misconfig",
+        "severity": "low",
+        "message": "Deprecated Feature Policy Header Set",
+        "location": "GET http://web:3000/",
+        "triageStatus": "confirmed_vulnerability",
+        "outcome": "FP",
+        "confidence": "none",
+        "challengeKey": null,
+        "challengeName": null,
+        "reason": "No precise Juice Shop challenge mapping for this scanner finding."
+      },
+      {
+        "id": "F-081",
+        "source": "zap",
+        "category": "misconfig",
+        "severity": "low",
+        "message": "Deprecated Feature Policy Header Set",
+        "location": "GET http://web:3000/chunk-KD3CNUZG.js",
+        "triageStatus": "confirmed_vulnerability",
+        "outcome": "FP",
+        "confidence": "none",
+        "challengeKey": null,
+        "challengeName": null,
+        "reason": "No precise Juice Shop challenge mapping for this scanner finding."
+      },
+      {
+        "id": "F-082",
+        "source": "zap",
+        "category": "misconfig",
+        "severity": "low",
+        "message": "Deprecated Feature Policy Header Set",
+        "location": "GET http://web:3000/chunk-PX7UKXVL.js",
+        "triageStatus": "confirmed_vulnerability",
+        "outcome": "FP",
+        "confidence": "none",
+        "challengeKey": null,
+        "challengeName": null,
+        "reason": "No precise Juice Shop challenge mapping for this scanner finding."
+      },
+      {
+        "id": "F-083",
+        "source": "zap",
+        "category": "misconfig",
+        "severity": "low",
+        "message": "Deprecated Feature Policy Header Set",
+        "location": "GET http://web:3000/file-upload",
+        "triageStatus": "confirmed_vulnerability",
+        "outcome": "FP",
+        "confidence": "none",
+        "challengeKey": null,
+        "challengeName": null,
+        "reason": "No precise Juice Shop challenge mapping for this scanner finding."
+      },
+      {
+        "id": "F-084",
+        "source": "zap",
+        "category": "misconfig",
+        "severity": "low",
+        "message": "Deprecated Feature Policy Header Set",
+        "location": "GET http://web:3000/sitemap.xml",
+        "triageStatus": "confirmed_vulnerability",
+        "outcome": "FP",
+        "confidence": "none",
+        "challengeKey": null,
+        "challengeName": null,
+        "reason": "No precise Juice Shop challenge mapping for this scanner finding."
+      },
+      {
+        "id": "F-085",
+        "source": "zap",
+        "category": "general",
+        "severity": "low",
+        "message": "Timestamp Disclosure - Unix",
+        "location": "GET http://web:3000/",
+        "triageStatus": "needs_manual_review",
+        "outcome": "FP",
+        "confidence": "none",
+        "challengeKey": null,
+        "challengeName": null,
+        "reason": "No precise Juice Shop challenge mapping for this scanner finding."
+      },
+      {
+        "id": "F-086",
+        "source": "zap",
+        "category": "general",
+        "severity": "low",
+        "message": "Timestamp Disclosure - Unix",
+        "location": "GET http://web:3000/file-upload",
+        "triageStatus": "needs_manual_review",
+        "outcome": "FP",
+        "confidence": "none",
+        "challengeKey": null,
+        "challengeName": null,
+        "reason": "No precise Juice Shop challenge mapping for this scanner finding."
+      },
+      {
+        "id": "F-087",
+        "source": "zap",
+        "category": "general",
+        "severity": "low",
+        "message": "Timestamp Disclosure - Unix",
+        "location": "GET http://web:3000/file-upload",
+        "triageStatus": "needs_manual_review",
+        "outcome": "FP",
+        "confidence": "none",
+        "challengeKey": null,
+        "challengeName": null,
+        "reason": "No precise Juice Shop challenge mapping for this scanner finding."
+      },
+      {
+        "id": "F-088",
+        "source": "zap",
+        "category": "general",
+        "severity": "low",
+        "message": "Timestamp Disclosure - Unix",
+        "location": "GET http://web:3000/sitemap.xml",
+        "triageStatus": "needs_manual_review",
+        "outcome": "FP",
+        "confidence": "none",
+        "challengeKey": null,
+        "challengeName": null,
+        "reason": "No precise Juice Shop challenge mapping for this scanner finding."
+      },
+      {
+        "id": "F-089",
+        "source": "zap",
+        "category": "general",
+        "severity": "low",
+        "message": "Timestamp Disclosure - Unix",
+        "location": "GET http://web:3000/sitemap.xml",
+        "triageStatus": "needs_manual_review",
+        "outcome": "FP",
+        "confidence": "none",
+        "challengeKey": null,
+        "challengeName": null,
+        "reason": "No precise Juice Shop challenge mapping for this scanner finding."
+      }
+    ],
+    "summary": {
+      "total": 89,
+      "exact": 10,
+      "partial": 49,
+      "noChallengeMapping": 30,
+      "exactPrecision": 0.1124,
+      "usefulPrecision": 0.6629
+    },
+    "bySource": [
+      {
+        "key": "semgrep",
+        "total": 23,
+        "exact": 10,
+        "partial": 8,
+        "noChallengeMapping": 5,
+        "exactPrecision": 0.4348,
+        "usefulPrecision": 0.7826
+      },
+      {
+        "key": "zap",
+        "total": 66,
+        "exact": 0,
+        "partial": 41,
+        "noChallengeMapping": 25,
+        "exactPrecision": 0,
+        "usefulPrecision": 0.6212
+      }
+    ]
+  },
+  "manual": {
+    "rawCount": 154,
+    "uniqueCount": 87,
+    "rows": [
+      {
+        "id": "TC-AI-001",
+        "title": "BFLA - PUT /api/Products/:id",
+        "type": "BFLA",
+        "endpoint": "PUT /api/Products/:id",
+        "method": "PUT",
+        "path": "/api/Products/:id",
+        "routeEvidence": "server.ts:369",
+        "classification": [
+          "idor_candidate",
+          "authz",
+          "missing_auth"
+        ],
+        "middleware": [
+          "security.isAuthorized"
+        ],
+        "riskSignals": [
+          "write_route_without_auth_middleware"
+        ],
+        "whyGenerated": "Endpoint lacks auth middleware and is a state-changing operation on product data.",
+        "confirmedIndicator": "Successful modification of product data without a valid session token.",
+        "outcome": "TP",
+        "challengeKey": "changeProductChallenge",
+        "challengeName": "Product Tampering",
+        "confidence": "exact",
+        "reason": "Product Tampering depends on the intentionally missing authorization for PUT /api/Products/:id."
+      },
+      {
+        "id": "TC-AI-043",
+        "title": "BFLA - DELETE /api/Products/:id",
+        "type": "BFLA",
+        "endpoint": "DELETE /api/Products/:id",
+        "method": "DELETE",
+        "path": "/api/Products/:id",
+        "routeEvidence": "data/static/codefixes/changeProductChallenge_1.ts:17",
+        "classification": [
+          "idor_candidate",
+          "authz",
+          "missing_auth"
+        ],
+        "middleware": [
+          "security.denyAll"
+        ],
+        "riskSignals": [
+          "write_route_without_auth_middleware"
+        ],
+        "whyGenerated": "The route lacks explicit role-based access control and is a destructive operation.",
+        "confirmedIndicator": "Product is removed from the system by a non-admin user.",
+        "outcome": "FP",
+        "challengeKey": null,
+        "challengeName": null,
+        "confidence": "none",
+        "reason": "No corresponding Juice Shop ground-truth challenge found for this generated manual test."
+      },
+      {
+        "id": "TC-AI-028",
+        "title": "IDOR - PUT /api/Recycles/:id",
+        "type": "IDOR",
+        "endpoint": "PUT /api/Recycles/:id",
+        "method": "PUT",
+        "path": "/api/Recycles/:id",
+        "routeEvidence": "data/static/codefixes/changeProductChallenge_3_correct.ts:36",
+        "classification": [
+          "idor_candidate",
+          "authz",
+          "missing_auth"
+        ],
+        "middleware": [
+          "security.denyAll"
+        ],
+        "riskSignals": [
+          "write_route_without_auth_middleware"
+        ],
+        "whyGenerated": "Endpoint lacks ownership checks and is flagged as an IDOR candidate, allowing potential modification of arbitrary recycle records.",
+        "confirmedIndicator": "HTTP 200 OK response when modifying another user's resource.",
+        "outcome": "FP",
+        "challengeKey": null,
+        "challengeName": null,
+        "confidence": "none",
+        "reason": "No corresponding Juice Shop ground-truth challenge found for this generated manual test."
+      },
+      {
+        "id": "TC-AI-004",
+        "title": "BFLA - DELETE /api/Recycles/:id",
+        "type": "BFLA",
+        "endpoint": "DELETE /api/Recycles/:id",
+        "method": "DELETE",
+        "path": "/api/Recycles/:id",
+        "routeEvidence": "server.ts:389",
+        "classification": [
+          "idor_candidate",
+          "authz",
+          "missing_auth"
+        ],
+        "middleware": [
+          "security.denyAll"
+        ],
+        "riskSignals": [
+          "write_route_without_auth_middleware"
+        ],
+        "whyGenerated": "Endpoint lacks proper authorization controls for a destructive action.",
+        "confirmedIndicator": "Resource is deleted by a user without appropriate permissions.",
+        "outcome": "FP",
+        "challengeKey": null,
+        "challengeName": null,
+        "confidence": "none",
+        "reason": "No corresponding Juice Shop ground-truth challenge found for this generated manual test."
+      },
+      {
+        "id": "TC-AI-018",
+        "title": "IDOR - PUT /api/BasketItems/:id",
+        "type": "IDOR",
+        "endpoint": "PUT /api/BasketItems/:id",
+        "method": "PUT",
+        "path": "/api/BasketItems/:id",
+        "routeEvidence": "data/static/codefixes/changeProductChallenge_4.ts:51",
+        "classification": [
+          "idor_candidate",
+          "authz",
+          "missing_auth"
+        ],
+        "middleware": [
+          "security.appendUserId",
+          "utils.asyncHandler",
+          "basketItems.quantityCheckBeforeBasketItemUpdate"
+        ],
+        "riskSignals": [
+          "write_route_without_auth_middleware"
+        ],
+        "whyGenerated": "Endpoint updates basket items but lacks explicit ownership checks, potentially allowing users to modify other users' basket quantities.",
+        "confirmedIndicator": "HTTP 200 OK and successful modification of resource belonging to another user.",
+        "outcome": "TP",
+        "challengeKey": "basketManipulateChallenge",
+        "challengeName": "Manipulate Basket",
+        "confidence": "exact",
+        "reason": "Manipulate Basket is solved when PUT /api/BasketItems/:id changes another BasketId."
+      },
+      {
+        "id": "TC-AI-046",
+        "title": "BFLA - DELETE /api/Quantitys/:id",
+        "type": "BFLA",
+        "endpoint": "DELETE /api/Quantitys/:id",
+        "method": "DELETE",
+        "path": "/api/Quantitys/:id",
+        "routeEvidence": "data/static/codefixes/changeProductChallenge_1.ts:53",
+        "classification": [
+          "idor_candidate",
+          "authz",
+          "missing_auth"
+        ],
+        "middleware": [
+          "security.denyAll"
+        ],
+        "riskSignals": [
+          "write_route_without_auth_middleware"
+        ],
+        "whyGenerated": "Endpoint lacks admin middleware despite being a sensitive administrative/state-changing action.",
+        "confirmedIndicator": "Successful deletion of the record by a non-admin user.",
+        "outcome": "FP",
+        "challengeKey": null,
+        "challengeName": null,
+        "confidence": "none",
+        "reason": "No corresponding Juice Shop ground-truth challenge found for this generated manual test."
+      },
+      {
+        "id": "TC-AI-033",
+        "title": "Mass_Assignment - PUT /api/Cards/:id",
+        "type": "Mass_Assignment",
+        "endpoint": "PUT /api/Cards/:id",
+        "method": "PUT",
+        "path": "/api/Cards/:id",
+        "routeEvidence": "data/static/codefixes/changeProductChallenge_3_correct.ts:65",
+        "classification": [
+          "idor_candidate",
+          "authz"
+        ],
+        "middleware": [
+          "security.denyAll"
+        ],
+        "riskSignals": [
+          "write_route_without_auth_middleware"
+        ],
+        "whyGenerated": "The endpoint handles card updates and lacks validation middleware, potentially allowing mass assignment of sensitive fields if the underlying model is exposed.",
+        "confirmedIndicator": "The database reflects changes to fields not intended for user modification.",
+        "outcome": "FP",
+        "challengeKey": null,
+        "challengeName": null,
+        "confidence": "none",
+        "reason": "No corresponding Juice Shop ground-truth challenge found for this generated manual test."
+      },
+      {
+        "id": "TC-AI-047",
+        "title": "BFLA - PUT /api/Feedbacks/:id",
+        "type": "BFLA",
+        "endpoint": "PUT /api/Feedbacks/:id",
+        "method": "PUT",
+        "path": "/api/Feedbacks/:id",
+        "routeEvidence": "data/static/codefixes/changeProductChallenge_1.ts:57",
+        "classification": [
+          "idor_candidate",
+          "authz",
+          "missing_auth"
+        ],
+        "middleware": [
+          "security.denyAll"
+        ],
+        "riskSignals": [
+          "write_route_without_auth_middleware"
+        ],
+        "whyGenerated": "Endpoint lacks authentication middleware, allowing unauthorized state changes.",
+        "confirmedIndicator": "Feedback updated successfully without a valid session.",
+        "outcome": "TP",
+        "challengeKey": "feedbackChallenge",
+        "challengeName": "Five-Star Feedback",
+        "confidence": "exact",
+        "reason": "Five-Star Feedback can be solved by deleting/updating all 5-star feedback through exposed feedback APIs."
+      },
+      {
+        "id": "TC-AI-048",
+        "title": "IDOR - DELETE /api/Cards/:id",
+        "type": "IDOR",
+        "endpoint": "DELETE /api/Cards/:id",
+        "method": "DELETE",
+        "path": "/api/Cards/:id",
+        "routeEvidence": "data/static/codefixes/changeProductChallenge_1.ts:65",
+        "classification": [
+          "idor_candidate",
+          "authz",
+          "missing_auth"
+        ],
+        "middleware": [
+          "security.appendUserId",
+          "utils.asyncHandler",
+          "payment.delPaymentMethodById"
+        ],
+        "riskSignals": [
+          "write_route_without_auth_middleware"
+        ],
+        "whyGenerated": "The endpoint lacks explicit ownership checks in the middleware chain, making it a prime candidate for BOLA/IDOR.",
+        "confirmedIndicator": "HTTP 200 OK or 204 No Content when deleting another user's resource.",
+        "outcome": "FP",
+        "challengeKey": null,
+        "challengeName": null,
+        "confidence": "none",
+        "reason": "No corresponding Juice Shop ground-truth challenge found for this generated manual test."
+      },
+      {
+        "id": "TC-AI-010",
+        "title": "BFLA - POST /rest/basket/:id/checkout",
+        "type": "BFLA",
+        "endpoint": "POST /rest/basket/:id/checkout",
+        "method": "POST",
+        "path": "/rest/basket/:id/checkout",
+        "routeEvidence": "server.ts:603",
+        "classification": [
+          "idor_candidate",
+          "payment",
+          "authz",
+          "missing_auth"
+        ],
+        "middleware": [
+          "placeOrder"
+        ],
+        "riskSignals": [
+          "write_route_without_auth_middleware"
+        ],
+        "whyGenerated": "State-changing payment endpoint lacks explicit authentication middleware, allowing potential unauthorized order placement.",
+        "confirmedIndicator": "Order is created or payment is triggered without an authenticated user session.",
+        "outcome": "PARTIAL",
+        "challengeKey": "negativeOrderChallenge",
+        "challengeName": "Payback Time",
+        "confidence": "partial",
+        "reason": "Checkout is a real challenge surface, but the intended weakness is business/input logic."
+      },
+      {
+        "id": "TC-AI-050",
+        "title": "Mass_Assignment - PUT /api/Addresss/:id",
+        "type": "Mass_Assignment",
+        "endpoint": "PUT /api/Addresss/:id",
+        "method": "PUT",
+        "path": "/api/Addresss/:id",
+        "routeEvidence": "data/static/codefixes/changeProductChallenge_1.ts:74",
+        "classification": [
+          "idor_candidate",
+          "authz",
+          "missing_auth"
+        ],
+        "middleware": [
+          "security.appendUserId"
+        ],
+        "riskSignals": [
+          "write_route_without_auth_middleware"
+        ],
+        "whyGenerated": "PUT endpoints often bind request bodies directly to models; sensitive fields in the schema could be overwritten if not properly filtered.",
+        "confirmedIndicator": "The application state reflects changes to fields that should not be user-modifiable.",
+        "outcome": "FP",
+        "challengeKey": null,
+        "challengeName": null,
+        "confidence": "none",
+        "reason": "No corresponding Juice Shop ground-truth challenge found for this generated manual test."
+      },
+      {
+        "id": "TC-AI-012",
+        "title": "Race_Condition - POST /rest/basket/:id/checkout",
+        "type": "Race_Condition",
+        "endpoint": "POST /rest/basket/:id/checkout",
+        "method": "POST",
+        "path": "/rest/basket/:id/checkout",
+        "routeEvidence": "server.ts:603",
+        "classification": [
+          "payment"
+        ],
+        "middleware": [
+          "placeOrder"
+        ],
+        "riskSignals": [
+          "write_route_without_auth_middleware"
+        ],
+        "whyGenerated": "Payment/Checkout logic is a high-value target for race conditions where balance or stock could be manipulated.",
+        "confirmedIndicator": "Multiple successful transactions for a single basket instance.",
+        "outcome": "PARTIAL",
+        "challengeKey": "negativeOrderChallenge",
+        "challengeName": "Payback Time",
+        "confidence": "partial",
+        "reason": "Checkout is real business-logic ground truth, but Payback Time is negative-order input tampering rather than a race condition."
+      },
+      {
+        "id": "TC-AI-013",
+        "title": "IDOR - PUT /rest/basket/:id/coupon/:coupon",
+        "type": "IDOR",
+        "endpoint": "PUT /rest/basket/:id/coupon/:coupon",
+        "method": "PUT",
+        "path": "/rest/basket/:id/coupon/:param",
+        "routeEvidence": "server.ts:604",
+        "classification": [
+          "idor_candidate",
+          "authz",
+          "missing_auth"
+        ],
+        "middleware": [
+          "utils.asyncHandler"
+        ],
+        "riskSignals": [
+          "write_route_without_auth_middleware"
+        ],
+        "whyGenerated": "Endpoint lacks ownership checks and auth middleware, allowing potential manipulation of other users' baskets.",
+        "confirmedIndicator": "200 OK response when modifying a resource not owned by the authenticated user.",
+        "outcome": "PARTIAL",
+        "challengeKey": "basketAccessChallenge",
+        "challengeName": "View Basket",
+        "confidence": "partial",
+        "reason": "The route can target a basket by id, but the YAML challenge closest to it is View Basket; coupon abuse is mainly coupon/crypto logic."
+      },
+      {
+        "id": "TC-AI-014",
+        "title": "BFLA - PUT /rest/order-history/:id/delivery-status",
+        "type": "BFLA",
+        "endpoint": "PUT /rest/order-history/:id/delivery-status",
+        "method": "PUT",
+        "path": "/rest/order-history/:id/delivery-status",
+        "routeEvidence": "server.ts:624",
+        "classification": [
+          "idor_candidate",
+          "payment",
+          "authz",
+          "missing_auth"
+        ],
+        "middleware": [
+          "security.isAccounting"
+        ],
+        "riskSignals": [
+          "write_route_without_auth_middleware"
+        ],
+        "whyGenerated": "Endpoint uses 'isAccounting' middleware but lacks general authentication, potentially allowing unauthorized state changes if the middleware is bypassed or misconfigured.",
+        "confirmedIndicator": "200 OK response for a non-privileged user.",
+        "outcome": "FP",
+        "challengeKey": null,
+        "challengeName": null,
+        "confidence": "none",
+        "reason": "No corresponding Juice Shop ground-truth challenge found for this generated manual test."
+      },
+      {
+        "id": "TC-AI-026",
+        "title": "Mass_Assignment - PUT /api/Products/:id",
+        "type": "Mass_Assignment",
+        "endpoint": "PUT /api/Products/:id",
+        "method": "PUT",
+        "path": "/api/Products/:id",
+        "routeEvidence": "data/static/codefixes/changeProductChallenge_3_correct.ts:17",
+        "classification": [
+          "idor_candidate",
+          "authz",
+          "missing_auth"
+        ],
+        "middleware": [
+          "security.denyAll"
+        ],
+        "riskSignals": [
+          "write_route_without_auth_middleware"
+        ],
+        "whyGenerated": "Product model contains sensitive business fields (price, deluxePrice) that may be exposed to mass assignment via PUT requests.",
+        "confirmedIndicator": "Product price changes to the value provided in the request body.",
+        "outcome": "PARTIAL",
+        "challengeKey": "changeProductChallenge",
+        "challengeName": "Product Tampering",
+        "confidence": "partial",
+        "reason": "The endpoint is a real product-tampering ground truth, but the root cause is broken access control rather than classic mass assignment."
+      },
+      {
+        "id": "TC-AI-016",
+        "title": "Race_Condition - PUT /rest/products/:id/reviews",
+        "type": "Race_Condition",
+        "endpoint": "PUT /rest/products/:id/reviews",
+        "method": "PUT",
+        "path": "/rest/products/:id/reviews",
+        "routeEvidence": "server.ts:632",
+        "classification": [
+          "idor_candidate",
+          "authz",
+          "missing_auth"
+        ],
+        "middleware": [
+          "utils.asyncHandler"
+        ],
+        "riskSignals": [
+          "write_route_without_auth_middleware"
+        ],
+        "whyGenerated": "Review creation endpoints often lack concurrency controls, potentially allowing review flooding or state inconsistency.",
+        "confirmedIndicator": "Multiple records created in the database for a single logical action.",
+        "outcome": "FP",
+        "challengeKey": null,
+        "challengeName": null,
+        "confidence": "none",
+        "reason": "No corresponding Juice Shop ground-truth challenge found for this generated manual test."
+      },
+      {
+        "id": "TC-AI-042",
+        "title": "Mass_Assignment - PUT /api/Recycles/:id",
+        "type": "Mass_Assignment",
+        "endpoint": "PUT /api/Recycles/:id",
+        "method": "PUT",
+        "path": "/api/Recycles/:id",
+        "routeEvidence": "data/static/codefixes/changeProductChallenge_1.ts:35",
+        "classification": [
+          "idor_candidate",
+          "authz",
+          "missing_auth"
+        ],
+        "middleware": [
+          "security.denyAll"
+        ],
+        "riskSignals": [
+          "write_route_without_auth_middleware"
+        ],
+        "whyGenerated": "PUT endpoints often bind request bodies directly to models. The schema contains sensitive business fields that could be overwritten.",
+        "confirmedIndicator": "Database reflects the change in sensitive fields (e.g., promotionalDiscount) after the request.",
+        "outcome": "FP",
+        "challengeKey": null,
+        "challengeName": null,
+        "confidence": "none",
+        "reason": "No corresponding Juice Shop ground-truth challenge found for this generated manual test."
+      },
+      {
+        "id": "TC-AI-038",
+        "title": "IDOR - DELETE /api/Quantitys/:id",
+        "type": "IDOR",
+        "endpoint": "DELETE /api/Quantitys/:id",
+        "method": "DELETE",
+        "path": "/api/Quantitys/:id",
+        "routeEvidence": "data/static/codefixes/changeProductChallenge_2.ts:50",
+        "classification": [
+          "idor_candidate",
+          "authz",
+          "missing_auth"
+        ],
+        "middleware": [
+          "security.denyAll"
+        ],
+        "riskSignals": [
+          "write_route_without_auth_middleware"
+        ],
+        "whyGenerated": "Endpoint lacks explicit ownership checks and uses a direct ID parameter, making it a prime candidate for IDOR.",
+        "confirmedIndicator": "Successful deletion of resource not owned by the authenticated user.",
+        "outcome": "FP",
+        "challengeKey": null,
+        "challengeName": null,
+        "confidence": "none",
+        "reason": "No corresponding Juice Shop ground-truth challenge found for this generated manual test."
+      },
+      {
+        "id": "TC-AI-040",
+        "title": "Race_Condition - DELETE /api/Cards/:id",
+        "type": "Race_Condition",
+        "endpoint": "DELETE /api/Cards/:id",
+        "method": "DELETE",
+        "path": "/api/Cards/:id",
+        "routeEvidence": "data/static/codefixes/changeProductChallenge_2.ts:62",
+        "classification": [
+          "idor_candidate",
+          "authz",
+          "missing_auth"
+        ],
+        "middleware": [
+          "security.appendUserId",
+          "utils.asyncHandler",
+          "payment.delPaymentMethodById"
+        ],
+        "riskSignals": [
+          "write_route_without_auth_middleware"
+        ],
+        "whyGenerated": "Payment-related deletion endpoints are susceptible to race conditions if the balance or state is not locked during the transaction.",
+        "confirmedIndicator": "Inconsistent application state or multiple successful deletions for a single resource.",
+        "outcome": "FP",
+        "challengeKey": null,
+        "challengeName": null,
+        "confidence": "none",
+        "reason": "No corresponding Juice Shop ground-truth challenge found for this generated manual test."
+      },
+      {
+        "id": "TC-AI-041",
+        "title": "IDOR - PUT /api/Addresss/:id",
+        "type": "IDOR",
+        "endpoint": "PUT /api/Addresss/:id",
+        "method": "PUT",
+        "path": "/api/Addresss/:id",
+        "routeEvidence": "data/static/codefixes/changeProductChallenge_2.ts:71",
+        "classification": [
+          "idor_candidate",
+          "authz",
+          "missing_auth"
+        ],
+        "middleware": [
+          "security.appendUserId"
+        ],
+        "riskSignals": [
+          "write_route_without_auth_middleware"
+        ],
+        "whyGenerated": "Endpoint lacks ownership checks and uses an ID parameter, making it a prime candidate for BOLA/IDOR.",
+        "confirmedIndicator": "HTTP 200 OK response when modifying another user's resource.",
+        "outcome": "FP",
+        "challengeKey": null,
+        "challengeName": null,
+        "confidence": "none",
+        "reason": "No corresponding Juice Shop ground-truth challenge found for this generated manual test."
+      },
+      {
+        "id": "TC-AI-025",
+        "title": "BFLA - DELETE /api/Addresss/:id",
+        "type": "BFLA",
+        "endpoint": "DELETE /api/Addresss/:id",
+        "method": "DELETE",
+        "path": "/api/Addresss/:id",
+        "routeEvidence": "data/static/codefixes/changeProductChallenge_4.ts:76",
+        "classification": [
+          "idor_candidate",
+          "authz",
+          "missing_auth"
+        ],
+        "middleware": [
+          "security.appendUserId",
+          "utils.asyncHandler",
+          "address.delAddressById"
+        ],
+        "riskSignals": [
+          "write_route_without_auth_middleware"
+        ],
+        "whyGenerated": "Route performs a destructive action (DELETE) without explicit authentication or role-based access control middleware.",
+        "confirmedIndicator": "Successful deletion of resource by an unauthenticated user.",
+        "outcome": "FP",
+        "challengeKey": null,
+        "challengeName": null,
+        "confidence": "none",
+        "reason": "No corresponding Juice Shop ground-truth challenge found for this generated manual test."
+      },
+      {
+        "id": "TC-AI-045",
+        "title": "Mass_Assignment - PUT /api/BasketItems/:id",
+        "type": "Mass_Assignment",
+        "endpoint": "PUT /api/BasketItems/:id",
+        "method": "PUT",
+        "path": "/api/BasketItems/:id",
+        "routeEvidence": "data/static/codefixes/changeProductChallenge_1.ts:50",
+        "classification": [
+          "idor_candidate",
+          "authz",
+          "missing_auth"
+        ],
+        "middleware": [
+          "security.appendUserId",
+          "utils.asyncHandler",
+          "basketItems.quantityCheckBeforeBasketItemUpdate"
+        ],
+        "riskSignals": [
+          "write_route_without_auth_middleware"
+        ],
+        "whyGenerated": "PUT endpoint interacts with Basket model which contains sensitive ownership fields.",
+        "confirmedIndicator": "Database reflects the changed UserId for the basket item.",
+        "outcome": "FP",
+        "challengeKey": null,
+        "challengeName": null,
+        "confidence": "none",
+        "reason": "No corresponding Juice Shop ground-truth challenge found for this generated manual test."
+      },
+      {
+        "id": "TC-AI-049",
+        "title": "IDOR - DELETE /api/Addresss/:id",
+        "type": "IDOR",
+        "endpoint": "DELETE /api/Addresss/:id",
+        "method": "DELETE",
+        "path": "/api/Addresss/:id",
+        "routeEvidence": "data/static/codefixes/changeProductChallenge_1.ts:75",
+        "classification": [
+          "idor_candidate",
+          "authz",
+          "missing_auth"
+        ],
+        "middleware": [
+          "security.appendUserId",
+          "utils.asyncHandler",
+          "address.delAddressById"
+        ],
+        "riskSignals": [
+          "write_route_without_auth_middleware"
+        ],
+        "whyGenerated": "The endpoint lacks explicit ownership checks, potentially allowing unauthorized deletion of PII-sensitive address data.",
+        "confirmedIndicator": "HTTP 200/204 response and address no longer visible in User A's profile.",
+        "outcome": "FP",
+        "challengeKey": null,
+        "challengeName": null,
+        "confidence": "none",
+        "reason": "No corresponding Juice Shop ground-truth challenge found for this generated manual test."
+      },
+      {
+        "id": "TC-AI-037",
+        "title": "Race_Condition - PUT /api/BasketItems/:id",
+        "type": "Race_Condition",
+        "endpoint": "PUT /api/BasketItems/:id",
+        "method": "PUT",
+        "path": "/api/BasketItems/:id",
+        "routeEvidence": "data/static/codefixes/changeProductChallenge_2.ts:47",
+        "classification": [
+          "authz",
+          "missing_auth"
+        ],
+        "middleware": [
+          "basketItems.quantityCheckBeforeBasketItemUpdate"
+        ],
+        "riskSignals": [
+          "write_route_without_auth_middleware"
+        ],
+        "whyGenerated": "Basket item updates involve quantity checks that are prone to race conditions if not atomic.",
+        "confirmedIndicator": "Quantity exceeds allowed business logic limits after concurrent requests.",
+        "outcome": "FP",
+        "challengeKey": null,
+        "challengeName": null,
+        "confidence": "none",
+        "reason": "No corresponding Juice Shop ground-truth challenge found for this generated manual test."
+      },
+      {
+        "id": "TC-AI-039",
+        "title": "Mass_Assignment - PUT /api/Feedbacks/:id",
+        "type": "Mass_Assignment",
+        "endpoint": "PUT /api/Feedbacks/:id",
+        "method": "PUT",
+        "path": "/api/Feedbacks/:id",
+        "routeEvidence": "data/static/codefixes/changeProductChallenge_2.ts:54",
+        "classification": [
+          "idor_candidate",
+          "authz",
+          "missing_auth"
+        ],
+        "middleware": [
+          "security.denyAll"
+        ],
+        "riskSignals": [
+          "write_route_without_auth_middleware"
+        ],
+        "whyGenerated": "PUT endpoint lacks validation middleware and interacts with models that have sensitive business fields.",
+        "confirmedIndicator": "Database reflects changes to fields that should not be user-modifiable.",
+        "outcome": "FP",
+        "challengeKey": null,
+        "challengeName": null,
+        "confidence": "none",
+        "reason": "No corresponding Juice Shop ground-truth challenge found for this generated manual test."
+      },
+      {
+        "id": "TC-AI-044",
+        "title": "IDOR - DELETE /api/Recycles/:id",
+        "type": "IDOR",
+        "endpoint": "DELETE /api/Recycles/:id",
+        "method": "DELETE",
+        "path": "/api/Recycles/:id",
+        "routeEvidence": "data/static/codefixes/changeProductChallenge_1.ts:36",
+        "classification": [
+          "idor_candidate",
+          "authz",
+          "missing_auth"
+        ],
+        "middleware": [
+          "security.denyAll"
+        ],
+        "riskSignals": [
+          "write_route_without_auth_middleware"
+        ],
+        "whyGenerated": "Endpoint lacks ownership checks and is marked as an IDOR candidate.",
+        "confirmedIndicator": "Successful deletion of resource not owned by the authenticated user.",
+        "outcome": "FP",
+        "challengeKey": null,
+        "challengeName": null,
+        "confidence": "none",
+        "reason": "No corresponding Juice Shop ground-truth challenge found for this generated manual test."
+      },
+      {
+        "id": "TC-AI-051",
+        "title": "Auth_Bypass - POST /file-upload",
+        "type": "Auth_Bypass",
+        "endpoint": "POST /file-upload",
+        "method": "POST",
+        "path": "/file-upload",
+        "routeEvidence": "server.ts:309",
+        "classification": [
+          "fileUpload",
+          "authz",
+          "missing_auth"
+        ],
+        "middleware": [
+          "uploadToMemory.single"
+        ],
+        "riskSignals": [
+          "write_route_without_auth_middleware"
+        ],
+        "whyGenerated": "Endpoint lacks authentication middleware despite being a file upload route, allowing potential unauthenticated resource exhaustion or malicious file injection.",
+        "confirmedIndicator": "HTTP 200/201 response for unauthenticated request.",
+        "outcome": "FP",
+        "challengeKey": null,
+        "challengeName": null,
+        "confidence": "none",
+        "reason": "No corresponding Juice Shop ground-truth challenge found for this generated manual test."
+      },
+      {
+        "id": "TC-AI-052",
+        "title": "BFLA - POST /profile/image/file",
+        "type": "BFLA",
+        "endpoint": "POST /profile/image/file",
+        "method": "POST",
+        "path": "/profile/image/file",
+        "routeEvidence": "server.ts:310",
+        "classification": [
+          "fileUpload",
+          "authz",
+          "missing_auth"
+        ],
+        "middleware": [
+          "profileImageFileUpload"
+        ],
+        "riskSignals": [
+          "write_route_without_auth_middleware"
+        ],
+        "whyGenerated": "The endpoint lacks role-based access control, potentially allowing any authenticated user to overwrite another user's profile image.",
+        "confirmedIndicator": "User A can successfully modify User B's profile image.",
+        "outcome": "FP",
+        "challengeKey": null,
+        "challengeName": null,
+        "confidence": "none",
+        "reason": "No corresponding Juice Shop ground-truth challenge found for this generated manual test."
+      },
+      {
+        "id": "TC-AI-053",
+        "title": "Mass_Assignment - POST /rest/memories",
+        "type": "Mass_Assignment",
+        "endpoint": "POST /rest/memories",
+        "method": "POST",
+        "path": "/rest/memories",
+        "routeEvidence": "server.ts:312",
+        "classification": [
+          "authz",
+          "missing_auth"
+        ],
+        "middleware": [
+          "addMemory"
+        ],
+        "riskSignals": [
+          "write_route_without_auth_middleware"
+        ],
+        "whyGenerated": "The endpoint processes memory creation and lacks explicit input validation, potentially allowing mass assignment of sensitive fields if the underlying model is exposed.",
+        "confirmedIndicator": "The database record reflects the injected 'UserId' value.",
+        "outcome": "FP",
+        "challengeKey": null,
+        "challengeName": null,
+        "confidence": "none",
+        "reason": "No corresponding Juice Shop ground-truth challenge found for this generated manual test."
+      },
+      {
+        "id": "TC-AI-054",
+        "title": "Race_Condition - POST /rest/memories",
+        "type": "Race_Condition",
+        "endpoint": "POST /rest/memories",
+        "method": "POST",
+        "path": "/rest/memories",
+        "routeEvidence": "server.ts:312",
+        "classification": [
+          "authz"
+        ],
+        "middleware": [
+          "uploadToDisk.single",
+          "addMemory"
+        ],
+        "riskSignals": [
+          "write_route_without_auth_middleware"
+        ],
+        "whyGenerated": "File upload and memory creation endpoints often involve disk/database I/O that can be susceptible to race conditions if not properly locked.",
+        "confirmedIndicator": "Inconsistent state or duplicate resources created from simultaneous requests.",
+        "outcome": "FP",
+        "challengeKey": null,
+        "challengeName": null,
+        "confidence": "none",
+        "reason": "No corresponding Juice Shop ground-truth challenge found for this generated manual test."
+      },
+      {
+        "id": "TC-AI-055",
+        "title": "Auth_Bypass - POST /api/Products",
+        "type": "Auth_Bypass",
+        "endpoint": "POST /api/Products",
+        "method": "POST",
+        "path": "/api/Products",
+        "routeEvidence": "server.ts:368",
+        "classification": [
+          "authz",
+          "missing_auth"
+        ],
+        "middleware": [
+          "security.isAuthorized"
+        ],
+        "riskSignals": [
+          "write_route_without_auth_middleware"
+        ],
+        "whyGenerated": "Endpoint lacks explicit auth middleware and is a write operation, potentially allowing unauthenticated state changes.",
+        "confirmedIndicator": "200 OK response for unauthenticated POST request.",
+        "outcome": "FP",
+        "challengeKey": null,
+        "challengeName": null,
+        "confidence": "none",
+        "reason": "No corresponding Juice Shop ground-truth challenge found for this generated manual test."
+      },
+      {
+        "id": "TC-AI-105",
+        "title": "Mass_Assignment - POST /api/Complaints",
+        "type": "Mass_Assignment",
+        "endpoint": "POST /api/Complaints",
+        "method": "POST",
+        "path": "/api/Complaints",
+        "routeEvidence": "data/static/codefixes/changeProductChallenge_2.ts:25",
+        "classification": [
+          "authz",
+          "missing_auth"
+        ],
+        "middleware": [
+          "security.isAuthorized"
+        ],
+        "riskSignals": [
+          "write_route_without_auth_middleware"
+        ],
+        "whyGenerated": "The Complaint model contains sensitive fields like 'UserId' and 'authToken' which are susceptible to mass assignment if the controller blindly binds the request body to the database model.",
+        "confirmedIndicator": "Database record reflects the injected UserId or authToken value.",
+        "outcome": "FP",
+        "challengeKey": null,
+        "challengeName": null,
+        "confidence": "none",
+        "reason": "No corresponding Juice Shop ground-truth challenge found for this generated manual test."
+      },
+      {
+        "id": "TC-AI-113",
+        "title": "Auth_Bypass - POST /api/Challenges",
+        "type": "Auth_Bypass",
+        "endpoint": "POST /api/Challenges",
+        "method": "POST",
+        "path": "/api/Challenges",
+        "routeEvidence": "data/static/codefixes/changeProductChallenge_1.ts:19",
+        "classification": [
+          "authz",
+          "missing_auth"
+        ],
+        "middleware": [
+          "security.denyAll"
+        ],
+        "riskSignals": [
+          "write_route_without_auth_middleware"
+        ],
+        "whyGenerated": "The route uses 'security.denyAll()' which is a suspicious pattern for a POST endpoint, suggesting it might be a placeholder or incorrectly implemented security control that can be bypassed if the middleware is misconfigured.",
+        "confirmedIndicator": "Successful request despite the 'denyAll' middleware.",
+        "outcome": "FP",
+        "challengeKey": null,
+        "challengeName": null,
+        "confidence": "none",
+        "reason": "No corresponding Juice Shop ground-truth challenge found for this generated manual test."
+      },
+      {
+        "id": "TC-AI-058",
+        "title": "Auth_Bypass - POST /api/Recycles",
+        "type": "Auth_Bypass",
+        "endpoint": "POST /api/Recycles",
+        "method": "POST",
+        "path": "/api/Recycles",
+        "routeEvidence": "server.ts:385",
+        "classification": [
+          "authz",
+          "missing_auth"
+        ],
+        "middleware": [
+          "security.isAuthorized"
+        ],
+        "riskSignals": [
+          "write_route_without_auth_middleware"
+        ],
+        "whyGenerated": "Endpoint lacks authentication middleware and performs a state-changing operation, allowing unauthenticated users to trigger recycling logic.",
+        "confirmedIndicator": "HTTP 200/201 response without a valid JWT or session cookie.",
+        "outcome": "FP",
+        "challengeKey": null,
+        "challengeName": null,
+        "confidence": "none",
+        "reason": "No corresponding Juice Shop ground-truth challenge found for this generated manual test."
+      },
+      {
+        "id": "TC-AI-059",
+        "title": "Auth_Bypass - POST /api/SecurityQuestions",
+        "type": "Auth_Bypass",
+        "endpoint": "POST /api/SecurityQuestions",
+        "method": "POST",
+        "path": "/api/SecurityQuestions",
+        "routeEvidence": "server.ts:391",
+        "classification": [
+          "authz",
+          "missing_auth"
+        ],
+        "middleware": [
+          "security.denyAll"
+        ],
+        "riskSignals": [
+          "write_route_without_auth_middleware"
+        ],
+        "whyGenerated": "The endpoint uses 'security.denyAll()' which is a placeholder or ineffective middleware, potentially allowing unauthorized access to security question management.",
+        "confirmedIndicator": "Successful creation of a security question record by an unauthenticated user.",
+        "outcome": "FP",
+        "challengeKey": null,
+        "challengeName": null,
+        "confidence": "none",
+        "reason": "No corresponding Juice Shop ground-truth challenge found for this generated manual test."
+      },
+      {
+        "id": "TC-AI-060",
+        "title": "Mass_Assignment - POST /api/Users",
+        "type": "Mass_Assignment",
+        "endpoint": "POST /api/Users",
+        "method": "POST",
+        "path": "/api/Users",
+        "routeEvidence": "server.ts:407",
+        "classification": [
+          "authz",
+          "missing_auth"
+        ],
+        "middleware": [],
+        "riskSignals": [
+          "write_route_without_auth_middleware"
+        ],
+        "whyGenerated": "The endpoint lacks validation middleware and handles user creation, making it a prime target for mass assignment of sensitive fields.",
+        "confirmedIndicator": "User account created with elevated privileges or custom hash values.",
+        "outcome": "TP",
+        "challengeKey": "registerAdminChallenge",
+        "challengeName": "Admin Registration",
+        "confidence": "exact",
+        "reason": "Juice Shop solves Admin Registration when POST /api/Users contains role=admin."
+      },
+      {
+        "id": "TC-AI-061",
+        "title": "Auth_Bypass - POST /api/Feedbacks",
+        "type": "Auth_Bypass",
+        "endpoint": "POST /api/Feedbacks",
+        "method": "POST",
+        "path": "/api/Feedbacks",
+        "routeEvidence": "server.ts:401",
+        "classification": [
+          "authz",
+          "missing_auth"
+        ],
+        "middleware": [
+          "verify.forgedFeedbackChallenge"
+        ],
+        "riskSignals": [
+          "write_route_without_auth_middleware"
+        ],
+        "whyGenerated": "The endpoint uses a custom 'forgedFeedbackChallenge' middleware which may be bypassable if the challenge logic is predictable or missing.",
+        "confirmedIndicator": "Feedback is successfully stored without a valid challenge response.",
+        "outcome": "PARTIAL",
+        "challengeKey": "forgedFeedbackChallenge",
+        "challengeName": "Forged Feedback",
+        "confidence": "partial",
+        "reason": "Forged Feedback is solved by supplying another UserId when posting feedback; the generated label is broader than the challenge."
+      },
+      {
+        "id": "TC-AI-119",
+        "title": "BFLA - POST /api/BasketItems",
+        "type": "BFLA",
+        "endpoint": "POST /api/BasketItems",
+        "method": "POST",
+        "path": "/api/BasketItems",
+        "routeEvidence": "data/static/codefixes/changeProductChallenge_1.ts:51",
+        "classification": [
+          "authz",
+          "missing_auth"
+        ],
+        "middleware": [
+          "security.appendUserId"
+        ],
+        "riskSignals": [
+          "write_route_without_auth_middleware"
+        ],
+        "whyGenerated": "Endpoint lacks explicit auth middleware and performs state-changing operations on user baskets.",
+        "confirmedIndicator": "HTTP 200 OK and item appears in User B's basket.",
+        "outcome": "FP",
+        "challengeKey": null,
+        "challengeName": null,
+        "confidence": "none",
+        "reason": "No corresponding Juice Shop ground-truth challenge found for this generated manual test."
+      },
+      {
+        "id": "TC-AI-100",
+        "title": "BFLA - POST /api/Quantitys",
+        "type": "BFLA",
+        "endpoint": "POST /api/Quantitys",
+        "method": "POST",
+        "path": "/api/Quantitys",
+        "routeEvidence": "data/static/codefixes/changeProductChallenge_3_correct.ts:55",
+        "classification": [
+          "authz",
+          "missing_auth"
+        ],
+        "middleware": [
+          "security.denyAll"
+        ],
+        "riskSignals": [
+          "write_route_without_auth_middleware"
+        ],
+        "whyGenerated": "The endpoint uses security.denyAll() but is a POST request, suggesting a potential bypass if the middleware is misconfigured or if the application logic expects this to be a public-facing state change.",
+        "confirmedIndicator": "HTTP 200/201 response for an unauthenticated POST request.",
+        "outcome": "FP",
+        "challengeKey": null,
+        "challengeName": null,
+        "confidence": "none",
+        "reason": "No corresponding Juice Shop ground-truth challenge found for this generated manual test."
+      },
+      {
+        "id": "TC-AI-121",
+        "title": "Mass_Assignment - POST /api/Cards",
+        "type": "Mass_Assignment",
+        "endpoint": "POST /api/Cards",
+        "method": "POST",
+        "path": "/api/Cards",
+        "routeEvidence": "data/static/codefixes/changeProductChallenge_1.ts:62",
+        "classification": [
+          "authz",
+          "missing_auth"
+        ],
+        "middleware": [
+          "security.appendUserId"
+        ],
+        "riskSignals": [
+          "write_route_without_auth_middleware"
+        ],
+        "whyGenerated": "Endpoint handles sensitive card/payment data and lacks explicit validation middleware.",
+        "confirmedIndicator": "The application accepts the injected price fields in the database.",
+        "outcome": "FP",
+        "challengeKey": null,
+        "challengeName": null,
+        "confidence": "none",
+        "reason": "No corresponding Juice Shop ground-truth challenge found for this generated manual test."
+      },
+      {
+        "id": "TC-AI-120",
+        "title": "BFLA - POST /api/PrivacyRequests",
+        "type": "BFLA",
+        "endpoint": "POST /api/PrivacyRequests",
+        "method": "POST",
+        "path": "/api/PrivacyRequests",
+        "routeEvidence": "data/static/codefixes/changeProductChallenge_1.ts:68",
+        "classification": [
+          "authz",
+          "missing_auth"
+        ],
+        "middleware": [
+          "security.isAuthorized"
+        ],
+        "riskSignals": [
+          "write_route_without_auth_middleware"
+        ],
+        "whyGenerated": "Endpoint uses security.isAuthorized() which may be insufficient if it does not validate object-level ownership.",
+        "confirmedIndicator": "HTTP 200 OK and confirmation that User B's data is being processed.",
+        "outcome": "FP",
+        "challengeKey": null,
+        "challengeName": null,
+        "confidence": "none",
+        "reason": "No corresponding Juice Shop ground-truth challenge found for this generated manual test."
+      },
+      {
+        "id": "TC-AI-123",
+        "title": "Auth_Bypass - POST /api/Addresss",
+        "type": "Auth_Bypass",
+        "endpoint": "POST /api/Addresss",
+        "method": "POST",
+        "path": "/api/Addresss",
+        "routeEvidence": "data/static/codefixes/changeProductChallenge_1.ts:72",
+        "classification": [
+          "authz",
+          "missing_auth"
+        ],
+        "middleware": [
+          "security.appendUserId"
+        ],
+        "riskSignals": [
+          "write_route_without_auth_middleware"
+        ],
+        "whyGenerated": "Endpoint lacks authentication middleware and performs a state-changing operation (POST), allowing unauthenticated users to inject data.",
+        "confirmedIndicator": "200 OK response for unauthenticated POST request.",
+        "outcome": "FP",
+        "challengeKey": null,
+        "challengeName": null,
+        "confidence": "none",
+        "reason": "No corresponding Juice Shop ground-truth challenge found for this generated manual test."
+      },
+      {
+        "id": "TC-AI-067",
+        "title": "BFLA - PUT /rest/continue-code/apply/:continueCode",
+        "type": "BFLA",
+        "endpoint": "PUT /rest/continue-code/apply/:continueCode",
+        "method": "PUT",
+        "path": "/rest/continue-code/apply/:param",
+        "routeEvidence": "server.ts:613",
+        "classification": [
+          "authz",
+          "missing_auth"
+        ],
+        "middleware": [
+          "utils.asyncHandler",
+          "restoreProgress.restoreProgress"
+        ],
+        "riskSignals": [
+          "write_route_without_auth_middleware"
+        ],
+        "whyGenerated": "State-changing endpoint lacks authentication, allowing anonymous users to potentially trigger progress restoration logic.",
+        "confirmedIndicator": "State change occurs (e.g., progress restored) without authentication.",
+        "outcome": "FP",
+        "challengeKey": null,
+        "challengeName": null,
+        "confidence": "none",
+        "reason": "No corresponding Juice Shop ground-truth challenge found for this generated manual test."
+      },
+      {
+        "id": "TC-AI-103",
+        "title": "Mass_Assignment - POST /api/Addresss",
+        "type": "Mass_Assignment",
+        "endpoint": "POST /api/Addresss",
+        "method": "POST",
+        "path": "/api/Addresss",
+        "routeEvidence": "data/static/codefixes/changeProductChallenge_3_correct.ts:73",
+        "classification": [
+          "authz",
+          "missing_auth"
+        ],
+        "middleware": [
+          "security.appendUserId"
+        ],
+        "riskSignals": [
+          "write_route_without_auth_middleware"
+        ],
+        "whyGenerated": "The endpoint uses security.appendUserId() but does not explicitly whitelist fields, potentially allowing mass assignment of sensitive fields if the model is exposed.",
+        "confirmedIndicator": "The extra field is reflected in the database or API response.",
+        "outcome": "FP",
+        "challengeKey": null,
+        "challengeName": null,
+        "confidence": "none",
+        "reason": "No corresponding Juice Shop ground-truth challenge found for this generated manual test."
+      },
+      {
+        "id": "TC-AI-069",
+        "title": "BFLA - POST /rest/user/data-export",
+        "type": "BFLA",
+        "endpoint": "POST /rest/user/data-export",
+        "method": "POST",
+        "path": "/rest/user/data-export",
+        "routeEvidence": "server.ts:619",
+        "classification": [
+          "export",
+          "authz",
+          "missing_auth"
+        ],
+        "middleware": [
+          "security.appendUserId",
+          "utils.asyncHandler",
+          "verifyImageCaptcha"
+        ],
+        "riskSignals": [
+          "write_route_without_auth_middleware"
+        ],
+        "whyGenerated": "Endpoint lacks authentication middleware and performs sensitive data export operations.",
+        "confirmedIndicator": "Successful export of user data without authentication.",
+        "outcome": "PARTIAL",
+        "challengeKey": "dataExportChallenge",
+        "challengeName": "GDPR Data Theft",
+        "confidence": "partial",
+        "reason": "The endpoint is a real access-control challenge surface, but the specific issue is object-level data theft."
+      },
+      {
+        "id": "TC-AI-070",
+        "title": "Race_Condition - PUT /rest/wallet/balance",
+        "type": "Race_Condition",
+        "endpoint": "PUT /rest/wallet/balance",
+        "method": "PUT",
+        "path": "/rest/wallet/balance",
+        "routeEvidence": "server.ts:626",
+        "classification": [
+          "authz",
+          "missing_auth"
+        ],
+        "middleware": [
+          "security.appendUserId",
+          "utils.asyncHandler",
+          "addWalletBalance"
+        ],
+        "riskSignals": [
+          "write_route_without_auth_middleware"
+        ],
+        "whyGenerated": "Endpoint modifies financial balance; susceptible to race conditions if balance updates are not atomic.",
+        "confirmedIndicator": "Balance increases by more than the intended single increment despite concurrent requests.",
+        "outcome": "PARTIAL",
+        "challengeKey": "web3WalletChallenge",
+        "challengeName": "Wallet Depletion",
+        "confidence": "partial",
+        "reason": "Wallet balance is business-critical, but the Juice Shop Wallet Depletion challenge is Web3 logic, not this REST race condition."
+      },
+      {
+        "id": "TC-AI-071",
+        "title": "Mass_Assignment - POST /rest/deluxe-membership",
+        "type": "Mass_Assignment",
+        "endpoint": "POST /rest/deluxe-membership",
+        "method": "POST",
+        "path": "/rest/deluxe-membership",
+        "routeEvidence": "server.ts:628",
+        "classification": [
+          "authz",
+          "missing_auth"
+        ],
+        "middleware": [
+          "security.appendUserId",
+          "utils.asyncHandler",
+          "upgradeToDeluxe"
+        ],
+        "riskSignals": [
+          "write_route_without_auth_middleware"
+        ],
+        "whyGenerated": "Endpoint handles membership upgrades; potential to inject sensitive fields like 'deluxeToken' or 'role'.",
+        "confirmedIndicator": "User account privileges escalated or token updated via mass assignment.",
+        "outcome": "PARTIAL",
+        "challengeKey": "freeDeluxeChallenge",
+        "challengeName": "Deluxe Fraud",
+        "confidence": "partial",
+        "reason": "Deluxe Fraud is a real business/input logic challenge; the generated mass-assignment label is only approximate."
+      },
+      {
+        "id": "TC-AI-072",
+        "title": "BFLA - PATCH /rest/products/reviews",
+        "type": "BFLA",
+        "endpoint": "PATCH /rest/products/reviews",
+        "method": "PATCH",
+        "path": "/rest/products/reviews",
+        "routeEvidence": "server.ts:633",
+        "classification": [
+          "authz",
+          "missing_auth"
+        ],
+        "middleware": [
+          "security.isAuthorized",
+          "updateProductReviews"
+        ],
+        "riskSignals": [
+          "write_route_without_auth_middleware"
+        ],
+        "whyGenerated": "Endpoint uses custom authorization middleware; verify if it correctly restricts access to non-admin users.",
+        "confirmedIndicator": "Unauthorized modification of another user's review.",
+        "outcome": "TP",
+        "challengeKey": "forgedReviewChallenge",
+        "challengeName": "Forged Review",
+        "confidence": "exact",
+        "reason": "Updating another user review is explicitly handled by the Forged Review challenge."
+      },
+      {
+        "id": "TC-AI-073",
+        "title": "BFLA - POST /rest/products/reviews",
+        "type": "BFLA",
+        "endpoint": "POST /rest/products/reviews",
+        "method": "POST",
+        "path": "/rest/products/reviews",
+        "routeEvidence": "server.ts:634",
+        "classification": [
+          "authz",
+          "missing_auth"
+        ],
+        "middleware": [
+          "security.isAuthorized",
+          "utils.asyncHandler",
+          "likeProductReviews"
+        ],
+        "riskSignals": [
+          "write_route_without_auth_middleware"
+        ],
+        "whyGenerated": "Endpoint lacks explicit auth middleware despite being a state-changing operation (likeProductReviews).",
+        "confirmedIndicator": "HTTP 200 OK or 201 Created without a valid JWT.",
+        "outcome": "PARTIAL",
+        "challengeKey": "timingAttackChallenge",
+        "challengeName": "Multiple Likes",
+        "confidence": "partial",
+        "reason": "The endpoint is a real ground-truth challenge surface, but the intended vulnerability is race condition, not BFLA."
+      },
+      {
+        "id": "TC-AI-074",
+        "title": "BFLA - POST /rest/chat",
+        "type": "BFLA",
+        "endpoint": "POST /rest/chat",
+        "method": "POST",
+        "path": "/rest/chat",
+        "routeEvidence": "server.ts:637",
+        "classification": [
+          "authz",
+          "missing_auth"
+        ],
+        "middleware": [
+          "utils.asyncHandler",
+          "chat"
+        ],
+        "riskSignals": [
+          "write_route_without_auth_middleware"
+        ],
+        "whyGenerated": "State-changing chat endpoint lacks authentication, allowing potential unauthorized message injection.",
+        "confirmedIndicator": "Message appears in chat logs or returns 200 OK without auth.",
+        "outcome": "FP",
+        "challengeKey": null,
+        "challengeName": null,
+        "confidence": "none",
+        "reason": "No corresponding Juice Shop ground-truth challenge found for this generated manual test."
+      },
+      {
+        "id": "TC-AI-075",
+        "title": "Mass_Assignment - POST /rest/web3/submitKey",
+        "type": "Mass_Assignment",
+        "endpoint": "POST /rest/web3/submitKey",
+        "method": "POST",
+        "path": "/rest/web3/submitKey",
+        "routeEvidence": "server.ts:640",
+        "classification": [
+          "authz",
+          "missing_auth"
+        ],
+        "middleware": [
+          "utils.asyncHandler",
+          "checkKeys"
+        ],
+        "riskSignals": [
+          "write_route_without_auth_middleware"
+        ],
+        "whyGenerated": "Endpoint handles sensitive Web3 components; potential to overwrite 'code' or 'contractBytecode' fields via mass assignment.",
+        "confirmedIndicator": "Server response reflects the injected fields or state change in subsequent GET requests.",
+        "outcome": "FP",
+        "challengeKey": null,
+        "challengeName": null,
+        "confidence": "none",
+        "reason": "No corresponding Juice Shop ground-truth challenge found for this generated manual test."
+      },
+      {
+        "id": "TC-AI-076",
+        "title": "Race_Condition - POST /rest/web3/walletNFTVerify",
+        "type": "Race_Condition",
+        "endpoint": "POST /rest/web3/walletNFTVerify",
+        "method": "POST",
+        "path": "/rest/web3/walletNFTVerify",
+        "routeEvidence": "server.ts:643",
+        "classification": [
+          "authz",
+          "missing_auth"
+        ],
+        "middleware": [
+          "walletNFTVerify"
+        ],
+        "riskSignals": [
+          "write_route_without_auth_middleware"
+        ],
+        "whyGenerated": "Wallet/NFT verification involves balance/state checks; susceptible to race conditions if not atomic.",
+        "confirmedIndicator": "Balance increases or state changes multiple times for a single trigger.",
+        "outcome": "FP",
+        "challengeKey": null,
+        "challengeName": null,
+        "confidence": "none",
+        "reason": "No corresponding Juice Shop ground-truth challenge found for this generated manual test."
+      },
+      {
+        "id": "TC-AI-077",
+        "title": "Auth_Bypass - POST /rest/web3/walletExploitAddress",
+        "type": "Auth_Bypass",
+        "endpoint": "POST /rest/web3/walletExploitAddress",
+        "method": "POST",
+        "path": "/rest/web3/walletExploitAddress",
+        "routeEvidence": "server.ts:644",
+        "classification": [
+          "authz",
+          "missing_auth"
+        ],
+        "middleware": [
+          "utils.asyncHandler",
+          "contractExploitListener"
+        ],
+        "riskSignals": [
+          "write_route_without_auth_middleware"
+        ],
+        "whyGenerated": "Endpoint lacks authentication middleware and performs sensitive state changes related to Web3 contracts.",
+        "confirmedIndicator": "HTTP 200/201 response without valid authentication credentials.",
+        "outcome": "FP",
+        "challengeKey": null,
+        "challengeName": null,
+        "confidence": "none",
+        "reason": "No corresponding Juice Shop ground-truth challenge found for this generated manual test."
+      },
+      {
+        "id": "TC-AI-078",
+        "title": "Race_Condition - POST /b2b/v2/orders",
+        "type": "Race_Condition",
+        "endpoint": "POST /b2b/v2/orders",
+        "method": "POST",
+        "path": "/b2b/v2/orders",
+        "routeEvidence": "server.ts:647",
+        "classification": [
+          "authz",
+          "missing_auth"
+        ],
+        "middleware": [
+          "b2bOrder"
+        ],
+        "riskSignals": [
+          "write_route_without_auth_middleware"
+        ],
+        "whyGenerated": "Order placement endpoints are classic targets for race conditions to bypass balance checks or inventory limits.",
+        "confirmedIndicator": "Multiple successful order responses (200 OK) despite insufficient funds/quota.",
+        "outcome": "PARTIAL",
+        "challengeKey": "deprecatedInterfaceChallenge",
+        "challengeName": "Deprecated Interface",
+        "confidence": "partial",
+        "reason": "The B2B endpoint is real ground truth for Deprecated Interface, not a confirmed race condition."
+      },
+      {
+        "id": "TC-AI-079",
+        "title": "Mass_Assignment - POST /profile",
+        "type": "Mass_Assignment",
+        "endpoint": "POST /profile",
+        "method": "POST",
+        "path": "/profile",
+        "routeEvidence": "server.ts:666",
+        "classification": [
+          "authz",
+          "missing_auth"
+        ],
+        "middleware": [
+          "utils.asyncHandler",
+          "updateUserProfile"
+        ],
+        "riskSignals": [
+          "write_route_without_auth_middleware"
+        ],
+        "whyGenerated": "The /profile endpoint is a common target for updating user objects; schema indicates sensitive fields like balance are mass-assignable.",
+        "confirmedIndicator": "Database reflects the modified sensitive field value after the request.",
+        "outcome": "FP",
+        "challengeKey": null,
+        "challengeName": null,
+        "confidence": "none",
+        "reason": "No corresponding Juice Shop ground-truth challenge found for this generated manual test."
+      },
+      {
+        "id": "TC-AI-080",
+        "title": "Auth_Bypass - POST /snippets/verdict",
+        "type": "Auth_Bypass",
+        "endpoint": "POST /snippets/verdict",
+        "method": "POST",
+        "path": "/snippets/verdict",
+        "routeEvidence": "server.ts:670",
+        "classification": [
+          "authz",
+          "missing_auth"
+        ],
+        "middleware": [
+          "utils.asyncHandler",
+          "checkVulnLines"
+        ],
+        "riskSignals": [
+          "write_route_without_auth_middleware"
+        ],
+        "whyGenerated": "Endpoint lacks auth and performs logic checks on vulnerabilities, potentially allowing unauthorized users to influence system verdicts.",
+        "confirmedIndicator": "HTTP 200 OK response without authentication.",
+        "outcome": "FP",
+        "challengeKey": null,
+        "challengeName": null,
+        "confidence": "none",
+        "reason": "No corresponding Juice Shop ground-truth challenge found for this generated manual test."
+      },
+      {
+        "id": "TC-AI-081",
+        "title": "BFLA - POST /snippets/fixes",
+        "type": "BFLA",
+        "endpoint": "POST /snippets/fixes",
+        "method": "POST",
+        "path": "/snippets/fixes",
+        "routeEvidence": "server.ts:672",
+        "classification": [
+          "authz",
+          "missing_auth"
+        ],
+        "middleware": [
+          "utils.asyncHandler",
+          "checkCorrectFix"
+        ],
+        "riskSignals": [
+          "write_route_without_auth_middleware"
+        ],
+        "whyGenerated": "The endpoint lacks authentication middleware and performs a state-changing operation, allowing potential unauthorized access to system-level fixes.",
+        "confirmedIndicator": "Successful execution of business logic without a valid session token.",
+        "outcome": "FP",
+        "challengeKey": null,
+        "challengeName": null,
+        "confidence": "none",
+        "reason": "No corresponding Juice Shop ground-truth challenge found for this generated manual test."
+      },
+      {
+        "id": "TC-AI-111",
+        "title": "Mass_Assignment - POST /api/Products",
+        "type": "Mass_Assignment",
+        "endpoint": "POST /api/Products",
+        "method": "POST",
+        "path": "/api/Products",
+        "routeEvidence": "data/static/codefixes/changeProductChallenge_1.ts:16",
+        "classification": [
+          "authz",
+          "missing_auth"
+        ],
+        "middleware": [
+          "security.isAuthorized"
+        ],
+        "riskSignals": [
+          "write_route_without_auth_middleware"
+        ],
+        "whyGenerated": "The endpoint allows POST requests to create products, and the Product model contains sensitive business fields like 'price' and 'deluxePrice' that are marked as mass assignment targets.",
+        "confirmedIndicator": "Product created with the injected price values.",
+        "outcome": "FP",
+        "challengeKey": null,
+        "challengeName": null,
+        "confidence": "none",
+        "reason": "No corresponding Juice Shop ground-truth challenge found for this generated manual test."
+      },
+      {
+        "id": "TC-AI-083",
+        "title": "BFLA - POST /",
+        "type": "BFLA",
+        "endpoint": "POST /",
+        "method": "POST",
+        "path": "/",
+        "routeEvidence": "routes/dataErasure.ts:74",
+        "classification": [
+          "authz",
+          "missing_auth"
+        ],
+        "middleware": [
+          "Request",
+          "Response"
+        ],
+        "riskSignals": [
+          "write_route_without_auth_middleware"
+        ],
+        "whyGenerated": "The endpoint handles data erasure and lacks authentication middleware, posing a severe risk of unauthorized data destruction.",
+        "confirmedIndicator": "Data is erased without an active session or with a session belonging to a different user.",
+        "outcome": "FP",
+        "challengeKey": null,
+        "challengeName": null,
+        "confidence": "none",
+        "reason": "No corresponding Juice Shop ground-truth challenge found for this generated manual test."
+      },
+      {
+        "id": "TC-AI-115",
+        "title": "BFLA - POST /api/Hints",
+        "type": "BFLA",
+        "endpoint": "POST /api/Hints",
+        "method": "POST",
+        "path": "/api/Hints",
+        "routeEvidence": "data/static/codefixes/changeProductChallenge_1.ts:22",
+        "classification": [
+          "authz",
+          "missing_auth"
+        ],
+        "middleware": [
+          "security.denyAll"
+        ],
+        "riskSignals": [
+          "write_route_without_auth_middleware"
+        ],
+        "whyGenerated": "Endpoint uses security.denyAll() but is a POST route, suggesting potential for misconfiguration or bypass if the middleware is not applied correctly to all HTTP verbs.",
+        "confirmedIndicator": "HTTP 200/201 response on a route protected by denyAll.",
+        "outcome": "FP",
+        "challengeKey": null,
+        "challengeName": null,
+        "confidence": "none",
+        "reason": "No corresponding Juice Shop ground-truth challenge found for this generated manual test."
+      },
+      {
+        "id": "TC-AI-116",
+        "title": "BFLA - POST /api/Complaints",
+        "type": "BFLA",
+        "endpoint": "POST /api/Complaints",
+        "method": "POST",
+        "path": "/api/Complaints",
+        "routeEvidence": "data/static/codefixes/changeProductChallenge_1.ts:28",
+        "classification": [
+          "authz",
+          "missing_auth"
+        ],
+        "middleware": [
+          "security.isAuthorized"
+        ],
+        "riskSignals": [
+          "write_route_without_auth_middleware"
+        ],
+        "whyGenerated": "Endpoint uses security.isAuthorized() but lacks explicit role or ownership checks, potentially allowing any authenticated user to submit complaints on behalf of others or bypass intended restrictions.",
+        "confirmedIndicator": "Successful creation of resource for another user ID.",
+        "outcome": "FP",
+        "challengeKey": null,
+        "challengeName": null,
+        "confidence": "none",
+        "reason": "No corresponding Juice Shop ground-truth challenge found for this generated manual test."
+      },
+      {
+        "id": "TC-AI-099",
+        "title": "Mass_Assignment - POST /api/Recycles",
+        "type": "Mass_Assignment",
+        "endpoint": "POST /api/Recycles",
+        "method": "POST",
+        "path": "/api/Recycles",
+        "routeEvidence": "data/static/codefixes/changeProductChallenge_3_correct.ts:33",
+        "classification": [
+          "authz",
+          "missing_auth"
+        ],
+        "middleware": [
+          "security.isAuthorized"
+        ],
+        "riskSignals": [
+          "write_route_without_auth_middleware"
+        ],
+        "whyGenerated": "Endpoint lacks validation middleware and processes input that could potentially map to sensitive model fields.",
+        "confirmedIndicator": "Application state reflects injected fields that should not be user-controllable.",
+        "outcome": "FP",
+        "challengeKey": null,
+        "challengeName": null,
+        "confidence": "none",
+        "reason": "No corresponding Juice Shop ground-truth challenge found for this generated manual test."
+      },
+      {
+        "id": "TC-AI-118",
+        "title": "BFLA - POST /api/SecurityQuestions",
+        "type": "BFLA",
+        "endpoint": "POST /api/SecurityQuestions",
+        "method": "POST",
+        "path": "/api/SecurityQuestions",
+        "routeEvidence": "data/static/codefixes/changeProductChallenge_1.ts:38",
+        "classification": [
+          "authz",
+          "missing_auth"
+        ],
+        "middleware": [
+          "security.denyAll"
+        ],
+        "riskSignals": [
+          "write_route_without_auth_middleware"
+        ],
+        "whyGenerated": "Sensitive endpoint for security questions protected by denyAll; testing if the middleware is effectively blocking unauthorized access to account recovery mechanisms.",
+        "confirmedIndicator": "HTTP 200 OK response on a restricted security endpoint.",
+        "outcome": "FP",
+        "challengeKey": null,
+        "challengeName": null,
+        "confidence": "none",
+        "reason": "No corresponding Juice Shop ground-truth challenge found for this generated manual test."
+      },
+      {
+        "id": "TC-AI-122",
+        "title": "Race_Condition - POST /api/BasketItems",
+        "type": "Race_Condition",
+        "endpoint": "POST /api/BasketItems",
+        "method": "POST",
+        "path": "/api/BasketItems",
+        "routeEvidence": "data/static/codefixes/changeProductChallenge_1.ts:51",
+        "classification": [
+          "authz"
+        ],
+        "middleware": [
+          "basketItems.quantityCheckBeforeBasketItemAddition"
+        ],
+        "riskSignals": [
+          "write_route_without_auth_middleware"
+        ],
+        "whyGenerated": "Basket item addition involves quantity checks which are classic targets for race conditions.",
+        "confirmedIndicator": "The final basket quantity exceeds the business logic limit.",
+        "outcome": "FP",
+        "challengeKey": null,
+        "challengeName": null,
+        "confidence": "none",
+        "reason": "No corresponding Juice Shop ground-truth challenge found for this generated manual test."
+      },
+      {
+        "id": "TC-AI-104",
+        "title": "BFLA - POST /api/Challenges",
+        "type": "BFLA",
+        "endpoint": "POST /api/Challenges",
+        "method": "POST",
+        "path": "/api/Challenges",
+        "routeEvidence": "data/static/codefixes/changeProductChallenge_2.ts:16",
+        "classification": [
+          "authz",
+          "missing_auth"
+        ],
+        "middleware": [
+          "security.denyAll"
+        ],
+        "riskSignals": [
+          "write_route_without_auth_middleware"
+        ],
+        "whyGenerated": "Endpoint lacks authentication middleware and is a state-changing POST request, potentially allowing anonymous users to trigger administrative or system-level challenges.",
+        "confirmedIndicator": "HTTP 200/201 response for unauthenticated request.",
+        "outcome": "FP",
+        "challengeKey": null,
+        "challengeName": null,
+        "confidence": "none",
+        "reason": "No corresponding Juice Shop ground-truth challenge found for this generated manual test."
+      },
+      {
+        "id": "TC-AI-095",
+        "title": "Race_Condition - POST /api/Hints",
+        "type": "Race_Condition",
+        "endpoint": "POST /api/Hints",
+        "method": "POST",
+        "path": "/api/Hints",
+        "routeEvidence": "data/static/codefixes/changeProductChallenge_3_correct.ts:23",
+        "classification": [
+          "authz",
+          "missing_auth"
+        ],
+        "middleware": [
+          "security.denyAll"
+        ],
+        "riskSignals": [
+          "write_route_without_auth_middleware"
+        ],
+        "whyGenerated": "Hints often involve balance or quota checks; concurrent requests may bypass limits.",
+        "confirmedIndicator": "Multiple successful responses for a single-use resource.",
+        "outcome": "FP",
+        "challengeKey": null,
+        "challengeName": null,
+        "confidence": "none",
+        "reason": "No corresponding Juice Shop ground-truth challenge found for this generated manual test."
+      },
+      {
+        "id": "TC-AI-101",
+        "title": "IDOR - POST /api/Cards",
+        "type": "IDOR",
+        "endpoint": "POST /api/Cards",
+        "method": "POST",
+        "path": "/api/Cards",
+        "routeEvidence": "data/static/codefixes/changeProductChallenge_3_correct.ts:63",
+        "classification": [
+          "authz",
+          "missing_auth"
+        ],
+        "middleware": [
+          "security.appendUserId"
+        ],
+        "riskSignals": [
+          "write_route_without_auth_middleware"
+        ],
+        "whyGenerated": "The endpoint uses security.appendUserId() but lacks explicit ownership checks, making it a prime candidate for IDOR if the user ID can be manipulated in the request body.",
+        "confirmedIndicator": "Resource created for User B while authenticated as User A.",
+        "outcome": "FP",
+        "challengeKey": null,
+        "challengeName": null,
+        "confidence": "none",
+        "reason": "No corresponding Juice Shop ground-truth challenge found for this generated manual test."
+      },
+      {
+        "id": "TC-AI-117",
+        "title": "Race_Condition - POST /api/Recycles",
+        "type": "Race_Condition",
+        "endpoint": "POST /api/Recycles",
+        "method": "POST",
+        "path": "/api/Recycles",
+        "routeEvidence": "data/static/codefixes/changeProductChallenge_1.ts:32",
+        "classification": [
+          "authz",
+          "missing_auth"
+        ],
+        "middleware": [
+          "security.isAuthorized"
+        ],
+        "riskSignals": [
+          "write_route_without_auth_middleware"
+        ],
+        "whyGenerated": "Recycle operations often involve state changes (e.g., balance updates, point increments) which are prone to race conditions if not handled with atomic database transactions.",
+        "confirmedIndicator": "Discrepancy between expected and actual state after concurrent requests.",
+        "outcome": "FP",
+        "challengeKey": null,
+        "challengeName": null,
+        "confidence": "none",
+        "reason": "No corresponding Juice Shop ground-truth challenge found for this generated manual test."
+      },
+      {
+        "id": "TC-AI-108",
+        "title": "IDOR - POST /api/BasketItems",
+        "type": "IDOR",
+        "endpoint": "POST /api/BasketItems",
+        "method": "POST",
+        "path": "/api/BasketItems",
+        "routeEvidence": "data/static/codefixes/changeProductChallenge_2.ts:48",
+        "classification": [
+          "authz",
+          "missing_auth"
+        ],
+        "middleware": [
+          "security.appendUserId"
+        ],
+        "riskSignals": [
+          "write_route_without_auth_middleware"
+        ],
+        "whyGenerated": "The endpoint uses 'security.appendUserId()' but lacks explicit ownership verification, potentially allowing a user to add items to another user's basket if the UserId can be manipulated.",
+        "confirmedIndicator": "Item appears in User B's basket after User A's request.",
+        "outcome": "TP",
+        "challengeKey": "basketManipulateChallenge",
+        "challengeName": "Manipulate Basket",
+        "confidence": "exact",
+        "reason": "Manipulate Basket is solved by posting an item with another BasketId."
+      },
+      {
+        "id": "TC-AI-110",
+        "title": "Race_Condition - POST /api/Quantitys",
+        "type": "Race_Condition",
+        "endpoint": "POST /api/Quantitys",
+        "method": "POST",
+        "path": "/api/Quantitys",
+        "routeEvidence": "data/static/codefixes/changeProductChallenge_2.ts:51",
+        "classification": [
+          "authz",
+          "missing_auth"
+        ],
+        "middleware": [
+          "security.denyAll"
+        ],
+        "riskSignals": [
+          "write_route_without_auth_middleware"
+        ],
+        "whyGenerated": "Endpoint manages quantity state, which is highly susceptible to race conditions if not protected by atomic database operations or locking.",
+        "confirmedIndicator": "Final balance or quantity is inconsistent with the number of requests sent.",
+        "outcome": "FP",
+        "challengeKey": null,
+        "challengeName": null,
+        "confidence": "none",
+        "reason": "No corresponding Juice Shop ground-truth challenge found for this generated manual test."
+      },
+      {
+        "id": "TC-AI-114",
+        "title": "IDOR - POST /api/Addresss",
+        "type": "IDOR",
+        "endpoint": "POST /api/Addresss",
+        "method": "POST",
+        "path": "/api/Addresss",
+        "routeEvidence": "data/static/codefixes/changeProductChallenge_2.ts:69",
+        "classification": [
+          "authz",
+          "missing_auth"
+        ],
+        "middleware": [
+          "security.appendUserId"
+        ],
+        "riskSignals": [
+          "write_route_without_auth_middleware"
+        ],
+        "whyGenerated": "The endpoint uses 'security.appendUserId()', which implies it relies on the client-provided or session-injected ID. If the logic fails to validate ownership of existing addresses, an IDOR is possible.",
+        "confirmedIndicator": "Address belonging to another user is modified.",
+        "outcome": "FP",
+        "challengeKey": null,
+        "challengeName": null,
+        "confidence": "none",
+        "reason": "No corresponding Juice Shop ground-truth challenge found for this generated manual test."
+      },
+      {
+        "id": "TC-AI-124",
+        "title": "BFLA - GET /rest/admin/application-version",
+        "type": "BFLA",
+        "endpoint": "GET /rest/admin/application-version",
+        "method": "GET",
+        "path": "/rest/admin/application-version",
+        "routeEvidence": "server.ts:605",
+        "classification": [
+          "admin",
+          "missing_admin"
+        ],
+        "middleware": [
+          "utils.asyncHandler",
+          "retrieveAppVersion"
+        ],
+        "riskSignals": [
+          "admin_endpoint_without_role_check"
+        ],
+        "whyGenerated": "Endpoint is explicitly marked as admin-only but lacks server-side role enforcement middleware.",
+        "confirmedIndicator": "200 OK response for a non-admin user.",
+        "outcome": "PARTIAL",
+        "challengeKey": "adminSectionChallenge",
+        "challengeName": "Admin Section",
+        "confidence": "partial",
+        "reason": "This is an admin-labelled route, but the YAML Admin Section challenge is primarily UI route access."
+      },
+      {
+        "id": "TC-AI-147",
+        "title": "IDOR - GET /api/Recycles/:id",
+        "type": "IDOR",
+        "endpoint": "GET /api/Recycles/:id",
+        "method": "GET",
+        "path": "/api/Recycles/:id",
+        "routeEvidence": "data/static/codefixes/changeProductChallenge_1.ts:34",
+        "classification": [
+          "idor_candidate"
+        ],
+        "middleware": [
+          "recycles.getRecycleItem"
+        ],
+        "riskSignals": [
+          "missing_auth"
+        ],
+        "whyGenerated": "Endpoint lacks any authentication or ownership check middleware.",
+        "confirmedIndicator": "HTTP 200 OK for arbitrary ID values.",
+        "outcome": "FP",
+        "challengeKey": null,
+        "challengeName": null,
+        "confidence": "none",
+        "reason": "No corresponding Juice Shop ground-truth challenge found for this generated manual test."
+      },
+      {
+        "id": "TC-AI-148",
+        "title": "IDOR - GET /api/Cards/:id",
+        "type": "IDOR",
+        "endpoint": "GET /api/Cards/:id",
+        "method": "GET",
+        "path": "/api/Cards/:id",
+        "routeEvidence": "data/static/codefixes/changeProductChallenge_1.ts:66",
+        "classification": [
+          "idor_candidate"
+        ],
+        "middleware": [
+          "security.appendUserId"
+        ],
+        "riskSignals": [
+          "missing_ownership_check"
+        ],
+        "whyGenerated": "Endpoint marked as idor_candidate and lacks explicit ownership check middleware.",
+        "confirmedIndicator": "HTTP 200 OK with sensitive card data belonging to another user.",
+        "outcome": "FP",
+        "challengeKey": null,
+        "challengeName": null,
+        "confidence": "none",
+        "reason": "No corresponding Juice Shop ground-truth challenge found for this generated manual test."
+      },
+      {
+        "id": "TC-AI-149",
+        "title": "IDOR - GET /api/Addresss/:id",
+        "type": "IDOR",
+        "endpoint": "GET /api/Addresss/:id",
+        "method": "GET",
+        "path": "/api/Addresss/:id",
+        "routeEvidence": "data/static/codefixes/changeProductChallenge_1.ts:76",
+        "classification": [
+          "idor_candidate"
+        ],
+        "middleware": [
+          "security.appendUserId"
+        ],
+        "riskSignals": [
+          "missing_ownership_check"
+        ],
+        "whyGenerated": "Endpoint marked as idor_candidate and lacks ownership validation.",
+        "confirmedIndicator": "HTTP 200 OK returning PII of another user.",
+        "outcome": "FP",
+        "challengeKey": null,
+        "challengeName": null,
+        "confidence": "none",
+        "reason": "No corresponding Juice Shop ground-truth challenge found for this generated manual test."
+      },
+      {
+        "id": "TC-AI-150",
+        "title": "Auth_Bypass - GET /api/Deliverys/:id",
+        "type": "Auth_Bypass",
+        "endpoint": "GET /api/Deliverys/:id",
+        "method": "GET",
+        "path": "/api/Deliverys/:id",
+        "routeEvidence": "data/static/codefixes/changeProductChallenge_1.ts:78",
+        "classification": [
+          "idor_candidate"
+        ],
+        "middleware": [
+          "utils.asyncHandler"
+        ],
+        "riskSignals": [
+          "missing_auth"
+        ],
+        "whyGenerated": "Endpoint lacks any authentication middleware, potentially exposing delivery methods intended for authenticated users.",
+        "confirmedIndicator": "HTTP 200 OK without valid credentials.",
+        "outcome": "FP",
+        "challengeKey": null,
+        "challengeName": null,
+        "confidence": "none",
+        "reason": "No corresponding Juice Shop ground-truth challenge found for this generated manual test."
+      },
+      {
+        "id": "TC-AI-129",
+        "title": "Race_Condition - POST /rest/2fa/verify",
+        "type": "Race_Condition",
+        "endpoint": "POST /rest/2fa/verify",
+        "method": "POST",
+        "path": "/rest/2fa/verify",
+        "routeEvidence": "server.ts:457",
+        "classification": [
+          "auth"
+        ],
+        "middleware": [
+          "rateLimit",
+          "twoFactorAuth.verify"
+        ],
+        "riskSignals": [
+          "auth"
+        ],
+        "whyGenerated": "2FA verification is a state-changing operation that may be vulnerable to brute-force or race conditions if rate limiting is bypassed or improperly implemented.",
+        "confirmedIndicator": "Successful 2FA bypass via brute force due to race condition in rate limiting.",
+        "outcome": "FP",
+        "challengeKey": null,
+        "challengeName": null,
+        "confidence": "none",
+        "reason": "No corresponding Juice Shop ground-truth challenge found for this generated manual test."
+      },
+      {
+        "id": "TC-AI-130",
+        "title": "BFLA - POST /rest/2fa/disable",
+        "type": "BFLA",
+        "endpoint": "POST /rest/2fa/disable",
+        "method": "POST",
+        "path": "/rest/2fa/disable",
+        "routeEvidence": "server.ts:470",
+        "classification": [
+          "auth"
+        ],
+        "middleware": [
+          "security.isAuthorized",
+          "twoFactorAuth.disable"
+        ],
+        "riskSignals": [
+          "missing_auth",
+          "missing_admin"
+        ],
+        "whyGenerated": "The endpoint lacks explicit auth middleware and role checks, potentially allowing unauthorized users to disable 2FA for other accounts if the backend relies solely on client-provided identifiers.",
+        "confirmedIndicator": "2FA status for User B changes to disabled.",
+        "outcome": "FP",
+        "challengeKey": null,
+        "challengeName": null,
+        "confidence": "none",
+        "reason": "No corresponding Juice Shop ground-truth challenge found for this generated manual test."
+      },
+      {
+        "id": "TC-AI-131",
+        "title": "Mass_Assignment - POST /rest/user/login",
+        "type": "Mass_Assignment",
+        "endpoint": "POST /rest/user/login",
+        "method": "POST",
+        "path": "/rest/user/login",
+        "routeEvidence": "server.ts:595",
+        "classification": [
+          "auth"
+        ],
+        "middleware": [
+          "login"
+        ],
+        "riskSignals": [
+          "missing_auth"
+        ],
+        "whyGenerated": "The login endpoint lacks validation middleware and the User model contains sensitive fields like 'role' and 'totpSecret' that are susceptible to mass assignment if the login controller blindly binds request bodies to the User object.",
+        "confirmedIndicator": "User account role is updated to 'admin' or totpSecret is overwritten after a login attempt.",
+        "outcome": "FP",
+        "challengeKey": null,
+        "challengeName": null,
+        "confidence": "none",
+        "reason": "No corresponding Juice Shop ground-truth challenge found for this generated manual test."
+      },
+      {
+        "id": "TC-AI-132",
+        "title": "Race_Condition - POST /rest/2fa/setup",
+        "type": "Race_Condition",
+        "endpoint": "POST /rest/2fa/setup",
+        "method": "POST",
+        "path": "/rest/2fa/setup",
+        "routeEvidence": "server.ts:464",
+        "classification": [
+          "auth"
+        ],
+        "middleware": [
+          "twoFactorAuth.setup"
+        ],
+        "riskSignals": [
+          "missing_ownership_check"
+        ],
+        "whyGenerated": "State-changing operations involving security secrets (2FA) are prone to race conditions if the backend does not implement atomic transactions or locking when generating/updating the 'totpSecret'.",
+        "confirmedIndicator": "The user account ends up with an unexpected or corrupted 2FA state, or multiple secrets are generated for a single user.",
+        "outcome": "FP",
+        "challengeKey": null,
+        "challengeName": null,
+        "confidence": "none",
+        "reason": "No corresponding Juice Shop ground-truth challenge found for this generated manual test."
+      },
+      {
+        "id": "TC-AI-133",
+        "title": "IDOR - GET /rest/basket/:id",
+        "type": "IDOR",
+        "endpoint": "GET /rest/basket/:id",
+        "method": "GET",
+        "path": "/rest/basket/:id",
+        "routeEvidence": "server.ts:602",
+        "classification": [
+          "idor_candidate"
+        ],
+        "middleware": [
+          "utils.asyncHandler",
+          "retrieveBasket"
+        ],
+        "riskSignals": [
+          "missing_ownership_check"
+        ],
+        "whyGenerated": "Endpoint lacks ownership checks and accesses sensitive Basket model data containing UserId.",
+        "confirmedIndicator": "HTTP 200 OK returned for a basket ID belonging to another user.",
+        "outcome": "TP",
+        "challengeKey": "basketAccessChallenge",
+        "challengeName": "View Basket",
+        "confidence": "exact",
+        "reason": "View Basket is solved by reading another user basket via /rest/basket/:id."
+      },
+      {
+        "id": "TC-AI-134",
+        "title": "IDOR - GET /rest/track-order/:id",
+        "type": "IDOR",
+        "endpoint": "GET /rest/track-order/:id",
+        "method": "GET",
+        "path": "/rest/track-order/:id",
+        "routeEvidence": "server.ts:616",
+        "classification": [
+          "idor_candidate",
+          "payment"
+        ],
+        "middleware": [
+          "trackOrder"
+        ],
+        "riskSignals": [
+          "missing_auth",
+          "missing_ownership_check"
+        ],
+        "whyGenerated": "Endpoint exposes PII (email) and financial data (totalPrice) without authentication or ownership validation.",
+        "confirmedIndicator": "Successful retrieval of sensitive order data for an unauthorized order ID.",
+        "outcome": "FP",
+        "challengeKey": null,
+        "challengeName": null,
+        "confidence": "none",
+        "reason": "No corresponding Juice Shop ground-truth challenge found for this generated manual test."
+      },
+      {
+        "id": "TC-AI-146",
+        "title": "IDOR - GET /api/Deliverys/:id",
+        "type": "IDOR",
+        "endpoint": "GET /api/Deliverys/:id",
+        "method": "GET",
+        "path": "/api/Deliverys/:id",
+        "routeEvidence": "data/static/codefixes/changeProductChallenge_2.ts:75",
+        "classification": [
+          "idor_candidate"
+        ],
+        "middleware": [
+          "utils.asyncHandler",
+          "delivery.getDeliveryMethod"
+        ],
+        "riskSignals": [
+          "missing_auth",
+          "missing_ownership_check"
+        ],
+        "whyGenerated": "Endpoint lacks any authentication or ownership check middleware.",
+        "confirmedIndicator": "HTTP 200 OK returned for unauthenticated requests.",
+        "outcome": "FP",
+        "challengeKey": null,
+        "challengeName": null,
+        "confidence": "none",
+        "reason": "No corresponding Juice Shop ground-truth challenge found for this generated manual test."
+      },
+      {
+        "id": "TC-AI-151",
+        "title": "BFLA - GET /rest/2fa/status",
+        "type": "BFLA",
+        "endpoint": "GET /rest/2fa/status",
+        "method": "GET",
+        "path": "/rest/2fa/status",
+        "routeEvidence": "server.ts:462",
+        "classification": [
+          "auth"
+        ],
+        "middleware": [
+          "security.isAuthorized"
+        ],
+        "riskSignals": [
+          "authz"
+        ],
+        "whyGenerated": "Endpoint handles sensitive 2FA state; requires verification that isAuthorized() correctly validates the session context.",
+        "confirmedIndicator": "Access granted to 2FA status for an unauthorized or partially authenticated user.",
+        "outcome": "FP",
+        "challengeKey": null,
+        "challengeName": null,
+        "confidence": "none",
+        "reason": "No corresponding Juice Shop ground-truth challenge found for this generated manual test."
+      },
+      {
+        "id": "TC-AI-152",
+        "title": "BFLA - GET /rest/order-history/orders",
+        "type": "BFLA",
+        "endpoint": "GET /rest/order-history/orders",
+        "method": "GET",
+        "path": "/rest/order-history/orders",
+        "routeEvidence": "server.ts:623",
+        "classification": [
+          "payment"
+        ],
+        "middleware": [
+          "security.isAccounting"
+        ],
+        "riskSignals": [
+          "missing_admin",
+          "authz"
+        ],
+        "whyGenerated": "Endpoint uses 'security.isAccounting()' middleware, which suggests a role-based restriction. Testing if a standard user can bypass this to access global order data.",
+        "confirmedIndicator": "HTTP 200 OK response for a non-accounting user.",
+        "outcome": "FP",
+        "challengeKey": null,
+        "challengeName": null,
+        "confidence": "none",
+        "reason": "No corresponding Juice Shop ground-truth challenge found for this generated manual test."
+      },
+      {
+        "id": "TC-AI-153",
+        "title": "IDOR - GET /rest/order-history",
+        "type": "IDOR",
+        "endpoint": "GET /rest/order-history",
+        "method": "GET",
+        "path": "/rest/order-history",
+        "routeEvidence": "server.ts:622",
+        "classification": [
+          "payment"
+        ],
+        "middleware": [
+          "utils.asyncHandler"
+        ],
+        "riskSignals": [
+          "missing_ownership_check",
+          "idor_candidate"
+        ],
+        "whyGenerated": "Endpoint lacks explicit ownership check middleware. Potential to access other users' order history by manipulating session context or parameters if they exist.",
+        "confirmedIndicator": "Accessing data belonging to another user without authorization.",
+        "outcome": "FP",
+        "challengeKey": null,
+        "challengeName": null,
+        "confidence": "none",
+        "reason": "No corresponding Juice Shop ground-truth challenge found for this generated manual test."
+      },
+      {
+        "id": "TC-AI-154",
+        "title": "Auth_Bypass - GET /rest/user/change-password",
+        "type": "Auth_Bypass",
+        "endpoint": "GET /rest/user/change-password",
+        "method": "GET",
+        "path": "/rest/user/change-password",
+        "routeEvidence": "server.ts:596",
+        "classification": [
+          "auth"
+        ],
+        "middleware": [
+          "utils.asyncHandler"
+        ],
+        "riskSignals": [
+          "missing_auth"
+        ],
+        "whyGenerated": "Endpoint lacks auth middleware. If it processes password changes without verifying the current session, it is a critical bypass.",
+        "confirmedIndicator": "Password change successful without a valid session token.",
+        "outcome": "TP",
+        "challengeKey": "changePasswordBenderChallenge",
+        "challengeName": "Change Bender's Password",
+        "confidence": "exact",
+        "reason": "Change Bender Password is solved through /rest/user/change-password without the current password."
+      }
+    ],
+    "summary": {
+      "total": 87,
+      "exact": 8,
+      "partial": 11,
+      "noChallengeMapping": 68,
+      "exactPrecision": 0.092,
+      "usefulPrecision": 0.2184
+    },
+    "byType": [
+      {
+        "key": "Auth_Bypass",
+        "total": 11,
+        "exact": 1,
+        "partial": 1,
+        "noChallengeMapping": 9,
+        "exactPrecision": 0.0909,
+        "usefulPrecision": 0.1818
+      },
+      {
+        "key": "BFLA",
+        "total": 27,
+        "exact": 3,
+        "partial": 4,
+        "noChallengeMapping": 20,
+        "exactPrecision": 0.1111,
+        "usefulPrecision": 0.2593
+      },
+      {
+        "key": "IDOR",
+        "total": 18,
+        "exact": 3,
+        "partial": 1,
+        "noChallengeMapping": 14,
+        "exactPrecision": 0.1667,
+        "usefulPrecision": 0.2222
+      },
+      {
+        "key": "Mass_Assignment",
+        "total": 17,
+        "exact": 1,
+        "partial": 2,
+        "noChallengeMapping": 14,
+        "exactPrecision": 0.0588,
+        "usefulPrecision": 0.1765
+      },
+      {
+        "key": "Race_Condition",
+        "total": 14,
+        "exact": 0,
+        "partial": 3,
+        "noChallengeMapping": 11,
+        "exactPrecision": 0,
+        "usefulPrecision": 0.2143
+      }
+    ]
+  },
+  "challengeCoverage": {
+    "exactChallengeCount": 13,
+    "usefulChallengeCount": 28,
+    "exactChallengeKeys": [
+      "accessLogDisclosureChallenge",
+      "basketAccessChallenge",
+      "basketManipulateChallenge",
+      "changePasswordBenderChallenge",
+      "changeProductChallenge",
+      "dbSchemaChallenge",
+      "directoryListingChallenge",
+      "feedbackChallenge",
+      "forgedReviewChallenge",
+      "loginAdminChallenge",
+      "redirectChallenge",
+      "registerAdminChallenge",
+      "unionSqlInjectionChallenge"
+    ],
+    "usefulChallengeKeys": [
+      "accessLogDisclosureChallenge",
+      "adminSectionChallenge",
+      "basketAccessChallenge",
+      "basketManipulateChallenge",
+      "changePasswordBenderChallenge",
+      "changeProductChallenge",
+      "dataExportChallenge",
+      "dbSchemaChallenge",
+      "deprecatedInterfaceChallenge",
+      "directoryListingChallenge",
+      "feedbackChallenge",
+      "forgedFeedbackChallenge",
+      "forgedReviewChallenge",
+      "forgottenBackupChallenge",
+      "freeDeluxeChallenge",
+      "jwtUnsignedChallenge",
+      "lfrChallenge",
+      "localXssChallenge",
+      "loginAdminChallenge",
+      "negativeOrderChallenge",
+      "nftUnlockChallenge",
+      "redirectChallenge",
+      "registerAdminChallenge",
+      "sstiChallenge",
+      "timingAttackChallenge",
+      "unionSqlInjectionChallenge",
+      "usernameXssChallenge",
+      "web3WalletChallenge"
+    ]
+  }
+}

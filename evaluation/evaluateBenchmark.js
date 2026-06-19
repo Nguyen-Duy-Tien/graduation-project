@@ -203,16 +203,9 @@ function evaluateTriage(report) {
 
   const findings = report.triaged_findings;
   const counts = countBy(findings, f => f.triage_status ?? 'unknown');
-  const rawCount = findings.length;
-  const falsePositiveCount = counts.false_positive ?? 0;
-  const postAiActionable = findings.filter(f => f.triage_status !== 'false_positive').length;
 
   return {
-    rawCount,
-    falsePositiveCount,
-    beforeAiFalsePositiveRate: null,
-    afterAiActionableCount: postAiActionable,
-    afterAiFalsePositiveRate: ratio(falsePositiveCount, rawCount),
+    findingCount: findings.length,
     counts,
   };
 }
@@ -237,7 +230,7 @@ function percent(value) {
 
 function buildMarkdown({ target, context, groundTruth, endpointEval, categoryEval, triageEval, manualTests }) {
   const posture = triageEval
-    ? `${triageEval.afterAiActionableCount}/${triageEval.rawCount} actionable sau AI triage`
+    ? `${triageEval.findingCount} findings triaged by AI`
     : 'Chưa có security-report.json để tính AI triage';
 
   return `# Experimental Evaluation
@@ -271,16 +264,16 @@ ${groundTruth.endpoints.map(ep => `| \`${ep.raw}\` | ${ep.category} | ${endpoint
 |---|---|
 ${groundTruth.categories.map(category => `| ${category} | ${categoryEval.matched.includes(category) ? 'Yes' : 'No'} |`).join('\n')}
 
-## False Positive / AI Triage
+## AI Triage
 
 | Metric | Value |
 |---|---:|
-| Raw findings before AI | ${triageEval?.rawCount ?? 'N/A'} |
-| Findings marked false positive by AI | ${triageEval?.falsePositiveCount ?? 'N/A'} |
-| Actionable findings after AI | ${triageEval?.afterAiActionableCount ?? 'N/A'} |
-| Estimated false positive rate after AI | ${triageEval ? percent(triageEval.afterAiFalsePositiveRate) : 'N/A'} |
+| Findings triaged by AI | ${triageEval?.findingCount ?? 'N/A'} |
+| Confirmed vulnerabilities | ${triageEval?.counts.confirmed_vulnerability ?? 'N/A'} |
+| Likely vulnerabilities | ${triageEval?.counts.likely_vulnerability ?? 'N/A'} |
+| Needs manual review | ${triageEval?.counts.needs_manual_review ?? 'N/A'} |
 
-> Before-AI false positive rate requires manual labeling of raw scanner findings. This script reports after-AI false positive classification from \`security-report.json\` when available.
+> The AI triage stage does not label or remove false positives. False-positive analysis must be done through manual validation or benchmark ground-truth mapping.
 
 ## Missed Ground Truth Endpoints
 

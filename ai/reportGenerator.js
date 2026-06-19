@@ -284,7 +284,7 @@ const TRIAGE_SYSTEM = `You are a senior security engineer performing vulnerabili
 You will receive a list of security findings from automated tools (Semgrep, Bandit, Trivy, ZAP) along with the project context.
 
 Your tasks:
-1. Classify each finding: confirmed_vulnerability | likely_vulnerability | needs_manual_review | false_positive
+1. Classify each finding: confirmed_vulnerability | likely_vulnerability | needs_manual_review
 2. Calculate a risk_score 0-100 based on: severity + exploitability + context relevance
 3. Generate specific remediation guidance referencing the exact file/framework
 4. Write an executive summary
@@ -299,6 +299,7 @@ Output schema:
     "critical_count": number,
     "high_count": number,
     "medium_count": number,
+    "low_count": number,
     "key_findings": ["string"],
     "immediate_actions": ["string"]
   },
@@ -306,7 +307,7 @@ Output schema:
     {
       "id": "F-001",
       "original_finding": { /* copy of input finding */ },
-      "triage_status": "confirmed_vulnerability" | "likely_vulnerability" | "needs_manual_review" | "false_positive",
+      "triage_status": "confirmed_vulnerability" | "likely_vulnerability" | "needs_manual_review",
       "triage_reason": "string",
       "risk_score": 0-100,
       "confirmed_by_sources": number,
@@ -340,6 +341,7 @@ export async function triageWithGemini(deduplicatedFindings, context, options = 
         critical_count: 0,
         high_count: 0,
         medium_count: 0,
+        low_count: 0,
         key_findings: ['No scanner findings were available for AI triage.'],
         immediate_actions: [],
       },
@@ -386,7 +388,7 @@ export async function triageWithGemini(deduplicatedFindings, context, options = 
         "results": [
           {
             "id": "F-001",
-            "triage_status": "confirmed_vulnerability" | "likely_vulnerability" | "needs_manual_review" | "false_positive",
+            "triage_status": "confirmed_vulnerability" | "likely_vulnerability" | "needs_manual_review",
             "triage_reason": "1 short sentence explaining why.",
             "risk_score": 50,
             "remediation_summary": "1 short sentence fixing it."
@@ -409,10 +411,14 @@ export async function triageWithGemini(deduplicatedFindings, context, options = 
         const findingId = `F-${String(i + idx + 1).padStart(3, '0')}`;
         const aiVerdict = parsed.results?.find(r => r.id === findingId) || {};
 
+        const triageStatus = ['confirmed_vulnerability', 'likely_vulnerability'].includes(aiVerdict.triage_status)
+          ? aiVerdict.triage_status
+          : 'needs_manual_review';
+
         allTriagedFindings.push({
           id: findingId,
           original_finding: rawFinding,
-          triage_status: aiVerdict.triage_status || 'needs_manual_review',
+          triage_status: triageStatus,
           triage_reason: aiVerdict.triage_reason || 'AI missing analysis due to context limit.',
           risk_score: aiVerdict.risk_score || 50,
           confirmed_by_sources: rawFinding.sourceCount || 1,
@@ -424,7 +430,7 @@ export async function triageWithGemini(deduplicatedFindings, context, options = 
         summaryForReduce.push({
           id: findingId,
           severity: rawFinding.severity,
-          status: aiVerdict.triage_status || 'needs_manual_review'
+          status: triageStatus
         });
       });
     } catch (e) {
@@ -466,6 +472,7 @@ export async function triageWithGemini(deduplicatedFindings, context, options = 
         "critical_count": number,
         "high_count": number,
         "medium_count": number,
+        "low_count": number,
         "key_findings": ["1 short sentence", "1 short sentence"],
         "immediate_actions": ["1 short sentence"]
       }
@@ -482,7 +489,7 @@ export async function triageWithGemini(deduplicatedFindings, context, options = 
     finalExecutiveSummary = parsedReduce.executive_summary || parsedReduce;
   } catch (e) {
     console.error("[WARN] Lỗi Giai đoạn Reduce (Executive Summary):", e.message);
-    finalExecutiveSummary = { overall_risk: "UNKNOWN", security_posture_score: 0, critical_count: 0, high_count: 0, medium_count: 0, key_findings: ["Pipeline fallback executed."] };
+    finalExecutiveSummary = { overall_risk: "UNKNOWN", security_posture_score: 0, critical_count: 0, high_count: 0, medium_count: 0, low_count: 0, key_findings: ["Pipeline fallback executed."] };
   }
 
   // Trả về đúng cấu trúc mà hàm buildHtml() của Tiến đang mong đợi
@@ -506,7 +513,6 @@ const STATUS_BADGE = {
   confirmed_vulnerability: { label: 'Confirmed',    bg: '#fee2e2', color: '#991b1b' },
   likely_vulnerability:    { label: 'Likely',        bg: '#fef3c7', color: '#92400e' },
   needs_manual_review:     { label: 'Review Needed', bg: '#e0f2fe', color: '#075985' },
-  false_positive:          { label: 'False Positive', bg: '#f0fdf4', color: '#166534' },
 };
 
 function renderFindingCard(f) {
@@ -572,15 +578,9 @@ export function buildHtml(triageResult, context, metadata = {}) {
   const toolLabel = [...toolNames, 'AI Triage (Gemini 3.0 Flash)'].join(' · ');
   const ts       = new Date().toISOString();
   const project  = `${context.techStack?.language ?? '?'} / ${context.techStack?.framework ?? '?'}`;
-  const actionableFindings = findings.filter(f => f.triage_status !== 'false_positive');
-  const filteredFindings = findings.filter(f => f.triage_status === 'false_positive');
   const toolRuns = triageResult.tool_runs ?? metadata.toolRuns ?? [];
 
-  const findingsHtml = actionableFindings
-    .map(renderFindingCard)
-    .join('\n');
-
-  const filteredFindingsHtml = filteredFindings
+  const findingsHtml = findings
     .map(renderFindingCard)
     .join('\n');
 
@@ -728,6 +728,10 @@ export function buildHtml(triageResult, context, metadata = {}) {
     <div class="stat-label">Medium</div>
   </div>
   <div class="stat-card">
+    <div class="stat-number" style="color:${SEVERITY_COLORS.low}">${summary.low_count ?? 0}</div>
+    <div class="stat-label">Low</div>
+  </div>
+  <div class="stat-card">
     <div class="stat-number" style="color:var(--c-accent)">${summary.security_posture_score ?? '?'}</div>
     <div class="stat-label">Posture Score</div>
   </div>
@@ -759,13 +763,6 @@ ${manualTestsHtml}` : ''}
 ${findingsHtml ? `<div class="findings-list">${findingsHtml}</div>` : '<p style="color:var(--c-muted)">No confirmed findings.</p>'}
 
 <footer>Generated by AI-assisted DevSecOps Pipeline · Gemini 3.0 Flash · ${ts}</footer>
-${filteredFindingsHtml ? `
-<h2 class="section-title">AI Filtered Findings</h2>
-<p style="color:var(--c-muted);font-size:0.86rem;margin-bottom:1rem">
-  These findings were produced by scanners but classified as false positive by AI triage. Keep them visible for auditability.
-</p>
-<div class="findings-list">${filteredFindingsHtml}</div>` : ''}
-
 </body>
 </html>`;
 }
@@ -852,8 +849,7 @@ function inferToolNames(findings) {
 }
 
 function normalizeTriageSummary(triageResult) {
-  const findings = (triageResult.triaged_findings ?? [])
-    .filter(f => f.triage_status !== 'false_positive');
+  const findings = triageResult.triaged_findings ?? [];
   const counts = { critical: 0, high: 0, medium: 0, low: 0, unknown: 0 };
 
   for (const finding of findings) {
@@ -1030,8 +1026,7 @@ async function main() {
   triaged.scan_summary = {
     raw_finding_count: allFindings.length,
     deduplicated_finding_count: deduped.length,
-    actionable_finding_count: triaged.triaged_findings?.filter(f => f.triage_status !== 'false_positive').length ?? 0,
-    false_positive_count: triaged.triaged_findings?.filter(f => f.triage_status === 'false_positive').length ?? 0,
+    triaged_finding_count: triaged.triaged_findings?.length ?? 0,
   };
   const manualTests = readManualTests(join(dirname(resolve(contextPath)), 'manual_tests.json'));
 
@@ -1047,7 +1042,7 @@ async function main() {
   console.log(`[OUTPUT] security-report.json → ${join(outputDir, 'security-report.json')}`);
 
   const s = triaged.executive_summary;
-  console.log(`\n[DONE] Risk: ${s?.overall_risk} | Posture: ${s?.security_posture_score}/100 | Critical: ${s?.critical_count} | High: ${s?.high_count}`);
+  console.log(`\n[DONE] Risk: ${s?.overall_risk} | Posture: ${s?.security_posture_score}/100 | Critical: ${s?.critical_count} | High: ${s?.high_count} | Medium: ${s?.medium_count} | Low: ${s?.low_count}`);
 }
 
 import { fileURLToPath } from 'url';

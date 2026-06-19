@@ -6,14 +6,14 @@ Target: `examples/vulnerable-rest-api`
 
 | Metric | Value |
 |---|---:|
-| Ground truth vulnerable endpoints | 19 |
-| Endpoints detected by collector | 24 |
-| Ground truth endpoints matched | 17 |
-| Endpoint coverage | 89.5% |
-| Ground truth vulnerability categories | 11 |
-| Categories matched by route/pattern collector | 7 |
-| Category coverage | 63.6% |
-| Dangerous patterns detected | 12 |
+| Ground truth vulnerable endpoints | 0 |
+| Endpoints detected by collector | 0 |
+| Ground truth endpoints matched | 0 |
+| Endpoint coverage | 0.0% |
+| Ground truth vulnerability categories | 0 |
+| Categories matched by route/pattern collector | 0 |
+| Category coverage | 0.0% |
+| Dangerous patterns detected | 0 |
 | Manual test cases generated | 0 |
 | AI triage status | Chưa có security-report.json để tính AI triage |
 
@@ -21,61 +21,29 @@ Target: `examples/vulnerable-rest-api`
 
 | Endpoint | Category | Detected |
 |---|---|---|
-| `POST /api/users` | business_logic | Yes |
-| `GET /api/authors` | info_leak | Yes |
-| `GET /api/books` | info_leak | Yes |
-| `GET /api/users/:param` | redos | Yes |
-| `PUT /api/users/:param` | xss | Yes |
-| `POST /api/auth` | idor_candidate | Yes |
-| `POST /api/otp` | idor_candidate | No |
-| `POST /api/books` | authz | Yes |
-| `PUT /api/books/:param` | authz | Yes |
-| `DELETE /api/books/:param` | authz | Yes |
-| `POST /api/authors` | authz | Yes |
-| `PUT /api/authors/:param` | authz | Yes |
-| `DELETE /api/authors/:param` | authz | Yes |
-| `GET /api/system/key` | auth | Yes |
-| `POST /api/adminAuth` | auth | Yes |
-| `POST /api/users/verify` | auth | Yes |
-| `GET /api/logs` | info_leak | Yes |
-| `GET /profile/:param` | business_logic | No |
-| `GET /api/me` | cache | Yes |
+
 
 ## Vulnerability Category Coverage
 
 | Category | Detected |
 |---|---|
-| mass_assign | Yes |
-| info_leak | Yes |
-| idor_candidate | Yes |
-| authz | No |
-| ssrf | Yes |
-| xss | No |
-| auth | Yes |
-| redos | Yes |
-| business_logic | No |
-| nosqli | Yes |
-| cache | No |
 
-## False Positive / AI Triage
+
+## AI Triage
 
 | Metric | Value |
 |---|---:|
-| Raw findings before AI | N/A |
-| Findings marked false positive by AI | N/A |
-| Actionable findings after AI | N/A |
-| Estimated false positive rate after AI | N/A |
+| Findings triaged by AI | N/A |
+| Confirmed vulnerabilities | N/A |
+| Likely vulnerabilities | N/A |
+| Needs manual review | N/A |
 
-> Before-AI false positive rate requires manual labeling of raw scanner findings. This script reports after-AI false positive classification from `security-report.json` when available.
+> The AI triage stage does not label or remove false positives. False-positive analysis must be done through manual validation or benchmark ground-truth mapping.
 
 ## Missed Ground Truth Endpoints
 
-- `POST /api/otp` (idor_candidate)
-- `GET /profile/:param` (business_logic)
+No missed ground truth endpoints.
 
 ## Missed Categories
 
-- authz
-- xss
-- business_logic
-- cache
+No missed ground truth categories.
