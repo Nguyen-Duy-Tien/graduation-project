@@ -149,9 +149,62 @@ export async function callGeminiWithRetry(prompt, systemInstruction = null, opti
 
 // ── JSON parser ───────────────────────────────────────────────────────────────
 
+function stripMarkdownJsonFence(text) {
+  return text
+    .replace(/^\uFEFF/, '')
+    .replace(/^```(?:json)?\s*\n?/i, '')
+    .replace(/\n?```\s*$/i, '')
+    .trim();
+}
+
+function extractFirstBalancedJsonValue(text) {
+  const start = text.search(/[{[]/);
+  if (start < 0) return text;
+
+  const stack = [];
+  let inString = false;
+  let escaped = false;
+
+  for (let i = start; i < text.length; i += 1) {
+    const ch = text[i];
+
+    if (inString) {
+      if (escaped) {
+        escaped = false;
+      } else if (ch === '\\') {
+        escaped = true;
+      } else if (ch === '"') {
+        inString = false;
+      }
+      continue;
+    }
+
+    if (ch === '"') {
+      inString = true;
+      continue;
+    }
+
+    if (ch === '{' || ch === '[') {
+      stack.push(ch);
+      continue;
+    }
+
+    if (ch === '}' || ch === ']') {
+      const open = stack.pop();
+      const matches = (open === '{' && ch === '}') || (open === '[' && ch === ']');
+      if (!matches) break;
+      if (stack.length === 0) {
+        return text.slice(start, i + 1);
+      }
+    }
+  }
+
+  return text.slice(start).trim();
+}
+
 /**
  * Strip markdown fences và parse JSON từ Gemini response text.
- * Dù đã dùng responseMimeType=application/json, đôi khi model vẫn bọc trong fences.
+ * Dù đã dùng responseMimeType=application/json, đôi khi model vẫn trả thêm text hoặc JSON fragment.
  * @param {string} rawText
  * @returns {object}
  */
@@ -160,24 +213,17 @@ export function parseJson(rawText) {
     throw new Error('parseJson: empty or non-string input');
   }
 
-  let cleaned = rawText.trim();
-
-  // Strip ```json ... ``` hoặc ``` ... ```
-  cleaned = cleaned.replace(/^```(?:json)?\s*\n?/i, '').replace(/\n?```\s*$/i, '').trim();
-
-  // Strip leading/trailing text nếu JSON bắt đầu với { hoặc [
-  const jsonStart = cleaned.search(/[{[]/);
-  const jsonEnd   = Math.max(cleaned.lastIndexOf('}'), cleaned.lastIndexOf(']'));
-
-  if (jsonStart > 0) cleaned = cleaned.slice(jsonStart);
-  if (jsonEnd > 0 && jsonEnd < cleaned.length - 1) {
-    cleaned = cleaned.slice(0, jsonEnd + 1);
-  }
+  const cleaned = stripMarkdownJsonFence(rawText);
 
   try {
     return JSON.parse(cleaned);
-  } catch (err) {
-    throw new Error(`parseJson failed: ${err.message}\nRaw (first 300 chars): ${rawText.slice(0, 300)}`);
+  } catch {
+    const firstJsonValue = extractFirstBalancedJsonValue(cleaned);
+    try {
+      return JSON.parse(firstJsonValue);
+    } catch (err) {
+      throw new Error(`parseJson failed: ${err.message}\nRaw (first 300 chars): ${rawText.slice(0, 300)}`);
+    }
   }
 }
 

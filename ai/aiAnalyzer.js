@@ -137,6 +137,7 @@ const MANUAL_TEST_RELEVANT_FLAGS = [
 const DEFAULT_MANUAL_TEST_BATCH_SIZE = 4;
 const DEFAULT_MANUAL_TEST_BATCH_DELAY_MS = 5000;
 const DEFAULT_MANUAL_TEST_MAX_OUTPUT_TOKENS = 8192;
+const DEFAULT_MANUAL_TEST_PARSE_RETRIES = 2;
 const MANUAL_TEST_CODE_EVIDENCE_LIMIT = 2;
 const MANUAL_TEST_SCHEMA_LIMIT = 6;
 const MANUAL_TEST_SNIPPET_LIMIT = 220;
@@ -301,6 +302,44 @@ function compactSchemaModel(model) {
     ownershipFields: model.ownershipFields ?? [],
     massAssignmentTargets: model.massAssignmentTargets ?? [],
   };
+}
+
+async function callGeminiAndParseJson(prompt, systemInstruction, options, callName, parseRetries = DEFAULT_MANUAL_TEST_PARSE_RETRIES) {
+  let lastError;
+
+  for (let attempt = 1; attempt <= parseRetries; attempt += 1) {
+    const strictPrompt = attempt === 1
+      ? prompt
+      : `${prompt}
+
+Your previous response was not parseable by JSON.parse.
+Return exactly one JSON object matching the requested schema.
+Do not include markdown fences, prose, comments, duplicate JSON objects, or trailing text.`;
+
+    const result = await callGeminiWithRetry(strictPrompt, systemInstruction, options);
+    const usageName = attempt === 1 ? callName : `${callName}-ParseRetry${attempt}`;
+    logUsage(usageName, result.usageMetadata);
+
+    if (result.finishReason === 'MAX_TOKENS') {
+      throw new Error(`${callName} exceeded Gemini output limit. Reduce MANUAL_TEST_BATCH_SIZE or tighten the prompt.`);
+    }
+
+    try {
+      return {
+        parsed: parseJson(result.text),
+        result,
+        parseAttempts: attempt,
+      };
+    } catch (err) {
+      lastError = err;
+      const shortMessage = String(err.message ?? err).split('\n')[0];
+      if (attempt < parseRetries) {
+        console.warn(`[AI] ${callName} returned malformed JSON (${shortMessage}). Retrying with stricter JSON-only instruction...`);
+      }
+    }
+  }
+
+  throw lastError;
 }
 
 // ── Gemini Call #1: Tool Selection ────────────────────────────────────────────
@@ -599,17 +638,16 @@ Generate test cases for:
 Do not invent endpoints. Generate at most one strongest manual test per endpoint unless two distinct vulnerability classes are clearly justified. Keep why_generated, http_request, expected_if_vulnerable, and remediation_hint concise. Return complete JSON only.`;
 
     console.log(`[AI] Gemini Call #2.${batchIndex + 1}/${endpointBatches.length}: Manual tests for ${endpointBatch.length} endpoint(s), ${batchSchemas.length} schema model(s), ${batchEvidenceCount} code evidence item(s)...`);
-    const result = await callGeminiWithRetry(prompt, MANUAL_TESTS_SYSTEM, {
-      apiKey: options.apiKey,
-      temperature: 0.2,
-      maxOutputTokens,
-    });
-
-    logUsage(`Call#2.${batchIndex + 1}-ManualTests`, result.usageMetadata);
-    if (result.finishReason === 'MAX_TOKENS') {
-      throw new Error(`Manual test batch ${batchIndex + 1}/${endpointBatches.length} exceeded Gemini output limit. Reduce MANUAL_TEST_BATCH_SIZE or tighten the prompt.`);
-    }
-    const parsed = parseJson(result.text);
+    const { parsed, result, parseAttempts } = await callGeminiAndParseJson(
+      prompt,
+      MANUAL_TESTS_SYSTEM,
+      {
+        apiKey: options.apiKey,
+        temperature: 0.2,
+        maxOutputTokens,
+      },
+      `Call#2.${batchIndex + 1}-ManualTests`,
+    );
     const testCases = parsed.manual_test_cases ?? parsed.test_cases ?? [];
     allTestCases.push(...testCases);
     batchMeta.push({
@@ -617,6 +655,7 @@ Do not invent endpoints. Generate at most one strongest manual test per endpoint
       endpoints: endpointBatch.length,
       generatedTests: testCases.length,
       finishReason: result.finishReason,
+      parseAttempts,
       usageMetadata: result.usageMetadata,
     });
 
