@@ -12,6 +12,7 @@ export function enabled(cfg) {
   return Boolean(cfg?.semgrep?.enabled);
 }
 
+
 /**
  * @param {object} cfg          — tool_config.json
  * @param {object} projectInfo  — { targetDir, reportsDir }
