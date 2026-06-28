@@ -24,9 +24,13 @@ export function buildScript(cfg, projectInfo) {
   // Phase 1: chỉ chạy 'fs'. Cảnh báo nếu target khác có trong list.
   const lines = [`echo "[SCA] Trivy — targets: ${targets.join(',')}"`];
   if (targets.includes('fs')) {
-    lines.push(`docker run --rm \\
+    lines.push(`TRIVY_REPORTS_DIR=${reportsDir}
+TRIVY_CACHE_DIR="$(cd "$TRIVY_REPORTS_DIR/.." && pwd -P)/.trivy-cache"
+mkdir -p "$TRIVY_CACHE_DIR"
+docker run --rm \\
   -v ${targetDir}:/src:ro \\
   -v ${reportsDir}:/out \\
+  -v "$TRIVY_CACHE_DIR:/root/.cache/trivy" \\
   aquasec/trivy \\
   fs --format json --output /out/trivy-report.json /src || true`);
   }

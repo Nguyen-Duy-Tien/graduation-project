@@ -1,401 +1,330 @@
 # AI-Assisted DevSecOps Pipeline Module
 
-Module tích hợp AI vào pipeline CI/CD để tự động phân tích bảo mật ứng dụng web — từ thu thập ngữ cảnh, lựa chọn công cụ quét, đến tổng hợp và phân loại kết quả thành báo cáo.
+Module Node.js hỗ trợ xây dựng pipeline DevSecOps cho ứng dụng web. Module thu thập ngữ cảnh từ mã nguồn, dùng Gemini để chọn cấu hình công cụ kiểm thử, sinh checklist kiểm thử thủ công, chạy scanner qua Docker adapter và tổng hợp báo cáo HTML/JSON.
 
----
+Repo hiện tại được thiết kế để chạy như một module CI/CD, không phải một web app độc lập.
 
 ## Mục lục
 
-- [Tổng quan kiến trúc](#tổng-quan-kiến-trúc)
-- [Yêu cầu hệ thống](#yêu-cầu-hệ-thống)
+- [Tổng quan](#tổng-quan)
+- [Yêu cầu](#yêu-cầu)
 - [Cài đặt](#cài-đặt)
 - [Cấu trúc thư mục](#cấu-trúc-thư-mục)
-- [Cách sử dụng](#cách-sử-dụng)
-- [Luồng hoạt động chi tiết](#luồng-hoạt-động-chi-tiết)
-- [Cấu hình Jenkins](#cấu-hình-jenkins)
-- [Output files](#output-files)
-- [Chạy tests](#chạy-tests)
-- [Các framework được hỗ trợ](#các-framework-được-hỗ-trợ)
-- [Giải thích 3 Gemini API calls](#giải-thích-3-gemini-api-calls)
+- [Chạy local](#chạy-local)
+- [Chạy Jenkins](#chạy-jenkins)
+- [Artifact đầu ra](#artifact-đầu-ra)
+- [Tool adapters](#tool-adapters)
+- [Collector và AI flow](#collector-và-ai-flow)
+- [Đánh giá thực nghiệm](#đánh-giá-thực-nghiệm)
+- [Chạy test](#chạy-test)
+- [Giới hạn hiện tại](#giới-hạn-hiện-tại)
 
----
+## Tổng quan
 
-## Tổng quan kiến trúc
+Luồng chính của hệ thống:
 
-```
-Source code
-     │
-     ▼
-┌─────────────────────────────────────┐
-│  Stage 3: Context Collection        │  ← 5 collectors chạy song song
-│  techStack + routes + codePatterns  │    không gọi AI
-│  + apiSurface + gitDiff + container │
-└──────────────────┬──────────────────┘
-                   │ context.json
-                   ▼
-┌─────────────────────────────────────┐
-│  Stage 4: AI Analysis               │
-│  Gemini Call #1 → tool_config.json  │  ← Chọn tool + cấu hình tối ưu
-│  Gemini Call #2 → manual_tests.json │  ← Sinh test case thủ công
-└──────────────────┬──────────────────┘
-                   │
-          ┌────────┴────────┐
-          ▼                 ▼
-┌──────────────┐   ┌─────────────────┐
-│ Stage 5 SAST │   │  Stage 7 DAST   │
-│ Semgrep      │   │  ZAP + Nuclei   │
-│ Bandit       │   │  + Nikto        │
-└──────┬───────┘   └────────┬────────┘
-       │    Stage 6 SCA     │
-       │    Trivy           │
-       └──────────┬─────────┘
-                  │ scan-reports/
-                  ▼
-┌─────────────────────────────────────┐
-│  Stage 8: AI Report                 │
-│  Gemini Call #3 → triage + score    │  ← Phân loại, risk score, remediation
-│  → security-report.html/.json       │
-└─────────────────────────────────────┘
+```text
+Target source code
+  |
+  | 1. collector/contextCollector.js
+  v
+security-context-output/context.json
+  |
+  | 2. ai/aiAnalyzer.js
+  v
+tool_config.json + manual_tests.json
+  |
+  | 3. ai/pipelineGenerator.js
+  v
+runtime/run-sast.sh + deploy-target.sh + run-dast.sh + teardown.sh
+  |
+  | 4. Docker scanner adapters
+  v
+scan-reports/*
+  |
+  | 5. ai/reportGenerator.js
+  v
+final-report/security-report.html + security-report.json
 ```
 
----
+Các scanner không được hardcode trong Jenkinsfile. Jenkins chỉ gọi các bước cố định, còn cấu hình công cụ được sinh từ `tool_config.json` và các script runtime.
 
-## Yêu cầu hệ thống
+## Yêu cầu
 
-| Thành phần | Phiên bản tối thiểu | Ghi chú |
-|---|---|---|
-| Node.js | ≥ 18.0.0 | Cần `fetch` native và `node:test` |
-| Jenkins | ≥ 2.400 | Pipeline plugin, HTML Publisher plugin |
-| Docker | bất kỳ | Để chạy ZAP container |
-| Semgrep | ≥ 1.0 | Cài trên Jenkins agent |
-| Trivy | ≥ 0.50 | Cài trên Jenkins agent |
-| Nuclei | ≥ 3.0 | Cài trên Jenkins agent |
-| Nikto | ≥ 2.1 | Cài trên Jenkins agent (chỉ cần nếu PHP) |
-| Bandit | ≥ 1.7 | Cài trên Jenkins agent (chỉ cần nếu Python) |
-| Gemini API Key | — | Google AI Studio → [aistudio.google.com](https://aistudio.google.com) |
+| Thành phần | Mục đích |
+|---|---|
+| Node.js >= 18 | Chạy ESM, `fetch` native và `node:test` |
+| npm | Cài dependency Node.js |
+| Docker | Chạy scanner container và target Docker Compose |
+| `docker-compose` | Script deploy hiện dùng lệnh `docker-compose`, không phải `docker compose` |
+| Gemini API key | Cần cho bước AI analyze và AI report |
+| Jenkins Linux agent | Cần nếu chạy `Jenkinsfile`; pipeline dùng `sh` |
 
----
+Jenkins cần cấu hình thêm:
+
+- NodeJS tool tên `NodeJS_18`.
+- Credential Secret Text có ID `GEMINI_API_KEY`.
+- Docker permission cho Jenkins agent.
+- Plugin HTML Publisher để publish `security-report.html`.
+- Pipeline Utility Steps nếu dùng `readJSON` trong quality gate.
 
 ## Cài đặt
 
-**1. Clone module vào Jenkins workspace:**
-
 ```bash
-# Đặt module tại pipeline/ai-module/ trong repo của dự án
-git clone <repo> pipeline/ai-module
-```
-
-**2. Cài dependencies:**
-
-```bash
-cd pipeline/ai-module
 npm install
 ```
 
-**3. Thêm credentials vào Jenkins:**
+Nếu cần chạy benchmark submodule:
 
-Vào `Manage Jenkins → Credentials → Global` và thêm:
-
-| ID | Loại | Mô tả |
-|---|---|---|
-| `gemini-api-key` | Secret Text | Gemini API Key từ Google AI Studio |
-
-**4. Thêm biến môi trường Jenkins (tuỳ chọn):**
-
-```
-STAGING_URL   = http://your-app:8080     # URL target cho DAST
-ZAP_LOGIN_URL = http://your-app/login    # URL login (nếu app cần auth)
+```bash
+git submodule update --init --recursive
 ```
 
----
+Thiết lập Gemini key:
+
+```bash
+export GEMINI_API_KEY="your_key"
+```
+
+PowerShell:
+
+```powershell
+$env:GEMINI_API_KEY = "your_key"
+```
 
 ## Cấu trúc thư mục
 
+```text
+ai/
+  geminiClient.js        Gemini REST client, retry, JSON parser
+  aiAnalyzer.js          Chọn tool + sinh manual tests
+  pipelineGenerator.js   Sinh runtime-info.json và shell scripts
+  reportGenerator.js     Đọc scanner reports, AI triage, render report
+
+collector/
+  contextCollector.js    Entry point thu thập context
+  techStack.js           Nhận diện language/framework/profile
+  routeScanner.js        Quét route và risk signal
+  codePattern.js         Quét dangerous code patterns
+  schemaScanner.js       Trích model/schema và sensitive fields
+  apiSurface.js          OpenAPI, git diff, Docker/Compose context
+
+tools/
+  index.js               Registry adapter
+  semgrep.js             Semgrep SAST adapter
+  bandit.js              Bandit Python SAST adapter
+  trivy.js               Trivy SCA adapter
+  zap.js                 OWASP ZAP DAST adapter
+  nuclei.js              Nuclei DAST adapter
+  nikto.js               Nikto DAST adapter
+
+runtime/
+  sanitize.js            Whitelist/sanitize giá trị từ AI trước khi đưa vào shell
+  servicePicker.js       Chọn service target từ Docker Compose
+  *.sh, runtime-info.json
+                         Artifact sinh bởi pipelineGenerator
+
+examples/sqli/           Flask/MySQL SQL Injection demo
+benchmarks/              Juice Shop, crAPI, OWASP Benchmark submodules
+evaluation/              Script và báo cáo đánh giá thực nghiệm
+Jenkinsfile              Pipeline Jenkins 9 stage
 ```
-pipeline/ai-module/
-├── ai/
-│   ├── aiAnalyzer.js          # Gemini Call #1 (tool selection) + #2 (manual tests)
-│   ├── geminiClient.js        # Wrapper Gemini API: callGemini, retry, parseJson
-│   ├── pipelineGenerator.js   # Sinh runtime-info.json + run-*.sh từ tool_config
-│   └── reportGenerator.js     # Gemini Call #3 (triage) + HTML report builder
-├── collector/
-│   ├── contextCollector.js    # Entry point: chạy 5 collector song song
-│   ├── techStack.js           # Nhận diện ngôn ngữ, framework, dependencies
-│   ├── routeScanner.js        # Quét route pattern + ghép Express mount/child route
-│   ├── codePattern.js         # Quét dangerous pattern cho OWASP API risks
-│   └── apiSurface.js          # OpenAPI/Swagger + git diff + Docker info
-├── tools/                     # Tool adapter pattern — thêm tool mới = thêm 1 file
-│   ├── index.js               # Registry: SAST_TOOLS, DAST_TOOLS
-│   ├── semgrep.js bandit.js trivy.js
-│   └── zap.js nuclei.js nikto.js
-├── runtime/                   # Sinh ra lúc chạy (artifacts), + safety layer
-│   ├── sanitize.js            # Whitelist regex chống injection qua AI output
-│   ├── servicePicker.js       # Heuristic chọn service từ docker-compose
-│   └── runtime-info.json, run-sast.sh, deploy-target.sh, run-dast.sh, teardown.sh
-├── examples/
-│   └── vulnerable-rest-api/   # Demo target (Node/Express). Không hardcode trong pipeline.
-├── Jenkinsfile                # 8 stage cố định mỏng — không sửa khi thêm tool/đổi target
-└── package.json
-```
 
----
+Lưu ý: `runtime/` vừa có source runtime, vừa có artifact sinh ra. Nếu dọn thủ công, chỉ xoá `runtime/*.sh` và `runtime/runtime-info.json`; không xoá `runtime/sanitize.js` hoặc `runtime/servicePicker.js`.
 
-## Chạy trên project bất kỳ
+## Chạy local
 
-Pipeline KHÔNG hardcode target. Truyền target qua tham số Jenkins `TARGET_PROJECT_DIR`:
-
-| Trường hợp | Tham số | Hành vi |
-|---|---|---|
-| Demo (Node/Express) | `examples/vulnerable-rest-api` (mặc định) | Đầy đủ SAST + SCA + DAST |
-| Project Python Flask của bạn | `path/to/your-flask-app` | techStack auto-detect → Bandit + Semgrep p/python + ZAP |
-| Project chỉ có source, không Docker | `path/to/static-only` | DAST tự skip, chỉ chạy SAST + SCA, build SUCCESS |
-| Override service (compose phức tạp) | sửa `runtime-info.json` sau Stage 5 | Bỏ qua heuristic |
-
-Chạy local không cần Jenkins:
+Ví dụ với target có sẵn:
 
 ```bash
-# 1. Collect context cho target
-node collector/contextCollector.js /path/to/target --output ./security-context-output
-
-# 2. AI chọn tool
-GEMINI_API_KEY=... node ai/aiAnalyzer.js ./security-context-output/context.json ./security-context-output
-
-# 3. Sinh shell scripts động (đây là bước MỚI thay cho hardcode Jenkins)
-node ai/pipelineGenerator.js ./security-context-output ./runtime /path/to/target
-
-# 4. Chạy SAST → deploy → DAST → report
-./runtime/run-sast.sh
-./runtime/deploy-target.sh
-./runtime/run-dast.sh
-node ai/reportGenerator.js ./security-context-output/context.json ./security-context-output/scan-reports ./final-report
-./runtime/teardown.sh
+node collector/contextCollector.js examples/sqli --output ./security-context-output
 ```
 
----
-
-## Cách sử dụng
-
-### Chạy thủ công từng bước
+Chạy AI analyze để sinh cấu hình tool và checklist thủ công:
 
 ```bash
-# Bước 1 — Thu thập context (không cần API key)
-npm run collect /path/to/your-project
-# Output: /path/to/your-project/security-context-output/context.json
+node ai/aiAnalyzer.js ./security-context-output/context.json ./security-context-output
+```
 
-# Bước 2 — AI phân tích, chọn tool, sinh test cases
-GEMINI_API_KEY=your_key npm run analyze \
+Sinh các script runtime:
+
+```bash
+node ai/pipelineGenerator.js ./security-context-output ./runtime examples/sqli
+```
+
+Chạy scanner. Các script này là Bash script, phù hợp Linux/Jenkins agent; trên Windows nên dùng WSL hoặc Git Bash có Docker access.
+
+```bash
+bash ./runtime/run-sast.sh
+bash ./runtime/deploy-target.sh
+bash ./runtime/run-dast.sh
+```
+
+Sinh báo cáo:
+
+```bash
+node ai/reportGenerator.js \
+  ./security-context-output/scan-reports \
   ./security-context-output/context.json \
-  ./security-context-output
-# Output: tool_config.json, manual_tests.json
-
-# Bước 3 — Chạy các tool scan (ví dụ Semgrep + Trivy)
-semgrep scan --config p/nodejs --json --output ./scan-reports/semgrep-report.json .
-trivy fs --format json --output ./scan-reports/trivy-report.json .
-
-# Bước 4 — AI tổng hợp báo cáo
-GEMINI_API_KEY=your_key npm run report \
-  ./scan-reports \
-  ./security-context-output/context.json \
-  ./final-report
-# Output: final-report/security-report.html
+  ./security-context-output/final-report
 ```
 
-### Chạy trong Jenkins
+Teardown target:
 
-Copy `Jenkinsfile` vào root của repo dự án, đảm bảo module nằm tại `pipeline/ai-module/`, rồi tạo Pipeline job trỏ vào `Jenkinsfile`.
+```bash
+bash ./runtime/teardown.sh
+```
 
----
+Nếu chỉ muốn thu thập context thì không cần `GEMINI_API_KEY`. Các bước `aiAnalyzer.js` và `reportGenerator.js` bắt buộc có key.
 
-## Luồng hoạt động chi tiết
+## Chạy Jenkins
 
-### Stage 3 — Context Collection
+`Jenkinsfile` hiện có các parameter:
 
-5 collector chạy **song song** với `Promise.all()`, không gọi AI:
-
-| Collector | Tác dụng | Output chính |
+| Parameter | Mặc định | Ý nghĩa |
 |---|---|---|
-| `techStack` | Đọc `package.json` / `requirements.txt` / `pom.xml`... | language, framework, features (jwt/orm/fileUpload) |
-| `routeScanner` | Quét 9 regex pattern tìm route declarations | danh sách endpoint + classification flags |
-| `codePattern` | Quét 20 dangerous pattern trên toàn bộ source | findings theo severity/category |
-| `apiSurface` | Tìm file OpenAPI/Swagger nếu có | specSummary với endpoint list |
-| `gitDiff` + `containerInfo` | `git diff HEAD~1`, đọc Dockerfile/docker-compose | changedFiles, recommendation (full/incremental) |
+| `TARGET_PROJECT_DIR` | `benchmarks/juice-shop` | Đường dẫn tương đối trong `WORKSPACE` tới target cần quét |
+| `KEEP_STAGING` | `true` | Giữ staging và dừng ở manual gate trước teardown |
 
-**6 classification flags cho endpoint:**
+Các stage chính:
 
-| Flag | Ý nghĩa | Ví dụ path |
-|---|---|---|
-| `auth` | Xác thực / phân quyền | `/login`, `/auth/refresh` |
-| `fileUpload` | Nhận file từ user | `/upload/avatar`, `/import` |
-| `idor_candidate` | Có tham số ID trong path | `/users/:id`, `/orders/123` |
-| `admin` | Chức năng quản trị | `/admin/dashboard` |
-| `export` | Xuất dữ liệu hàng loạt | `/reports/download`, `/export.csv` |
-| `payment` | Thanh toán | `/checkout`, `/stripe/webhook` |
+1. `Init`: validate `TARGET_PROJECT_DIR`, xoá artifact cũ, tạo thư mục output.
+2. `Install deps`: chạy `npm ci || npm install`.
+3. `Collect context`: sinh `security-context-output/context.json`.
+4. `AI analyze`: sinh `tool_config.json` và `manual_tests.json`.
+5. `Generate pipeline scripts`: sinh script trong `runtime/`.
+6. `SAST + SCA`: chạy `runtime/run-sast.sh`.
+7. `Deploy + DAST`: deploy target qua Docker Compose và chạy DAST.
+8. `AI Report`: sinh `security-report.html` và `security-report.json`.
+9. `Manual Test Gate`: nếu `KEEP_STAGING=true`, Jenkins chờ input để người kiểm thử chạy checklist thủ công.
 
----
+Post action luôn gọi `runtime/teardown.sh`, archive artifact và publish HTML report. Quality gate hiện đánh dấu build `FAILURE` khi `executive_summary.critical_count > 20`.
 
-### Stage 4 — AI Analysis (2 Gemini calls)
-
-**Gemini Call #1 — Tool Selection**
-
-- Input: techStack + top 20 high-risk routes + top 15 dangerous patterns + git diff recommendation
-- Output: `tool_config.json` — danh sách tool enabled/disabled, rulesets Semgrep, mode ZAP, tags Nuclei
-- Logic: JWT patterns → bật `p/jwt`; file upload endpoints → bật Nuclei `file-upload` templates; PHP → bật Nikto; không thay đổi security-sensitive → incremental scan
-
-**Gemini Call #2 — Manual Test Cases**
-
-- Input: endpoints có flag `idor_candidate`, `fileUpload`, `auth`, `admin` (tối đa 25)
-- Output: `manual_tests.json` — test case chi tiết cho IDOR, BFLA, JWT logic flaw, race condition, mass assignment
-- Mỗi test case có: steps cụ thể, HTTP request mẫu, chỉ số xác nhận lỗ hổng, gợi ý fix
-
----
-
-### Stage 8 — AI Report (Gemini Call #3)
-
-- Đọc output của Semgrep, Bandit, Trivy, ZAP, Nikto → **deduplication** theo `category:ruleId:location`
-- Gửi tối đa 40 findings (ưu tiên critical/high) lên Gemini
-- Gemini phân loại mỗi finding: `confirmed_vulnerability` | `likely_vulnerability` | `needs_manual_review`
-- Tính `risk_score` 0–100, sinh `remediation` cụ thể cho framework đang dùng
-- Render `security-report.html` dark-themed với executive summary, severity stats, per-finding details
-
----
-
-## Cấu hình Jenkins
-
-### Credentials cần có
-
-```groovy
-// Trong Jenkinsfile environment block
-GEMINI_API_KEY = credentials('gemini-api-key')   // Secret Text
-```
-
-### Biến môi trường tuỳ chỉnh
-
-```groovy
-environment {
-    STAGING_URL   = "${env.STAGING_URL ?: 'http://app:8080'}"
-    ZAP_LOGIN_URL = "${env.ZAP_LOGIN_URL ?: ''}"
-}
-```
-
-### ZAP Authentication
-
-Hiện tại Jenkinsfile chạy ZAP ở chế độ unauthenticated scan. `tool_config.json` vẫn ghi nhận `authRequired` để đưa vào báo cáo/manual tests, nhưng tự động đăng nhập ZAP bằng form-based auth chưa được implement trong pipeline.
-
-### Build status
-
-Pipeline mark **FAILURE** khi `security-report.json` có critical finding. Đây là quality gate chính của demo.
-
----
-
-## Output files
+## Artifact đầu ra
 
 | File | Vị trí | Mô tả |
 |---|---|---|
-| `context.json` | `security-context-output/` | Toàn bộ ngữ cảnh dự án: tech stack, routes, patterns |
-| `tool_config.json` | `security-context-output/` | Cấu hình tool do AI chọn, đọc bởi Jenkinsfile stages |
-| `manual_tests.json` | `security-context-output/` | Test case thủ công cho IDOR/BFLA/JWT/Race condition |
-| `semgrep-report.json` | `scan-reports/` | Kết quả SAST từ Semgrep |
-| `bandit-report.json` | `scan-reports/` | Kết quả SAST từ Bandit (Python) |
-| `trivy-report.json` | `scan-reports/` | Kết quả SCA từ Trivy |
-| `zap-report.json` | `scan-reports/` | Kết quả DAST từ ZAP |
-| `nikto-report.json` | `scan-reports/` | Kết quả DAST từ Nikto (PHP) |
-| `nuclei-report.jsonl` | `scan-reports/` | Kết quả DAST từ Nuclei dạng JSONL |
-| `security-report.html` | `final-report/` | Báo cáo HTML đầy đủ, hiển thị qua Jenkins HTML Publisher |
-| `security-report.json` | `final-report/` | Báo cáo JSON machine-readable, dùng cho tích hợp tiếp theo |
+| `context.json` | `security-context-output/` | Tech stack, routes, schemas, patterns, API surface, git diff, container info |
+| `tool_config.json` | `security-context-output/` | Cấu hình scanner do Gemini sinh hoặc fallback profile |
+| `manual_tests.json` | `security-context-output/` | Checklist IDOR/BFLA/JWT/race/mass assignment/auth bypass |
+| `runtime-info.json` | `runtime/` | Service, port, network, compose file và trạng thái skip DAST |
+| `semgrep-report.json` | `security-context-output/scan-reports/` | Semgrep output |
+| `bandit-report.json` | `security-context-output/scan-reports/` | Bandit output nếu target Python |
+| `trivy-report.json` | `security-context-output/scan-reports/` | Trivy filesystem SCA output |
+| `zap-report.json` | `security-context-output/scan-reports/` | OWASP ZAP output |
+| `nuclei-report.jsonl` | `security-context-output/scan-reports/` | Nuclei JSONL output |
+| `nikto-report.json` | `security-context-output/scan-reports/` | Nikto output |
+| `security-report.html` | `security-context-output/final-report/` | Báo cáo HTML publish trên Jenkins |
+| `security-report.json` | `security-context-output/final-report/` | Báo cáo máy đọc được cho đánh giá/tích hợp tiếp |
 
----
+## Tool adapters
+
+Scanner được chạy qua Docker image:
+
+| Tool | Loại | Image / hành vi |
+|---|---|---|
+| Semgrep | SAST | `returntocorp/semgrep`; hỗ trợ target là Git submodule bằng cách mount superproject |
+| Bandit | SAST Python | `ghcr.io/pycqa/bandit/bandit`; chỉ chạy khi `techStack.language === "python"` |
+| Trivy | SCA | `aquasec/trivy`; hiện chỉ thực thi target `fs` |
+| ZAP | DAST | `ghcr.io/zaproxy/zaproxy:stable`; mode `baseline`, `api-scan`, `full-scan` |
+| Nuclei | DAST | `projectdiscovery/nuclei`; dùng severity và tags từ `tool_config.json` |
+| Nikto | DAST | `alpine/nikto` |
+
+Các adapter đều sanitize đầu vào từ AI trước khi render shell command. Nhiều scanner được nối `|| true` để pipeline vẫn đi tiếp tới bước report dù scanner trả exit code khác 0.
+
+## Collector và AI flow
+
+`contextCollector.js` chạy `techStack` trước để xác định ngôn ngữ/framework. Sau đó các collector còn lại chạy song song:
+
+- `routeScanner`: quét route cho Express/NestJS/Flask/FastAPI/Django/Spring/Laravel/Gin/Rails, phân loại endpoint và suy ra risk signal như `missing_auth`, `missing_admin`, `missing_ownership_check`.
+- `codePattern`: tìm pattern nguy hiểm như SQLi, NoSQLi, RCE, JWT weakness, mass assignment, SSRF, XSS, secret, path traversal, auth bypass, info leak, ReDoS.
+- `schemaScanner`: trích model/schema, sensitive fields, ownership fields và mass assignment targets.
+- `apiSurface`: đọc OpenAPI/Swagger nếu có.
+- `gitDiff`: lấy thay đổi gần nhất và đề xuất `full` hoặc `incremental`.
+- `containerInfo`: đọc Dockerfile/Docker Compose, service, port, network và biến môi trường dạng key.
+
+`aiAnalyzer.js` gọi Gemini cho hai mục đích:
+
+- Chọn scanner và cấu hình scanner, ghi `tool_config.json`.
+- Sinh checklist thủ công theo batch, ghi `manual_tests.json`.
+
+Các biến có thể dùng để điều chỉnh manual-test batching:
+
+| Biến | Mặc định |
+|---|---:|
+| `MANUAL_TEST_BATCH_SIZE` | `4` |
+| `MANUAL_TEST_BATCH_DELAY_MS` | `5000` |
+| `MANUAL_TEST_MAX_OUTPUT_TOKENS` | `8192` |
+
+`reportGenerator.js` đọc report của các tool, deduplicate theo nguồn/category/rule/location, gọi Gemini triage theo chunk, sau đó render HTML/JSON. Nếu không có scanner finding, report vẫn được sinh với risk thấp và checklist thủ công nếu có.
 
 ## Đánh giá thực nghiệm
 
-Sinh bảng đánh giá cho benchmark demo:
+Các script trong `evaluation/` phục vụ đánh giá artifact đã sinh. Nên truyền path rõ ràng thay vì dựa vào default legacy trong một số script.
+
+Đánh giá OWASP Benchmark từ Semgrep report:
 
 ```bash
-npm run evaluate -- --target examples/vulnerable-rest-api
+npm run evaluate:owasp -- \
+  --expected benchmarks/owasp-benchmark/expectedresults-1.2.csv \
+  --semgrep-report security-context-output-benchmark/scan-reports/semgrep-report.json \
+  --output evaluation/owasp-benchmark-evaluation.md \
+  --json-output evaluation/owasp-benchmark-evaluation.json
 ```
 
-Nếu đã chạy đầy đủ pipeline và có AI report:
+Đánh giá Juice Shop theo challenge/context:
 
 ```bash
-npm run evaluate -- \
-  --context security-context-output/context.json \
+node evaluation/evaluateJuiceShopContext.js \
+  --challenges benchmarks/juice-shop/data/static/challenges.yml \
   --report security-context-output/final-report/security-report.json \
-  --manual-tests security-context-output/manual_tests.json
+  --html security-context-output/final-report/security-report.html \
+  --output evaluation/juice-shop-context-evaluation.md \
+  --json-output evaluation/juice-shop-context-evaluation.json
 ```
 
-Output mặc định: `evaluation/evaluation-report.md`.
+Script generic `evaluation/evaluateBenchmark.js` kỳ vọng target có file `vulnerabilities/vulnerabilities.md`. Nếu target không có ground truth theo format đó, hãy truyền `--context`, `--report` và `--manual-tests` để chỉ tính các metric có thể tính được.
 
-Bảng đánh giá gồm:
-
-| Nhóm chỉ số | Ý nghĩa |
-|---|---|
-| Ground truth vulnerable endpoints | Endpoint lỗ hổng đọc từ `vulnerabilities/vulnerabilities.md` |
-| Endpoints detected by collector | Số endpoint route scanner phát hiện |
-| Endpoint coverage | Tỷ lệ endpoint ground truth được scanner phát hiện |
-| Category coverage | Tỷ lệ nhóm lỗ hổng ground truth có evidence từ route/pattern collector |
-| Scanner findings triaged by AI | Số scanner findings đã được AI triage, lấy từ `security-report.json` nếu có |
-| Confirmed vulnerabilities | Số finding được AI xếp `confirmed_vulnerability` |
-| Needs manual review | Số finding cần kiểm chứng thủ công |
-
-Lưu ý: AI triage không gắn hoặc lọc `false_positive`. Việc tính false positive cần kiểm chứng thủ công hoặc đối chiếu với ground truth benchmark.
-
----
-
-## Chạy tests
+## Chạy test
 
 ```bash
 npm test
 ```
 
-Test suite hiện tại phủ các hàm pure và collector chính của module:
+Script `npm test` hiện chạy test trong `runtime/`, `collector/` và `ai/` theo cấu hình `package.json`.
 
-| Nhóm | Hàm được test |
+Các test adapter trong `tools/*.test.js` có thể chạy trực tiếp:
+
+```bash
+node --test tools/*.test.js
+```
+
+## Framework/profile được hỗ trợ
+
+Các profile chính trong `collector/techStack.js`:
+
+| Profile | Framework/ngôn ngữ |
 |---|---|
-| `sanitize` | whitelist ruleset, ZAP mode, service name, port, severity, focus path, shell quoting |
-| `servicePicker` | chọn backend API service, bỏ DB/frontend, parse container port |
-| `techStack` | nhận diện backend manifest trong compose/subfolder |
-| `routeScanner` | ghép Express mount route với router child route |
-| `codePattern` | phát hiện pattern OWASP API benchmark |
+| `nodejs-rest-api` | Express, Fastify, Koa, Restify, NestJS |
+| `nodejs-fullstack` | Express có template engine, Next/Nuxt style dependency |
+| `python-flask` | Flask |
+| `python-fastapi` | FastAPI |
+| `python-django` | Django |
+| `java-spring` | Spring Boot/MVC/WebFlux |
+| `php-laravel` | Laravel |
+| `php-generic` | PHP generic |
+| `golang-gin` | Gin |
+| `ruby-rails` | Rails |
+| `unknown` | Fallback với Semgrep OWASP Top Ten + ZAP baseline |
 
----
+Một số framework được detect nhưng chưa có profile riêng đầy đủ sẽ rơi về `unknown` hoặc profile generic.
 
-## Các framework được hỗ trợ
+## Giới hạn hiện tại
 
-| Ngôn ngữ | Framework | Tool profile |
-|---|---|---|
-| Node.js | Express, Fastify, Koa, NestJS | `nodejs-rest-api` |
-| Node.js | Express + template engine, Next.js | `nodejs-fullstack` |
-| Python | Flask | `python-flask` |
-| Python | FastAPI | `python-fastapi` |
-| Python | Django | `python-django` |
-| Java | Spring Boot, Spring MVC | `java-spring` |
-| PHP | Laravel | `php-laravel` |
-| PHP | Generic | `php-generic` |
-| Go | Gin | `golang-gin` |
-| Ruby | Rails | `ruby-rails` |
-
-Framework không nhận ra sẽ dùng profile `unknown` với Semgrep `p/owasp-top-ten` + ZAP baseline.
-
----
-
-## Giải thích 3 Gemini API calls
-
-```
-Call #1 (aiAnalyzer.js)
-  temperature: 0.15  |  max_tokens: 4096
-  Input:  ~2–5KB (compact payload: tech stack + top 20 high-risk routes + top 15 patterns)
-  Output: tool_config.json (~1–2KB)
-  Mục đích: quyết định tool nào chạy, với cấu hình gì
-
-Call #2 (aiAnalyzer.js)
-  temperature: 0.20  |  max_tokens: 6144
-  Input:  ~3–6KB (tối đa 25 endpoint liên quan + code evidence)
-  Output: manual_tests.json (~3–8KB, 5–15 test cases)
-  Mục đích: sinh test case cho lỗ hổng logic mà tool tự động không phát hiện được
-
-Call #3 (reportGenerator.js)
-  temperature: 0.10  |  max_tokens: 8192
-  Input:  tối đa 40 findings đã dedup (~5–10KB)
-  Output: triaged findings với risk score + remediation + executive summary
-  Mục đích: ưu tiên findings, chấm risk score, đưa ra hướng fix cụ thể
-```
-
+- ZAP chưa có form-based authentication tự động; `authRequired` chủ yếu phục vụ report/manual tests.
+- DAST chỉ chạy khi target có Docker Compose và service có port mapping hợp lệ.
+- `servicePicker` chọn một service target theo heuristic, có thể cần chỉnh compose hoặc output runtime nếu compose phức tạp.
+- Trivy adapter hiện chỉ chạy `fs`; `image` và `config` được sanitize nhưng chỉ log skip.
+- Manual tests là hypothesis để kiểm chứng, không phải vulnerability đã xác nhận.
+- Gemini model endpoint đang được hardcode trong `ai/geminiClient.js`; nếu provider thay đổi API/model name cần cập nhật file đó.
+- Pipeline sinh Bash script, nên môi trường chạy thực tế nên là Linux/Jenkins agent hoặc WSL/Git Bash có Docker access.
