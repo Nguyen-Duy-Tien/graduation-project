@@ -66,6 +66,7 @@ mkdir -p "$TRIVY_CACHE_DIR" "$TRIVY_REPORTS_DIR"`;
 function buildFsScript() {
   return `echo "[SCA] Trivy fs"
 docker run --rm \\
+  --user "$(id -u):$(id -g)" \\
   -v "$TRIVY_TARGET_DIR:/src:ro" \\
   -v "$TRIVY_REPORTS_DIR:/out" \\
   -v "$TRIVY_CACHE_DIR:/root/.cache/trivy" \\
@@ -76,6 +77,7 @@ docker run --rm \\
 function buildConfigScript() {
   return `echo "[SCA] Trivy config"
 docker run --rm \\
+  --user "$(id -u):$(id -g)" \\
   -v "$TRIVY_TARGET_DIR:/src:ro" \\
   -v "$TRIVY_REPORTS_DIR:/out" \\
   -v "$TRIVY_CACHE_DIR:/root/.cache/trivy" \\
@@ -85,6 +87,7 @@ docker run --rm \\
 
 function imageScanCommand(imageRef, outputFile) {
   return `docker run --rm "\${TRIVY_DOCKER_SOCKET_ARGS[@]}" \\
+  --user "$(id -u):$(id -g)" \\
   -v "$TRIVY_REPORTS_DIR:/out" \\
   -v "$TRIVY_CACHE_DIR:/root/.cache/trivy" \\
   aquasec/trivy \\
@@ -93,6 +96,7 @@ function imageScanCommand(imageRef, outputFile) {
 
 function imageScanCommandFromVariable(outputFile) {
   return `docker run --rm "\${TRIVY_DOCKER_SOCKET_ARGS[@]}" \\
+  --user "$(id -u):$(id -g)" \\
   -v "$TRIVY_REPORTS_DIR:/out" \\
   -v "$TRIVY_CACHE_DIR:/root/.cache/trivy" \\
   aquasec/trivy \\
