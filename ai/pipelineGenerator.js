@@ -44,7 +44,7 @@ function configFromProfile(profileKey) {
       rulesets: profile.sast?.rulesets ?? ['p/owasp-top-ten'],
     },
     bandit:  { enabled: active.has('bandit') },
-    trivy:   { enabled: active.has('trivy'), targets: ['fs'] },
+    trivy:   { enabled: active.has('trivy'), targets: ['fs', 'image', 'config'] },
     zap:     {
       enabled:    active.has('zap'),
       mode:       profile.dast?.mode ?? 'baseline',
@@ -145,14 +145,14 @@ function collectRootComposeFallback(targetDir) {
 
 const SHEBANG = '#!/usr/bin/env bash\nset -u\n';
 
-function renderSastScript(cfg, projectInfo) {
+function renderSastScript(cfg, projectInfo, runtimeInfo) {
   const sections = [SHEBANG, 'echo "═══ SAST + SCA ═══"'];
   for (const adapter of SAST_TOOLS) {
     if (!adapter.enabled(cfg, projectInfo)) {
       sections.push(`echo "[SKIP] ${adapter.name} — not enabled"`);
       continue;
     }
-    const result = adapter.buildScript(cfg, projectInfo);
+    const result = adapter.buildScript(cfg, projectInfo, runtimeInfo);
     if (result.skipped) {
       sections.push(`echo "[SKIP] ${adapter.name} — ${result.reason}"`);
     } else {
@@ -262,6 +262,11 @@ export function generatePipeline({ contextDir, runtimeDir, targetDir }) {
         ? 'no app service with port mapping (only DB images?)'
         : 'no Docker Compose file in target' };
 
+  projectInfo.containerInfo = containerInfo;
+  projectInfo.composeFile = containerInfo.composeFile;
+  projectInfo.composeDir = containerInfo.composeDir;
+  projectInfo.composeProjectName = runtimeInfo.composeProjectName;
+
   // Đảm bảo runtimeDir và reportsDir tồn tại
   mkdirSync(resolve(runtimeDir), { recursive: true });
   mkdirSync(projectInfo.reportsDir, { recursive: true });
@@ -280,7 +285,7 @@ export function generatePipeline({ contextDir, runtimeDir, targetDir }) {
 
   // Render và ghi 4 script
   const files = [
-    { name: 'run-sast.sh',     content: renderSastScript(cfg, projectInfo) },
+    { name: 'run-sast.sh',     content: renderSastScript(cfg, projectInfo, runtimeInfo) },
     { name: 'deploy-target.sh', content: renderDeployScript(runtimeInfo, projectInfo) },
     { name: 'run-dast.sh',     content: renderDastScript(cfg, projectInfo, runtimeInfo) },
     { name: 'teardown.sh',     content: renderTeardownScript(runtimeInfo, projectInfo) },

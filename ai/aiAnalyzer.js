@@ -45,6 +45,7 @@ Output schema (strict):
     "trivy": {
       "enabled": boolean,
       "targets": ["fs", "image", "config"],
+      "images": ["optional image refs from Docker Compose, if known"],
       "reason": "string"
     },
     "zap": {
@@ -532,6 +533,7 @@ export function buildToolConfig(aiResult, context) {
     trivy: {
       enabled: tools.trivy?.enabled  ?? true,
       targets: tools.trivy?.targets  ?? ['fs'],
+      images:  tools.trivy?.images   ?? tools.trivy?.image_refs ?? [],
       reason:  tools.trivy?.reason   ?? '',
     },
     zap: {

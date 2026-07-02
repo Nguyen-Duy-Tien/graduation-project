@@ -5,7 +5,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import {
   assertRuleset, assertZapMode, assertServiceName, assertPort, assertSeverityList,
-  sanitizeRulesets, sanitizeNucleiTags, sanitizeFocusPaths,
+  sanitizeRulesets, sanitizeNucleiTags, sanitizeFocusPaths, sanitizeImageRefs,
   shellQuote,
 } from './sanitize.js';
 
@@ -60,6 +60,18 @@ test('sanitizeNucleiTags: drops bad', () => {
 test('sanitizeFocusPaths: drops path traversal', () => {
   const result = sanitizeFocusPaths(['/api/books', '/api;curl', '..\\..', '/v1/users/me']);
   assert.deepEqual(result, ['/api/books', '/v1/users/me']);
+});
+
+test('sanitizeImageRefs: accepts image refs and drops shell injection', () => {
+  const result = sanitizeImageRefs([
+    'bkimminich/juice-shop:latest',
+    'registry.local:5000/team/api@sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+    'alpine; curl evil',
+  ]);
+  assert.deepEqual(result, [
+    'bkimminich/juice-shop:latest',
+    'registry.local:5000/team/api@sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+  ]);
 });
 
 test('sanitizeRulesets: empty array on garbage input', () => {

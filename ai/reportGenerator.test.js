@@ -9,6 +9,7 @@ import {
   readNuclei,
   readZap,
   readManualTests,
+  readTrivyExtended,
 } from './reportGenerator.js';
 
 test('readNuclei: parses JSONL findings', () => {
@@ -51,6 +52,77 @@ test('readNikto: parses host vulnerabilities', () => {
   assert.equal(findings.length, 1);
   assert.equal(findings[0].source, 'nikto');
   assert.equal(findings[0].category, 'misconfig');
+});
+
+test('readTrivyExtended: parses aggregated image and config reports', () => {
+  const dir = mkdtempSync(join(tmpdir(), 'ai-module-report-'));
+  const imagePath = join(dir, 'trivy-image-report.json');
+  writeFileSync(imagePath, JSON.stringify({
+    Reports: [{
+      ArtifactName: 'bkimminich/juice-shop:latest',
+      ArtifactType: 'container_image',
+      Results: [{
+        Target: 'node-pkg',
+        Vulnerabilities: [{
+          VulnerabilityID: 'CVE-2026-0001',
+          PkgName: 'demo-lib',
+          InstalledVersion: '1.0.0',
+          FixedVersion: '1.0.1',
+          Severity: 'HIGH',
+          Title: 'Demo vulnerability',
+        }],
+      }],
+    }],
+  }));
+
+  const imageFindings = readTrivyExtended(imagePath, { reportType: 'container_image' });
+  assert.equal(imageFindings.length, 1);
+  assert.equal(imageFindings[0].source, 'trivy');
+  assert.equal(imageFindings[0].category, 'dependency');
+  assert.equal(imageFindings[0].reportType, 'container_image');
+
+  const configPath = join(dir, 'trivy-config-report.json');
+  writeFileSync(configPath, JSON.stringify({
+    Results: [{
+      Target: 'compose.yaml',
+      Misconfigurations: [{
+        ID: 'AVD-DS-0001',
+        Severity: 'CRITICAL',
+        Title: 'Container runs as root',
+        Message: 'Specify a non-root user.',
+        Resolution: 'Set USER in Dockerfile.',
+        CauseMetadata: { StartLine: 3, Provider: 'dockerfile' },
+      }],
+    }],
+  }));
+
+  const configFindings = readTrivyExtended(configPath, { reportType: 'config' });
+  assert.equal(configFindings.length, 1);
+  assert.equal(configFindings[0].category, 'misconfig');
+  assert.equal(configFindings[0].severity, 'critical');
+  assert.equal(configFindings[0].file, 'compose.yaml');
+});
+
+test('readTrivyExtended: redacts secret matches', () => {
+  const dir = mkdtempSync(join(tmpdir(), 'ai-module-report-'));
+  const path = join(dir, 'trivy-report.json');
+  writeFileSync(path, JSON.stringify({
+    Results: [{
+      Target: '.env',
+      Secrets: [{
+        RuleID: 'aws-access-key-id',
+        Severity: 'HIGH',
+        Title: 'AWS Access Key ID',
+        StartLine: 2,
+        Match: 'AKIASECRET',
+      }],
+    }],
+  }));
+
+  const findings = readTrivyExtended(path);
+  assert.equal(findings.length, 1);
+  assert.equal(findings[0].category, 'secret');
+  assert.equal(findings[0].snippet, 'Secret value redacted by report parser.');
 });
 
 test('readZap: keeps alert instances as separate findings', () => {

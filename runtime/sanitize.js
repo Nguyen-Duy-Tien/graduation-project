@@ -20,7 +20,7 @@ const PATTERNS = {
   port:         /^[1-9][0-9]{0,4}$/,
   focusPath:    /^\/[a-zA-Z0-9_\-/.~%]{0,200}$/,
   trivyTarget:  /^(fs|image|config)$/,
-  imageRef:     /^[a-z0-9][a-z0-9._/-]{0,200}(:[\w.-]{1,60})?$/,
+  imageRef:     /^(?:[a-z0-9][a-z0-9.-]*(?::[1-9][0-9]{0,4})?\/)?[a-z0-9][a-z0-9._/-]{0,200}(?::[\w.-]{1,128})?(?:@sha256:[a-f0-9]{64})?$/,
 };
 
 // ── Single-value asserters (throw on fail) ────────────────────────────────────
@@ -74,6 +74,7 @@ export const sanitizeRulesets    = makeArraySanitizer('rulesets',    PATTERNS.ru
 export const sanitizeNucleiTags  = makeArraySanitizer('nucleiTags',  PATTERNS.nucleiTag);
 export const sanitizeFocusPaths  = makeArraySanitizer('focusPaths',  PATTERNS.focusPath);
 export const sanitizeTrivyTargets = makeArraySanitizer('trivyTargets', PATTERNS.trivyTarget);
+export const sanitizeImageRefs = makeArraySanitizer('imageRefs', PATTERNS.imageRef);
 
 // ── Shell quote (single-quote escape, POSIX-safe) ─────────────────────────────
 // Dùng cho path có space/Unicode (vd. "E:\đồ án tốt nghiệp\")

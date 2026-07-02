@@ -99,6 +99,83 @@ export function readTrivy(reportPath) {
   }
 }
 
+export function readTrivyExtended(reportPath, options = {}) {
+  if (!existsSync(reportPath)) return [];
+  try {
+    const raw = JSON.parse(readFileSync(reportPath, 'utf8'));
+    const reports = Array.isArray(raw.Reports) ? raw.Reports : [raw];
+    const findings = [];
+
+    for (const report of reports) {
+      const reportTarget = report.ArtifactName ?? report.Metadata?.ImageID ?? '';
+      const reportType = options.reportType ?? report.ArtifactType ?? 'filesystem';
+
+      for (const result of report.Results ?? []) {
+        for (const vuln of result.Vulnerabilities ?? []) {
+          findings.push({
+            source:    'trivy',
+            ruleId:    vuln.VulnerabilityID ?? '',
+            category:  'dependency',
+            severity:  (vuln.Severity ?? 'UNKNOWN').toLowerCase(),
+            location:  result.Target ?? reportTarget,
+            file:      result.Target ?? reportTarget,
+            line:      0,
+            message:   `${vuln.VulnerabilityID}: ${vuln.Title ?? vuln.Description?.slice(0, 120) ?? ''}`,
+            snippet:   `${vuln.PkgName}@${vuln.InstalledVersion} -> fix: ${vuln.FixedVersion ?? 'no fix available'}`,
+            cweId:     null,
+            cvssScore: vuln.CVSS?.nvd?.V3Score ?? vuln.CVSS?.nvd?.V2Score ?? null,
+            artifact:  reportTarget,
+            reportType,
+          });
+        }
+
+        for (const misconfig of result.Misconfigurations ?? []) {
+          findings.push({
+            source:   'trivy',
+            ruleId:   misconfig.ID ?? misconfig.AVDID ?? '',
+            category: 'misconfig',
+            severity: (misconfig.Severity ?? 'UNKNOWN').toLowerCase(),
+            location: result.Target ?? reportTarget,
+            file:     result.Target ?? reportTarget,
+            line:     misconfig.CauseMetadata?.StartLine ?? 0,
+            message:  `${misconfig.ID ?? misconfig.AVDID ?? 'MISCONFIG'}: ${misconfig.Title ?? misconfig.Message ?? ''}`,
+            snippet:  [
+              misconfig.Message,
+              misconfig.Resolution ? `Resolution: ${misconfig.Resolution}` : '',
+            ].filter(Boolean).join('\n'),
+            cweId:    null,
+            owasp:    misconfig.CauseMetadata?.Provider ?? null,
+            artifact: reportTarget,
+            reportType,
+          });
+        }
+
+        for (const secret of result.Secrets ?? []) {
+          findings.push({
+            source:   'trivy',
+            ruleId:   secret.RuleID ?? secret.Category ?? 'secret',
+            category: 'secret',
+            severity: normalizeSeverity(secret.Severity ?? 'high'),
+            location: secret.StartLine ? `${result.Target ?? reportTarget}:${secret.StartLine}` : (result.Target ?? reportTarget),
+            file:     result.Target ?? reportTarget,
+            line:     secret.StartLine ?? 0,
+            message:  secret.Title ?? secret.RuleID ?? 'Secret detected',
+            snippet:  'Secret value redacted by report parser.',
+            cweId:    null,
+            artifact: reportTarget,
+            reportType,
+          });
+        }
+      }
+    }
+
+    return findings;
+  } catch (e) {
+    console.warn(`[readTrivyExtended] Parse error: ${e.message}`);
+    return [];
+  }
+}
+
 /**
  * Parse ZAP JSON report.
  * ZAP outputs array of sites → each with alerts
@@ -991,7 +1068,9 @@ async function main() {
   const reportSpecs = [
     { key: 'semgrep', label: 'Semgrep', file: 'semgrep-report.json', reader: readSemgrep },
     { key: 'bandit',  label: 'Bandit',  file: 'bandit-report.json',  reader: readBandit },
-    { key: 'trivy',   label: 'Trivy',   file: 'trivy-report.json',   reader: readTrivy },
+    { key: 'trivy',   label: 'Trivy FS',     file: 'trivy-report.json',        reader: readTrivyExtended },
+    { key: 'trivy-image', label: 'Trivy Image',  file: 'trivy-image-report.json',  reader: (path) => readTrivyExtended(path, { reportType: 'container_image' }) },
+    { key: 'trivy-config', label: 'Trivy Config', file: 'trivy-config-report.json', reader: (path) => readTrivyExtended(path, { reportType: 'config' }) },
     { key: 'zap',     label: 'ZAP',     file: 'zap-report.json',     reader: readZap },
     { key: 'nuclei',  label: 'Nuclei',  file: 'nuclei-report.jsonl', reader: readNuclei },
     { key: 'nikto',   label: 'Nikto',   file: 'nikto-report.json',   reader: readNikto },
