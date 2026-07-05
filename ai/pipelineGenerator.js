@@ -240,6 +240,7 @@ export function generatePipeline({ contextDir, runtimeDir, targetDir }) {
     console.warn(`[pipelineGenerator] tool_config.json missing/invalid — falling back to PROFILE_TOOL_MAP[${profileKey}]`);
     cfg = configFromProfile(profileKey);
   }
+  writeFileSync(join(contextDir, 'tool_config.resolved.json'), JSON.stringify(cfg, null, 2));
 
   // projectInfo: thông tin về target dùng cho tools
   const resolvedTargetDir = isAbsolute(targetDir) ? targetDir : resolve(targetDir);

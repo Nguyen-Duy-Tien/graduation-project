@@ -1,0 +1,39 @@
+{
+  "_meta": {
+    "generatedBy": "fallback/PROFILE_TOOL_MAP",
+    "profileKey": "nodejs-fullstack"
+  },
+  "scanStrategy": "full",
+  "semgrep": {
+    "enabled": true,
+    "rulesets": [
+      "p/nodejs",
+      "p/xss",
+      "p/injection"
+    ]
+  },
+  "bandit": {
+    "enabled": false
+  },
+  "trivy": {
+    "enabled": true,
+    "targets": [
+      "fs",
+      "image",
+      "config"
+    ]
+  },
+  "zap": {
+    "enabled": true,
+    "mode": "full-scan",
+    "focusPaths": []
+  },
+  "nuclei": {
+    "enabled": false,
+    "templateTags": [],
+    "severity": "medium,high,critical"
+  },
+  "nikto": {
+    "enabled": false
+  }
+}

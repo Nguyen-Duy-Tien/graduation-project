@@ -69,8 +69,9 @@ docker run --rm \\
   --user "$(id -u):$(id -g)" \\
   -v "$TRIVY_TARGET_DIR:/src:ro" \\
   -v "$TRIVY_REPORTS_DIR:/out" \\
-  -v "$TRIVY_CACHE_DIR:/root/.cache/trivy" \\
+  -v "$TRIVY_CACHE_DIR:/tmp/trivy-cache" \\
   aquasec/trivy \\
+  --cache-dir /tmp/trivy-cache \\
   fs --format json --output /out/trivy-report.json /src || true`;
 }
 
@@ -80,8 +81,9 @@ docker run --rm \\
   --user "$(id -u):$(id -g)" \\
   -v "$TRIVY_TARGET_DIR:/src:ro" \\
   -v "$TRIVY_REPORTS_DIR:/out" \\
-  -v "$TRIVY_CACHE_DIR:/root/.cache/trivy" \\
+  -v "$TRIVY_CACHE_DIR:/tmp/trivy-cache" \\
   aquasec/trivy \\
+  --cache-dir /tmp/trivy-cache \\
   config --skip-version-check --format json --output /out/trivy-config-report.json /src || true`;
 }
 
@@ -89,8 +91,9 @@ function imageScanCommand(imageRef, outputFile) {
   return `docker run --rm "\${TRIVY_DOCKER_SOCKET_ARGS[@]}" \\
   --user "$(id -u):$(id -g)" \\
   -v "$TRIVY_REPORTS_DIR:/out" \\
-  -v "$TRIVY_CACHE_DIR:/root/.cache/trivy" \\
+  -v "$TRIVY_CACHE_DIR:/tmp/trivy-cache" \\
   aquasec/trivy \\
+  --cache-dir /tmp/trivy-cache \\
   image --skip-version-check --format json --output /out/${outputFile} ${shellQuote(imageRef)} || true`;
 }
 
@@ -98,8 +101,9 @@ function imageScanCommandFromVariable(outputFile) {
   return `docker run --rm "\${TRIVY_DOCKER_SOCKET_ARGS[@]}" \\
   --user "$(id -u):$(id -g)" \\
   -v "$TRIVY_REPORTS_DIR:/out" \\
-  -v "$TRIVY_CACHE_DIR:/root/.cache/trivy" \\
+  -v "$TRIVY_CACHE_DIR:/tmp/trivy-cache" \\
   aquasec/trivy \\
+  --cache-dir /tmp/trivy-cache \\
   image --skip-version-check --format json --output /out/${outputFile} "$TRIVY_IMAGE_REF" || true`;
 }
 

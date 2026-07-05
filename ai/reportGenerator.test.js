@@ -5,6 +5,7 @@ import { join } from 'path';
 import { tmpdir } from 'os';
 import {
   buildHtml,
+  collectReportRuns,
   readNikto,
   readNuclei,
   readZap,
@@ -255,6 +256,39 @@ test('buildHtml: shows tool run counts and keeps all findings visible', () => {
   assert.match(html, /missing zap-report\.json/);
   assert.doesNotMatch(html, /AI Filtered Findings/);
   assert.match(html, /Scanner-only finding/);
+});
+
+test('collectReportRuns: marks disabled tools separately from missing reports', () => {
+  const dir = mkdtempSync(join(tmpdir(), 'ai-module-report-'));
+  const runs = collectReportRuns(dir, {
+    semgrep: { enabled: true },
+    bandit: { enabled: false },
+    trivy: { enabled: true, targets: ['fs', 'image'] },
+    zap: { enabled: true },
+    nuclei: { enabled: false },
+    nikto: { enabled: false },
+  });
+
+  const byKey = Object.fromEntries(runs.map(run => [run.key, run]));
+  assert.equal(byKey.semgrep.status, 'missing');
+  assert.equal(byKey.bandit.status, 'disabled');
+  assert.equal(byKey['trivy-config'].status, 'disabled');
+  assert.equal(byKey.nikto.status, 'disabled');
+
+  const html = buildHtml(
+    {
+      executive_summary: { key_findings: [], immediate_actions: [] },
+      tool_runs: [
+        { key: 'nikto', label: 'Nikto', file: 'nikto-report.json', exists: false, status: 'disabled', findingCount: 0 },
+      ],
+      triaged_findings: [],
+    },
+    { techStack: { language: 'nodejs', framework: 'nodejs-fullstack' } },
+  );
+
+  assert.match(html, /Nikto/);
+  assert.match(html, /disabled/);
+  assert.doesNotMatch(html, /missing nikto-report\.json/);
 });
 
 test('buildHtml: lists only tools passed in metadata', () => {

@@ -666,9 +666,9 @@ export function buildHtml(triageResult, context, metadata = {}) {
   <h2>Tool Run Summary</h2>
   <div class="tool-run-grid">
     ${toolRuns.map(run => `
-    <div class="tool-run ${run.exists ? 'tool-run-ok' : 'tool-run-missing'}">
+    <div class="tool-run ${toolRunClass(run)}">
       <strong>${escHtml(run.label ?? run.key)}</strong>
-      <span>${run.exists ? `${escHtml(run.findingCount ?? 0)} findings` : `missing ${escHtml(run.file ?? '')}`}</span>
+      <span>${renderToolRunText(run)}</span>
     </div>`).join('')}
   </div>
 </div>` : '';
@@ -748,6 +748,7 @@ export function buildHtml(triageResult, context, metadata = {}) {
   .tool-run { border: 1px solid var(--c-border); border-radius: 6px; padding: 0.65rem 0.75rem; display: flex; flex-direction: column; gap: 0.25rem; }
   .tool-run span { color: var(--c-muted); font-size: 0.8rem; }
   .tool-run-missing { opacity: 0.7; }
+  .tool-run-disabled { opacity: 0.55; }
   .manual-steps { padding-left: 1.25rem; color: var(--c-muted); font-size: 0.86rem; }
   .manual-steps li { margin-bottom: 0.75rem; }
   h2.section-title { font-size: 1rem; font-weight: 600; margin: 2rem 0 1rem; border-bottom: 1px solid var(--c-border); padding-bottom: 0.5rem; }
@@ -1052,6 +1053,88 @@ function mapNiktoSeverity(message) {
 
 // ── CLI runner (Stage 8 trong Jenkinsfile) ────────────────────────────────────
 
+const REPORT_SPECS = [
+  { key: 'semgrep', label: 'Semgrep', file: 'semgrep-report.json', reader: readSemgrep },
+  { key: 'bandit', label: 'Bandit', file: 'bandit-report.json', reader: readBandit },
+  { key: 'trivy', label: 'Trivy FS', file: 'trivy-report.json', reader: readTrivyExtended },
+  { key: 'trivy-image', label: 'Trivy Image', file: 'trivy-image-report.json', reader: (path) => readTrivyExtended(path, { reportType: 'container_image' }) },
+  { key: 'trivy-config', label: 'Trivy Config', file: 'trivy-config-report.json', reader: (path) => readTrivyExtended(path, { reportType: 'config' }) },
+  { key: 'zap', label: 'ZAP', file: 'zap-report.json', reader: readZap },
+  { key: 'nuclei', label: 'Nuclei', file: 'nuclei-report.jsonl', reader: readNuclei },
+  { key: 'nikto', label: 'Nikto', file: 'nikto-report.json', reader: readNikto },
+];
+
+function readJsonIfExists(path) {
+  try {
+    if (!existsSync(path)) return null;
+    return JSON.parse(readFileSync(path, 'utf8'));
+  } catch {
+    return null;
+  }
+}
+
+export function readReportToolConfig(contextPath) {
+  const contextDir = dirname(resolve(contextPath));
+  return readJsonIfExists(join(contextDir, 'tool_config.resolved.json'))
+    ?? readJsonIfExists(join(contextDir, 'tool_config.json'));
+}
+
+function normalizedTrivyTargets(toolConfig) {
+  const rawTargets = toolConfig?.trivy?.targets;
+  if (!Array.isArray(rawTargets) || rawTargets.length === 0) return ['fs'];
+  return rawTargets
+    .map(target => String(target).toLowerCase())
+    .filter(target => ['fs', 'image', 'config'].includes(target));
+}
+
+export function isReportSpecEnabled(spec, toolConfig) {
+  if (!toolConfig) return true;
+
+  if (spec.key === 'trivy') {
+    return toolConfig.trivy?.enabled === true && normalizedTrivyTargets(toolConfig).includes('fs');
+  }
+  if (spec.key === 'trivy-image') {
+    return toolConfig.trivy?.enabled === true && normalizedTrivyTargets(toolConfig).includes('image');
+  }
+  if (spec.key === 'trivy-config') {
+    return toolConfig.trivy?.enabled === true && normalizedTrivyTargets(toolConfig).includes('config');
+  }
+
+  return toolConfig[spec.key]?.enabled === true;
+}
+
+export function collectReportRuns(reportsDir, toolConfig = null) {
+  return REPORT_SPECS.map(spec => {
+    const path = join(reportsDir, spec.file);
+    const enabled = isReportSpecEnabled(spec, toolConfig);
+    const fileExists = existsSync(path);
+    const findings = enabled && fileExists ? spec.reader(path) : [];
+    const status = !enabled ? 'disabled' : fileExists ? 'ok' : 'missing';
+    return {
+      ...spec,
+      path,
+      enabled,
+      exists: enabled && fileExists,
+      fileExists,
+      status,
+      findingCount: findings.length,
+      findings,
+    };
+  });
+}
+
+function renderToolRunText(run) {
+  if (run.status === 'disabled') return 'disabled';
+  if (run.status === 'skipped') return 'skipped';
+  if (run.exists) return `${escHtml(run.findingCount ?? 0)} findings`;
+  return `missing ${escHtml(run.file ?? '')}`;
+}
+
+function toolRunClass(run) {
+  if (run.status === 'disabled' || run.status === 'skipped') return 'tool-run-disabled';
+  return run.exists ? 'tool-run-ok' : 'tool-run-missing';
+}
+
 async function main() {
   const args        = process.argv.slice(2);
   const reportsDir  = args[0] ?? './scan-reports';
@@ -1065,34 +1148,21 @@ async function main() {
   }
 
   console.log('[INFO] Reading scan reports...');
-  const reportSpecs = [
-    { key: 'semgrep', label: 'Semgrep', file: 'semgrep-report.json', reader: readSemgrep },
-    { key: 'bandit',  label: 'Bandit',  file: 'bandit-report.json',  reader: readBandit },
-    { key: 'trivy',   label: 'Trivy FS',     file: 'trivy-report.json',        reader: readTrivyExtended },
-    { key: 'trivy-image', label: 'Trivy Image',  file: 'trivy-image-report.json',  reader: (path) => readTrivyExtended(path, { reportType: 'container_image' }) },
-    { key: 'trivy-config', label: 'Trivy Config', file: 'trivy-config-report.json', reader: (path) => readTrivyExtended(path, { reportType: 'config' }) },
-    { key: 'zap',     label: 'ZAP',     file: 'zap-report.json',     reader: readZap },
-    { key: 'nuclei',  label: 'Nuclei',  file: 'nuclei-report.jsonl', reader: readNuclei },
-    { key: 'nikto',   label: 'Nikto',   file: 'nikto-report.json',   reader: readNikto },
-  ];
-
-  const reportRuns = reportSpecs.map(spec => {
-    const path = join(reportsDir, spec.file);
-    const exists = existsSync(path);
-    const findings = exists ? spec.reader(path) : [];
-    return { ...spec, path, exists, findingCount: findings.length, findings };
-  });
+  const toolConfig = readReportToolConfig(contextPath);
+  const reportRuns = collectReportRuns(reportsDir, toolConfig);
 
   const allFindings = reportRuns.flatMap(run => run.findings);
   const toolsForReport = reportRuns
     .filter(run => run.exists)
     .map(run => run.label);
-  const toolRunSummary = reportRuns.map(({ key, label, file, exists, findingCount }) => ({
+  const toolRunSummary = reportRuns.map(({ key, label, file, exists, findingCount, enabled, status }) => ({
     key,
     label,
     file,
     exists,
     findingCount,
+    enabled,
+    status,
   }));
   console.log(`[INFO] Total raw findings: ${allFindings.length}`);
 
